@@ -68,7 +68,7 @@
     bubble("user", text); input.value = ""; autosize(); S.listen(false);
     if (!online) { bubble("assistant", C.offline); return; }
     busy = true; send.disabled = true; box.setAttribute("data-busy", "1");
-    var li = bubble("assistant", ""), b = li.querySelector(".bubble"), act = activityBox(li), text_ = "", pending = {};
+    var li = bubble("assistant", ""), b = li.querySelector(".bubble"), act = activityBox(li), text_ = "", pending = {}, running = 0;
     b.classList.add("typing");
     S.chatBusy(true); setStatus(C.reading);
     var guard = (T.roles.securite || {}).short || "La sentinelle";
@@ -82,7 +82,7 @@
         if (ev === "run.started") setStatus(C.reading);
         else if (ev === "tool.started") {
           var role = S.roleOfTool(d.tool_name), c = T.roles[role] || {};
-          S.pulse(role);
+          S.pulse(role); running++;
           setStatus((c.short || "") + " · " + (c.work || "au travail"));
           var line = fmt((C.activity || {})[role] || "{short} ({tool})", { short: c.short || role, tool: d.tool_name, preview: d.preview || d.tool_name });
           /* le même outil plusieurs fois de suite → une seule ligne avec un compteur */
@@ -95,10 +95,12 @@
             pending[d.tool_name] = el;
           }
         } else if (ev === "tool.completed" || ev === "tool.failed") {
+          running = Math.max(0, running - 1);
           var l = pending[d.tool_name]; if (l) l.className = (ev === "tool.failed" || d.error) ? "fail" : "ok";
           if (ev === "tool.failed" || d.error) { S.toolFailed(); addActivity(act, fmt((C.activity || {}).failed, { guard: guard, tool: d.tool_name }), "fail"); act.last = null; }
           setStatus(C.thinking);
         } else if (ev === "assistant.delta" && d.delta) {
+          if (!running && S.settle) S.settle();
           text_ += d.delta; b.classList.remove("typing"); b.innerHTML = render(text_.replace(/^\s+/, "")); setStatus(C.writing);
           list.scrollTop = list.scrollHeight;
         } else if (ev === "assistant.completed" && d.content) {
@@ -130,7 +132,7 @@
     }).then(function () {
       busy = false; send.disabled = false; box.removeAttribute("data-busy");
       if (!text_) b.classList.remove("typing");
-      S.chatBusy(false); setStatus(C.ready); list.scrollTop = list.scrollHeight;
+      if (S.settle) S.settle(); S.chatBusy(false); setStatus(C.ready); list.scrollTop = list.scrollHeight;
     });
   }
 

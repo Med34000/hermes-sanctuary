@@ -226,7 +226,14 @@
     }
     function next() {
       var job = queue.shift();
-      if (!job) { walkTo(HOME, function () { walking = false; walker.style.display = "none"; pano.setAttribute("data-walking", "0"); }); return; }
+      if (!job) {
+        walkTo(HOME, function () {
+          walking = false;
+          if (queue.length) { next(); return; }   /* une tâche est arrivée pendant le retour : on repart */
+          walker.style.display = "none"; pano.setAttribute("data-walking", "0");
+        });
+        return;
+      }
       if (!walking) { walking = true; pos = HOME.slice(); place(pos[0], pos[1], 1); walker.style.display = "block"; pano.setAttribute("data-walking", "1"); }
       log("MESSAGE", say("deliver", job.role));
       walkTo(R[job.role].visit, function () { job.cb(); setTimeout(next, 450); });
@@ -256,7 +263,7 @@
         var cur = (e.animaux || {})[key] || {}, old = (prev.animaux || {})[key] || {};
         if (cur.dernier && cur.dernier !== old.dernier) {
           var idle = phase[role] !== "work"; lastWork[role] = now;
-          if (idle && !demoOn) { phase[role] = "work"; inFlight[role] = true; deliver(role, function () { inFlight[role] = false; set(role, phase[role]); }); }
+          if (idle && !demoOn) { phase[role] = "work"; inFlight[role] = true; deliver(role, function () { inFlight[role] = false; if (lastWork[role] && phase[role] === "work") lastWork[role] = Math.max(lastWork[role], Date.now() - 1500); set(role, phase[role]); }); }
           else set(role, "work");
         }
       });
@@ -311,7 +318,7 @@
       chatActive = true; if (demoOn) stopDemo();
       var now = Date.now(); lastWork[role] = now;
       if (role === "coordination") { tick(); return; }
-      if (phase[role] !== "work") { phase[role] = "work"; inFlight[role] = true; deliver(role, function () { inFlight[role] = false; set(role, phase[role]); }); }
+      if (phase[role] !== "work") { phase[role] = "work"; inFlight[role] = true; deliver(role, function () { inFlight[role] = false; if (lastWork[role] && phase[role] === "work") lastWork[role] = Math.max(lastWork[role], Date.now() - 1500); set(role, phase[role]); }); }
       else set(role, "work");
     }
 
@@ -361,6 +368,12 @@
       chatBusy: function (on) {
         chatActive = true; if (demoOn) stopDemo();
         chatBusyFlag = !!on; if (!on) coordDoneAt = Date.now(); tick();
+      },
+      /* la réponse arrive : les compagnons encore « au travail » terminent tout de suite (la Chouette rentre) */
+      settle: function () {
+        var now = Date.now();
+        WORKERS.forEach(function (role) { if (lastWork[role] && now - lastWork[role] < WORK_HOLD) lastWork[role] = now - WORK_HOLD; });
+        tick();
       },
       toolFailed: function () { chatActive = true; alertUntil = Date.now() + WORK_HOLD; lastWork.securite = Date.now(); if (A.securite) A.securite.el.setAttribute("data-alert", "1"); set("securite", "work"); },
       demoOn: function () { return demoOn; }
