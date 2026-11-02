@@ -24,6 +24,8 @@ Les outils non reconnus sont listés dans `etat.json` → `inconnus` (noms seule
 ## Contenu
 
 - `web/chouette-vol.js` — envol de la Chouette (recherche web) : elle quitte son perchoir, part chercher, revient lire sa trouvaille.
+- `web/moteur.js` — **moteur commun** à tous les environnements (activité Hermes, rôles, états, marche du coordinateur, envol, boucles animées, journal, démo).
+- `web/themes/<id>/theme.json` — **habillage** d'un environnement (décor, personnages, positions, boucles, textes). Premier : `themes/sanctuaire/`. Choix : `panorama.html?theme=<id>` ou balise `sanctuaire-theme`.
 - `web/panorama.html` — vue panorama : tous les compagnons dans la grande clairière, Kitsune Hermes marche porter les lettres (même source live).
 - `web/` — la page (même fichier que l'artefact claude.ai) et ses images. Sans `etat.json` joignable, elle tourne en démo.
   Source réglable : `<meta name="sanctuaire-source" content="etat.json">`.
@@ -42,3 +44,10 @@ Les outils non reconnus sont listés dans `etat.json` → `inconnus` (noms seule
 
 - Jamais d'accès d'un tiers à l'instance Hermes personnelle. Une personne = une instance isolée.
 - `etat.json` ne contient jamais de message, réponse, identifiant ni résultat d'outil.
+
+## Créer un nouvel environnement
+
+1. Copier `web/themes/sanctuaire/` en `web/themes/<nouveau>/` et mettre `"base": "themes/<nouveau>/"`.
+2. Y déposer le panorama et les images/planches des 5 rôles (coordination, fabrication, recherche, analyse, securite).
+3. Ajuster dans `theme.json` : noms, positions (`pos`, `visit`), boucles (`loop`, `alertLoop`, `fly`, `walk`) et textes.
+4. Ouvrir `panorama.html?theme=<nouveau>`.

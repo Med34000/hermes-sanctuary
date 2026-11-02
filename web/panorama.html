@@ -5,32 +5,35 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Sanctuaire Panorama</title>
 <meta name="sanctuaire-source" content="etat.json">
-<!-- Sanctuaire Solaire — vue panorama : tous les compagnons dans un seul décor, Kitsune Hermes marche distribuer les tâches.
-     2026-11-02 ≈12:10 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5 -->
+<meta name="sanctuaire-theme" content="sanctuaire">
+<!-- Panorama — page commune à tous les environnements. Le moteur (moteur.js) lit l'habillage dans themes/<id>/theme.json
+     (choix possible par l'adresse : panorama.html?theme=<id>). La colonne de droite est réservée au futur chat.
+     2026-11-02 ≈19:00 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@600;700&family=JetBrains+Mono:wght@400&display=swap">
 <style>
 :root {
   --cream: #FFF4DE; --glass: rgba(255, 247, 229, .9); --bark: #3F2A18; --ink: #2C1D10; --muted: #7A5A3C;
-  --ember: #E4802F; --moss: #3F7A4A; --aqua: #2BA7A3; --night: #142016;
+  --accent: #E4802F; --accent2: #2BA7A3; --moss: #3F7A4A; --night: #142016;
   --display: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
   --body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
-  --ratio: 2.3568; /* 2576 / 1093 */
+  --ratio: 2.3568;
+  --chat-w: 0px; /* largeur de la future colonne de chat (0 tant qu'elle n'existe pas) */
   color-scheme: light;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
 body { background: var(--night); color: var(--ink); font-family: var(--body); overflow: hidden; }
 
-.viewport { position: fixed; inset: 0; overflow-x: auto; overflow-y: hidden; display: flex; align-items: center; }
-.backdrop { position: fixed; inset: -5%; background: url("panorama-bg.webp") center / cover no-repeat; filter: blur(22px) brightness(.55) saturate(1.1); }
+.backdrop { position: fixed; inset: -5%; background: center / cover no-repeat; filter: blur(22px) brightness(.55) saturate(1.1); }
+.viewport { position: fixed; top: 0; bottom: 0; left: 0; right: var(--chat-w); overflow-x: auto; overflow-y: hidden; display: flex; align-items: center; }
 .pano {
   position: relative; flex: none; margin: 0 auto; overflow: hidden;
-  width: max(min(100vw, calc((100vh - 140px) * var(--ratio))), 900px);
+  width: max(min(calc(100vw - var(--chat-w)), calc((100vh - 140px) * var(--ratio))), 900px);
   aspect-ratio: 2576 / 1093;
-  background: url("panorama-bg.webp") center / 100% 100% no-repeat;
+  background: center / 100% 100% no-repeat;
   box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
 }
 .rays { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen;
@@ -39,25 +42,24 @@ body { background: var(--night); color: var(--ink); font-family: var(--body); ov
   animation: rays 8s ease-in-out infinite alternate; }
 @keyframes rays { from { opacity: .4; } to { opacity: 1; } }
 
-/* companions: anchored at the feet (x = center, y = ground), height in % of the panorama */
+/* personnages : ancrés aux pieds (left = x, top = sol), hauteur en % du panorama */
 .actor { position: absolute; transform: translate(-50%, -100%); transform-origin: 50% 100%; cursor: pointer; }
-.actor .sprite { position: relative; height: 100%; }
+.actor .sprite { position: relative; height: 100%; transition: opacity .25s ease; }
 .actor img { position: absolute; left: 50%; bottom: 0; height: 100%; width: auto; transform: translateX(-50%); transition: opacity .35s ease; user-select: none; -webkit-user-drag: none; }
 .actor .p-work, .actor .p-hit { opacity: 0; }
-#a-chouette[data-state="done"] .p-work { opacity: 1; }
-#a-chouette[data-state="done"] .p-rest { opacity: 0; }
-#a-chouette .sprite { transition: opacity .2s ease; }
 .actor[data-state="work"] .p-work { opacity: 1; }
 .actor[data-state="work"] .p-rest { opacity: 0; }
 .actor[data-state="work"][data-hit="1"] .p-hit { opacity: 1; }
 .actor[data-state="work"][data-hit="1"] .p-work { opacity: 0; }
+.actor[data-done-sprite="work"][data-state="done"] .p-work { opacity: 1; }
+.actor[data-done-sprite="work"][data-state="done"] .p-rest { opacity: 0; }
 .actor .breath { position: absolute; inset: 0; transform-origin: 50% 100%; animation: breath 4.5s ease-in-out infinite; }
 @keyframes breath { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.006, 1.012); } }
 .actor[data-state="work"] .breath { animation: busy .9s ease-in-out infinite; }
 @keyframes busy { 0%, 100% { transform: translateY(0) rotate(0); } 30% { transform: translateY(-1.2%) rotate(-.6deg); } 60% { transform: translateY(0) rotate(.5deg); } }
 .actor[data-state="done"] .breath { animation: hop .7s ease-out 2; }
 @keyframes hop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-6%); } }
-.actor::before { /* glow at the feet while working */
+.actor::before {
   content: ""; position: absolute; left: 50%; bottom: -3%; width: 90%; height: 16%; transform: translateX(-50%);
   background: radial-gradient(ellipse at center, rgba(255, 200, 90, .65), rgba(255, 160, 40, 0) 70%);
   opacity: 0; transition: opacity .5s ease; mix-blend-mode: screen; pointer-events: none;
@@ -66,70 +68,55 @@ body { background: var(--night); color: var(--ink); font-family: var(--body); ov
 .actor[data-state="done"]::before { opacity: .8; background: radial-gradient(ellipse at center, rgba(140, 230, 120, .6), rgba(80, 200, 90, 0) 70%); }
 @keyframes glow { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
 
+/* boucles animées tirées de vidéos (planches d'images) */
+.vsheet { position: absolute; background-repeat: no-repeat; background-position: 0 0; opacity: 0; pointer-events: none; }
+.actor.has-video[data-state="work"] .breath { opacity: 0; animation: none; }
+.actor.has-video[data-state="work"] .vsheet.main { opacity: 1; }
+.actor.has-video[data-state="work"][data-alert="1"] .vsheet.main { opacity: 0; }
+.actor.has-video[data-state="work"][data-alert="1"] .vsheet.alert { opacity: 1; }
+
 .tag {
   position: absolute; left: 50%; bottom: 100%; transform: translate(-50%, -6px);
   display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
   font: 700 clamp(9px, .75vw, 12px)/1 var(--body); letter-spacing: .05em; text-transform: uppercase;
   padding: 5px 9px; border-radius: 999px; background: rgba(255, 247, 229, .92); color: var(--bark);
-  box-shadow: 0 4px 12px rgba(30, 18, 5, .3); pointer-events: none; transition: transform .3s ease;
+  box-shadow: 0 4px 12px rgba(30, 18, 5, .3); pointer-events: none;
 }
 .tag i { width: 7px; height: 7px; border-radius: 50%; background: #8aa0a6; flex: none; }
-.actor[data-state="work"] .tag i { background: var(--ember); animation: pulse 1s ease-in-out infinite; }
+.actor[data-state="work"] .tag i { background: var(--accent); animation: pulse 1s ease-in-out infinite; }
 .actor[data-state="done"] .tag i { background: var(--moss); }
 @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.6); opacity: .5; } }
 
-/* Brico-Castor at work: real hammering loop */
-#a-castor .vsheet { position: absolute; left: 1.8%; top: 1.15%; width: 94.51%; height: 97.32%; background: url("castor-forge-video.webp") 0 0 / 1200% 200% no-repeat; opacity: 0; pointer-events: none; }
-#a-castor.has-video[data-state="work"] .vsheet { opacity: 1; }
-#a-castor.has-video[data-state="work"] .breath { opacity: 0; animation: none; }
-#a-taupe .vsheet { position: absolute; left: 16.16%; top: -13.27%; width: 97.95%; height: 112.52%; background: url("taupe-pioche-video.webp") 0 0 / 1400% 400% no-repeat; opacity: 0; pointer-events: none; }
-#a-taupe.has-video[data-state="work"] .vsheet { opacity: 1; }
-#a-taupe.has-video[data-state="work"] .breath { opacity: 0; animation: none; }
-#a-shiba .vsheet { position: absolute; left: -8.66%; top: 1.21%; width: 118.65%; height: 98.87%; background: url("shiba-garde-video.webp") 0 0 / 1100% 400% no-repeat; opacity: 0; pointer-events: none; }
-#a-shiba.has-video[data-state="work"] .vsheet { opacity: 1; }
-#a-shiba.has-video[data-state="work"] .breath { opacity: 0; animation: none; }
-#a-shiba .vsheet-alert { left: 4.85%; top: 1.55%; width: 89.57%; height: 97.33%; background-image: url("shiba-alerte-video.webp"); background-size: 1100% 200%; }
-#a-shiba.has-video[data-state="work"] .vsheet-alert { opacity: 0; }
-#a-shiba.has-video[data-state="work"][data-alert="1"] .vsheet-alert { opacity: 1; }
-#a-shiba.has-video[data-state="work"][data-alert="1"] .vsheet:not(.vsheet-alert) { opacity: 0; }
-/* positions on the panorama: left = feet x, top = feet y, height = sprite canvas height (all in %) */
-#a-castor   { left: 26.5%; top: 84%; height: 27%; aspect-ratio: 840 / 900; }
-#a-chouette { left: 40.6%; top: 55%; height: 18%; aspect-ratio: 760 / 864; }
-#a-renard   { left: 56.2%; top: 79%; height: 22%; aspect-ratio: 760 / 826; }
-#a-taupe    { left: 66.8%; top: 76.5%; height: 20%; aspect-ratio: 760 / 854; }
-#a-shiba    { left: 82.5%; top: 82%; height: 24%; aspect-ratio: 760 / 945; }
+/* coordinateur qui marche, compagnon qui s'envole */
+.walker { position: absolute; transform: translate(-50%, -100%); pointer-events: none; display: none; z-index: 5; }
+.walker .flip, .walker .sheet, .flyer .sheet { position: absolute; inset: 0; background-repeat: no-repeat; }
+.walker::after { content: ""; position: absolute; left: 50%; bottom: -2%; width: 60%; height: 7%; transform: translateX(-50%); background: radial-gradient(ellipse at center, rgba(30, 18, 6, .45), rgba(30, 18, 6, 0) 70%); }
+.pano[data-walking="1"] .actor[data-role="coordination"] .sprite { opacity: 0; }
+.flyer { position: absolute; transform: translate(-50%, -50%); pointer-events: none; display: none; }
 
-/* walking fox */
-#walker { position: absolute; height: 24%; aspect-ratio: 340 / 322; transform: translate(-50%, -100%); pointer-events: none; display: none; z-index: 5; }
-#walker .flip { position: absolute; inset: 0; }
-/* real walk cycle: 42 frames (14 x 3) cut from a generated video, green screen removed */
-#walker .sheet { position: absolute; inset: 0; background: url("renard-marche-video.webp") 0 0 / 1400% 300% no-repeat; }
-#walker::after { content: ""; position: absolute; left: 50%; bottom: -2%; width: 60%; height: 7%; transform: translateX(-50%); background: radial-gradient(ellipse at center, rgba(30, 18, 6, .45), rgba(30, 18, 6, 0) 70%); }
-.pano[data-walking="1"] #a-renard .sprite { opacity: 0; }
-#a-renard .sprite { transition: opacity .25s ease; }
-
-/* UI */
+/* barre du haut */
 .bar {
-  position: fixed; z-index: 10; top: calc(env(safe-area-inset-top, 0px) + 12px); left: max(16px, env(safe-area-inset-left)); right: max(16px, env(safe-area-inset-right));
+  position: fixed; z-index: 10; top: calc(env(safe-area-inset-top, 0px) + 12px); left: max(16px, env(safe-area-inset-left)); right: calc(max(16px, env(safe-area-inset-right)) + var(--chat-w));
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 9px 14px; border-radius: 20px;
   background: var(--glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(30, 18, 5, .25);
 }
-.logo { width: 38px; height: 38px; border-radius: 11px; background: linear-gradient(145deg, #F7B24A, var(--ember)); display: grid; place-items: center; flex: none; }
+.logo { width: 38px; height: 38px; border-radius: 11px; background: linear-gradient(145deg, #F7B24A, var(--accent)); display: grid; place-items: center; flex: none; }
 .logo svg { width: 22px; height: 22px; }
 .titles { flex: 1 1 200px; min-width: 0; }
 h1 { margin: 0; font: 600 clamp(16px, 2vw, 22px)/1.1 var(--display); color: var(--bark); }
-.sub { margin: 2px 0 0; font: 700 10px/1.2 var(--body); letter-spacing: .09em; text-transform: uppercase; color: var(--aqua); }
+.sub { margin: 2px 0 0; font: 700 10px/1.2 var(--body); letter-spacing: .09em; text-transform: uppercase; color: var(--accent2); }
 .pills { display: flex; gap: 8px; flex-wrap: wrap; }
 .pill { font: 700 11px/1 var(--body); letter-spacing: .06em; text-transform: uppercase; padding: 9px 13px; border-radius: 999px; border: 1px solid rgba(63, 42, 24, .14); background: #fff; color: var(--bark); display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
 button.pill, a.pill { cursor: pointer; }
 .pill[aria-pressed="true"] { background: var(--bark); color: var(--cream); }
-.pill .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ember); }
+.pill .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
 #src-pill[data-src="live"] .dot { background: #3FB45A; animation: pulse 1.6s ease-in-out infinite; }
 #src-pill[data-src="lost"] .dot { background: #C0473A; }
-button:focus-visible, a:focus-visible, .actor:focus-visible { outline: 3px solid var(--aqua); outline-offset: 2px; }
+button:focus-visible, a:focus-visible, .actor:focus-visible { outline: 3px solid var(--accent2); outline-offset: 2px; }
 
+/* journal et titre d'activité */
 .log {
-  position: fixed; z-index: 10; right: max(16px, env(safe-area-inset-right)); bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+  position: fixed; z-index: 10; right: calc(max(16px, env(safe-area-inset-right)) + var(--chat-w)); bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
   width: min(380px, calc(100vw - 32px)); padding: 10px 13px; border-radius: 16px;
   background: var(--glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(30, 18, 5, .25);
 }
@@ -140,12 +127,11 @@ button:focus-visible, a:focus-visible, .actor:focus-visible { outline: 3px solid
 .log time { color: var(--muted); }
 .log .k { color: #B4571C; }
 @media (max-width: 700px) { .log { display: none; } }
-/* tall screens: the journal fills the band under the clearing, a headline fills the band above */
-body.bands .log { left: 50%; right: auto; transform: translateX(-50%); width: min(820px, calc(100vw - 32px)); display: block; }
+body.bands .log { left: calc((100vw - var(--chat-w)) / 2); right: auto; transform: translateX(-50%); width: min(820px, calc(100vw - var(--chat-w) - 32px)); display: block; }
 body.bands .log ol { font-size: 12.5px; }
 body.bands .log li { grid-template-columns: 70px 1fr; }
 #headline {
-  position: fixed; z-index: 9; left: 50%; transform: translate(-50%, -50%); width: min(900px, calc(100vw - 32px));
+  position: fixed; z-index: 9; left: calc((100vw - var(--chat-w)) / 2); transform: translate(-50%, -50%); width: min(900px, calc(100vw - var(--chat-w) - 32px));
   text-align: center; margin: 0; display: none; pointer-events: none;
   font: 600 clamp(18px, 2.2vw, 28px)/1.25 var(--display); color: var(--cream); text-shadow: 0 2px 14px rgba(0, 0, 0, .55);
 }
@@ -156,276 +142,24 @@ body.bands #headline { display: block; }
 </style>
 </head>
 <body>
-<div class="backdrop" aria-hidden="true"></div>
+<div class="backdrop" id="backdrop" aria-hidden="true"></div>
 <header class="bar">
   <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2" fill="#fff"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M18.7 5.3l-1.8 1.8M7.1 16.9l-1.8 1.8"/></svg></div>
-  <div class="titles"><h1>Le Sanctuaire Solaire de Hermes</h1><p class="sub">La grande clairière · panorama</p></div>
+  <div class="titles"><h1 id="title">Sanctuaire</h1><p class="sub" id="subtitle">Panorama</p></div>
   <div class="pills">
     <span class="pill" id="src-pill" data-src="demo"><span class="dot"></span><span id="src-txt">Démo · événements simulés</span></span>
     <button class="pill" id="demo" type="button" aria-pressed="false">Démo auto</button>
-    <a class="pill" href="index.html">Les 5 scènes</a>
+    <a class="pill" id="scenes-link" href="index.html">Les 5 scènes</a>
   </div>
 </header>
 
 <main class="viewport" id="viewport">
-  <div class="pano" id="pano" data-walking="0">
-    <div class="rays" aria-hidden="true"></div>
-    <div class="actor" id="a-castor" data-state="rest" tabindex="0" title="Brico-Castor · forge du code">
-      <span class="tag"><i></i><b>Brico-Castor</b></span>
-      <div class="sprite"><div class="breath"><img class="p-rest" src="castor-rest.webp" alt=""><img class="p-work" src="castor-work.webp" alt=""><img class="p-hit" src="castor-hit.webp" alt=""></div><div class="vsheet"></div></div>
-    </div>
-    <div class="actor" id="a-chouette" data-state="rest" tabindex="0" title="Chouette Céleste · recherche">
-      <span class="tag"><i></i><b>Chouette Céleste</b></span>
-      <div class="sprite"><div class="breath"><img class="p-rest" src="chouette-rest.webp" alt=""><img class="p-work" src="chouette-read.webp" alt=""></div></div>
-    </div>
-    <div class="actor" id="a-renard" data-state="rest" tabindex="0" title="Kitsune Hermes · messages">
-      <span class="tag"><i></i><b>Kitsune Hermes</b></span>
-      <div class="sprite"><div class="breath"><img class="p-rest" src="renard-rest.webp" alt=""><img class="p-work" src="renard-work.webp" alt=""></div></div>
-    </div>
-    <div class="actor" id="a-taupe" data-state="rest" tabindex="0" title="Data-Taupe · données">
-      <span class="tag"><i></i><b>Data-Taupe</b></span>
-      <div class="sprite"><div class="breath"><img class="p-rest" src="taupe-rest.webp" alt=""><img class="p-work" src="taupe-work.webp" alt=""></div><div class="vsheet"></div></div>
-    </div>
-    <div class="actor" id="a-shiba" data-state="rest" tabindex="0" title="Shiba Sentinel · sécurité">
-      <span class="tag"><i></i><b>Shiba Sentinel</b></span>
-      <div class="sprite"><div class="breath"><img class="p-rest" src="shiba-rest.webp" alt=""><img class="p-work" src="shiba-work.webp" alt=""></div><div class="vsheet"></div><div class="vsheet vsheet-alert"></div></div>
-    </div>
-    <div id="walker" aria-hidden="true"><div class="flip"><div class="sheet"></div></div></div>
-  </div>
+  <div class="pano" id="pano" data-walking="0"></div>
 </main>
 
-<p id="headline" aria-live="polite"><span id="hl-txt">La grande clairière s'éveille.</span><small id="hl-sub">Démo · événements simulés</small></p>
+<p id="headline" aria-live="polite"><span id="hl-txt">Chargement…</span><small id="hl-sub">Démo · événements simulés</small></p>
 <aside class="log" aria-label="Journal"><h2>Sous le capot <span id="log-src">flux simulé</span></h2><ol id="log"></ol></aside>
 
-<script src="chouette-vol.js"></script>
-<script>
-(function () {
-  "use strict";
-  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var pano = document.getElementById("pano"), walker = document.getElementById("walker"), sheet = walker.querySelector(".sheet");
-  var flip = walker.querySelector(".flip"), logEl = document.getElementById("log");
-  var IDS = ["castor", "chouette", "taupe", "renard", "shiba"];
-  var A = {}, NAMES = { castor: "Brico-Castor", chouette: "Chouette Céleste", taupe: "Data-Taupe", renard: "Kitsune Hermes", shiba: "Shiba Sentinel" };
-  var SHORT = { castor: "Castor", chouette: "Chouette", taupe: "Taupe", renard: "Kitsune", shiba: "Shiba" };
-  var WORK = { castor: "Forge le code", chouette: "En vol", taupe: "Fouille", renard: "Messages", shiba: "Garde" };
-  /* where the fox stops to hand over the letter (feet position in %) */
-  var VISIT = { castor: [33.5, 84], chouette: [37, 79], taupe: [62, 80], shiba: [77, 84] };
-  var HOME = [56.2, 79];
-  IDS.forEach(function (id) {
-    var el = document.getElementById("a-" + id);
-    A[id] = { el: el, state: "rest", label: el.querySelector(".tag b"), hit: null };
-  });
-
-  var hlTxt = document.getElementById("hl-txt");
-  function headline(t) {
-    hlTxt.style.opacity = "0";
-    setTimeout(function () { hlTxt.textContent = t; hlTxt.style.opacity = "1"; }, 250);
-  }
-  function log(k, t) {
-    headline(t);
-    var li = document.createElement("li"), tm = document.createElement("time"), s = document.createElement("span"), g = document.createElement("span");
-    var d = new Date(); tm.textContent = d.toTimeString().slice(0, 8);
-    g.className = "k"; g.textContent = "[" + k + "] "; s.appendChild(g); s.appendChild(document.createTextNode(t));
-    li.appendChild(tm); li.appendChild(s); logEl.insertBefore(li, logEl.firstChild);
-    while (logEl.children.length > 5) logEl.removeChild(logEl.lastChild);
-  }
-  function setState(id, s) {
-    var a = A[id]; if (!a || a.state === s) return;
-    a.state = s; a.el.setAttribute("data-state", s);
-    if (id === "chouette" && owl) owl.state(s); a.el.setAttribute("data-hit", "0");
-    a.label.textContent = s === "work" ? SHORT[id] + " · " + (id === "shiba" && a.el.getAttribute("data-alert") === "1" ? "Alerte !" : WORK[id]) : s === "done" ? SHORT[id] + " · Terminé" : NAMES[id];
-    clearInterval(a.hit);
-    if ((id === "castor" || id === "taupe" || id === "shiba") && s === "work") a.vStart = performance.now();
-    if (id === "castor" && s === "work" && !reduce && !a.el.classList.contains("has-video")) a.hit = setInterval(function () { a.el.setAttribute("data-hit", "1"); setTimeout(function () { a.el.setAttribute("data-hit", "0"); }, 180); }, 1000);
-    if (s === "work" && id !== "renard") log(NAMES[id].toUpperCase().split(" ")[0], NAMES[id] + " se met au travail.");
-    if (s === "done") log("TERMINE", NAMES[id] + " a fini sa tâche.");
-  }
-
-  /* ---- the owl flies away to search and comes back ---- */
-  var owl = window.ChouetteVol ? window.ChouetteVol({
-    container: pano, perch: [40.6, 45], away: [104, -30], height: 26,
-    hide: function (h) { A.chouette.el.querySelector(".sprite").style.opacity = h ? "0" : ""; },
-    onAway: function () { log("ENVOL", "La Chouette Céleste s'envole chercher des informations."); },
-    onLanded: function () { log("RETOUR", "La Chouette Céleste revient avec sa trouvaille."); }
-  }) : null;
-
-  /* ---- video loops cut from generated videos: Castor hammering, Taupe digging (24 fps) ---- */
-  [["castor", "castor-forge-video.webp", 24, 12, 2, 24], ["taupe", "taupe-pioche-video.webp", 53, 14, 4, 24],
-   ["shiba", "shiba-garde-video.webp", 43, 11, 4, 12, true], ["shiba", "shiba-alerte-video.webp", 22, 11, 2, 24, false, true]].forEach(function (c) {
-    var a = A[c[0]], vs = a.el.querySelectorAll(".vsheet")[c[7] ? 1 : 0], img = new Image(), last = -1, N = c[2], COLS = c[3], ROWS = c[4], FPS = c[5], PING = c[6];
-    img.onload = function () { a.el.classList.add("has-video"); clearInterval(a.hit); requestAnimationFrame(loop); };
-    img.src = c[1];
-    function loop(now) {
-      if (a.state === "work" && !reduce) {
-        var raw = Math.floor((now - (a.vStart || now)) / (1000 / FPS)), f;
-        if (PING) { var per = 2 * (N - 1), r = raw % per; f = r < N ? r : per - r; } else f = raw % N;
-        if (f !== last) { last = f; vs.style.backgroundPosition = ((f % COLS) / (COLS - 1) * 100) + "% " + (Math.floor(f / COLS) / (ROWS - 1) * 100) + "%"; }
-      }
-      requestAnimationFrame(loop);
-    }
-  });
-
-  /* ---- Kitsune Hermes walks to an animal, hands over the letter, walks back ---- */
-  var queue = [], walking = false, pos = HOME.slice(), frameT = 0, frameI = 0;
-  function placeWalker(x, y, dir) {
-    walker.style.left = x + "%"; walker.style.top = y + "%";
-    flip.style.transform = dir < 0 ? "scaleX(-1)" : "";
-  }
-  function walkTo(target, done) {
-    var from = pos.slice(), dx = target[0] - from[0], dist = Math.abs(dx) + Math.abs(target[1] - from[1]) * .4;
-    var dur = Math.max(700, dist / 6 * 1000), t0 = performance.now(), dir = dx >= 0 ? 1 : -1;
-    function step(now) {
-      var k = Math.min(1, (now - t0) / dur), e = k;
-      pos = [from[0] + dx * e, from[1] + (target[1] - from[1]) * e];
-      var bob = 0;
-      placeWalker(pos[0], pos[1] + bob, dir);
-      if (now - frameT > 32) { frameT = now; frameI = (frameI + 1) % 42; sheet.style.backgroundPosition = ((frameI % 14) / 13 * 100) + "% " + ((frameI / 14 | 0) / 2 * 100) + "%"; }
-      if (k < 1) requestAnimationFrame(step); else done();
-    }
-    requestAnimationFrame(step);
-  }
-  function deliver(id, cb) {
-    if (reduce || !VISIT[id]) { cb(); return; }
-    queue.push({ id: id, cb: cb });
-    if (!walking) next();
-  }
-  function next() {
-    var job = queue.shift();
-    if (!job) {
-      walkTo(HOME, function () { walking = false; walker.style.display = "none"; pano.setAttribute("data-walking", "0"); });
-      return;
-    }
-    if (!walking) { walking = true; pos = HOME.slice(); placeWalker(pos[0], pos[1], 1); walker.style.display = "block"; pano.setAttribute("data-walking", "1"); }
-    log("MESSAGE", "Kitsune Hermes part porter une lettre à " + NAMES[job.id] + ".");
-    walkTo(VISIT[job.id], function () { job.cb(); setTimeout(next, 450); });
-  }
-  /* a walk already under way finishes its delivery even if the next one is not via the fox */
-  window.SanctuairePano = { setState: setState, deliver: deliver };
-
-  /* ---- live mode (same files as the main page) ---- */
-  var meta = document.querySelector('meta[name="sanctuaire-source"]');
-  var SRC = (meta && meta.content) || "etat.json", SRC_SENT = SRC.replace(/etat\.json/, "sentinelle.json");
-  var POLL = 2000, WORK_HOLD = 9000, DONE_HOLD = 4000, STALE = 15 * 60;
-  var prev = null, prevSen = null, isLive = false, fails = 0, lastWork = {}, phase = {}, inFlight = {}, approval = false;
-  var ren = { busy: false, doneAt: 0 }, demoOn = false, demoTimer = null;
-  var pill = document.getElementById("src-pill"), txt = document.getElementById("src-txt"), logSrc = document.getElementById("log-src");
-  function badge(m) {
-    pill.setAttribute("data-src", m);
-    txt.textContent = m === "live" ? "En direct · Hermes" : m === "lost" ? "Connexion perdue · Hermes" : "Démo · événements simulés";
-    logSrc.textContent = m === "live" ? "flux en direct" : m === "lost" ? "connexion perdue" : "flux simulé";
-    document.getElementById("hl-sub").textContent = m === "live" ? "En direct de Hermes" : m === "lost" ? "Connexion perdue · nouvelle tentative" : "Démo · événements simulés";
-  }
-  function set(id, s) { phase[id] = s; if (!inFlight[id] && !demoOn) setState(id, s); }
-  function apply(e) {
-    var now = Date.now(), a = e.animaux || {}, r = e.renard || {};
-    if (!prev) { prev = e; return; }
-    var pa = prev.animaux || {}, pr = prev.renard || {};
-    var busy = !!r.en_cours && (e.maj - (r.debut || 0) < STALE);
-    if (r.debut !== pr.debut && r.en_cours) log("HERMES", "Nouvelle demande reçue.");
-    IDS.forEach(function (id) {
-      if (id === "renard") return;
-      var c = a[id] || {}, o = pa[id] || {};
-      if (c.dernier && c.dernier !== o.dernier) {
-        var idle = phase[id] !== "work"; lastWork[id] = now;
-        if (idle && !demoOn) { phase[id] = "work"; inFlight[id] = true; deliver(id, function () { inFlight[id] = false; set(id, phase[id]); }); }
-        else set(id, "work");
-      }
-    });
-    prev = e; ren.busy = busy; if (r.fin !== pr.fin && !r.en_cours) ren.doneAt = now;
-    tick();
-  }
-  var alertUntil = 0;
-  function applySen(sen) {
-    if (!sen || !sen.approbation) return;
-    approval = !!sen.approbation.en_attente && (sen.maj - (sen.approbation.debut || 0) < STALE);
-    if (!prevSen) { prevSen = sen; return; }
-    if (sen.dernier !== prevSen.dernier) {
-      lastWork.shiba = Date.now();
-      if (sen.erreurs_api > prevSen.erreurs_api || sen.erreurs_outils > prevSen.erreurs_outils) alertUntil = Date.now() + WORK_HOLD;
-      if (sen.approbation.n > prevSen.approbation.n) alertUntil = 0;
-      set("shiba", "work");
-      if (sen.erreurs_api > prevSen.erreurs_api) log("ALERTE", "Le modèle ou le fournisseur ne répond pas.");
-      if (sen.erreurs_outils > prevSen.erreurs_outils) log("ALERTE", "Shiba Sentinel a repéré une erreur d'outil.");
-      if (sen.approbation.n > prevSen.approbation.n) log("GARDE", "Hermes attend ton approbation.");
-    }
-    prevSen = sen;
-  }
-  function tick() {
-    var now = Date.now();
-    if (!demoOn) A.shiba.el.setAttribute("data-alert", now < alertUntil ? "1" : "0");
-    if (approval) lastWork.shiba = now;
-    set("renard", ren.busy ? "work" : now - ren.doneAt < DONE_HOLD ? "done" : "rest");
-    IDS.forEach(function (id) {
-      if (id === "renard" || !lastWork[id]) return;
-      var age = now - lastWork[id];
-      set(id, age < WORK_HOLD ? "work" : age < WORK_HOLD + DONE_HOLD ? "done" : "rest");
-    });
-  }
-  function poll() {
-    fetch(SRC + "?t=" + Date.now(), { cache: "no-store" })
-      .then(function (r) { if (!r.ok) throw 0; return r.json(); })
-      .then(function (e) {
-        if (!e || !e.animaux) throw 0;
-        fails = 0;
-        if (!isLive) { isLive = true; stopDemo(); log("EN DIRECT", "Connecté à Hermes."); }
-        badge("live"); apply(e);
-        return fetch(SRC_SENT + "?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.json() : null; }).then(applySen, function () {});
-      })
-      .catch(function () { fails++; if (isLive && fails === 3) { badge("lost"); log("RESEAU", "Hermes injoignable, nouvelle tentative."); } })
-      .then(function () { setTimeout(poll, isLive || fails < 2 ? POLL : 30000); });
-  }
-  setInterval(function () { if (isLive) tick(); }, 1000);
-
-  /* ---- demo: the fox hands out random tasks ---- */
-  var demoBtn = document.getElementById("demo");
-  function demoStep() {
-    if (!demoOn) return;
-    var idle = ["castor", "chouette", "taupe", "shiba"].filter(function (k) { return A[k].state === "rest" && !inFlight[k]; });
-    if (idle.length) {
-      var id = idle[Math.floor(Math.random() * idle.length)]; inFlight[id] = true;
-      if (id === "shiba") A.shiba.el.setAttribute("data-alert", Math.random() < .5 ? "1" : "0");
-      setState("renard", "work");
-      deliver(id, function () {
-        inFlight[id] = false; setState(id, "work"); setState("renard", "rest");
-        setTimeout(function () { if (demoOn) { setState(id, "done"); setTimeout(function () { if (demoOn) setState(id, "rest"); }, 3000); } }, 5000 + Math.random() * 4000);
-      });
-    }
-    demoTimer = setTimeout(demoStep, 4500 + Math.random() * 3500);
-  }
-  function startDemo() { demoOn = true; demoBtn.setAttribute("aria-pressed", "true"); demoStep(); }
-  function stopDemo() { demoOn = false; clearTimeout(demoTimer); demoBtn.setAttribute("aria-pressed", "false"); IDS.forEach(function (k) { inFlight[k] = false; setState(k, phase[k] || "rest"); }); }
-  demoBtn.addEventListener("click", function () { if (demoOn) stopDemo(); else startDemo(); });
-
-  /* click an animal: open its scene on the main page */
-  var SCENE = { castor: "castor", chouette: "chouette", taupe: "taupe", renard: "renard", shiba: "shiba" };
-  IDS.forEach(function (id) {
-    function go() { location.href = "index.html#" + SCENE[id]; }
-    A[id].el.addEventListener("click", go);
-    A[id].el.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
-  });
-
-  /* center the oak on narrow screens */
-  var vp = document.getElementById("viewport");
-  requestAnimationFrame(function () { vp.scrollLeft = (pano.offsetWidth - vp.clientWidth) * .5; });
-  var bar = document.querySelector(".bar"), logBox = document.querySelector(".log"), hl = document.getElementById("headline");
-  function layout() {
-    var r = pano.getBoundingClientRect(), hb = bar.getBoundingClientRect().bottom;
-    var top = r.top - hb, bottom = window.innerHeight - r.bottom;
-    var ok = top >= 90 && bottom >= logBox.offsetHeight + 24 && window.innerWidth > 700;
-    document.body.classList.toggle("bands", ok);
-    if (ok) {
-      hl.style.top = (hb + top / 2) + "px";
-      logBox.style.bottom = Math.max(12, (bottom - logBox.offsetHeight) / 2) + "px";
-    } else { logBox.style.bottom = ""; }
-  }
-  window.addEventListener("resize", layout);
-  new MutationObserver(layout).observe(logEl, { childList: true });
-  layout();
-
-  log("CLAIRIERE", "La grande clairière s'éveille.");
-  poll();
-  setTimeout(function () { if (!isLive && !demoOn) startDemo(); }, 1500);
-})();
-</script>
+<script src="moteur.js"></script>
 </body>
 </html>
