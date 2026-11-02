@@ -49,11 +49,18 @@
   }
 
   /* ---- envoi d'un message et lecture du flux ---- */
+  /* Hermes refuse deux conversations avec le même titre : titre daté à la seconde, et nouvel essai sans titre si refus */
   function ensureSession() {
     if (sessionId) return Promise.resolve(sessionId);
-    return fetch("chat/sessions", { method: "POST", headers: HDR, body: JSON.stringify({ title: "Sanctuaire · " + new Date().toLocaleDateString("fr-CH") }) })
-      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-      .then(function (d) { var s = d.session || d; sessionId = s.id || s.session_id; store("sanctuaire.session", sessionId); return sessionId; });
+    var d = new Date(), p = function (n) { return (n < 10 ? "0" : "") + n; };
+    var title = "Sanctuaire · " + d.toLocaleDateString("fr-CH") + " " + p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds());
+    function create(body) {
+      return fetch("chat/sessions", { method: "POST", headers: HDR, body: JSON.stringify(body) })
+        .then(function (r) { if (!r.ok) throw new Error("création de conversation : " + r.status); return r.json(); });
+    }
+    return create({ title: title })
+      .catch(function (e) { console.warn("[Sanctuaire]", e.message, "→ nouvel essai sans titre"); return create({}); })
+      .then(function (j) { var s = j.session || j; sessionId = s.id || s.session_id; store("sanctuaire.session", sessionId); return sessionId; });
   }
 
   function submit(text) {
@@ -117,7 +124,8 @@
         });
       }
       return pump();
-    }).catch(function () {
+    }).catch(function (e) {
+      console.warn("[Sanctuaire] envoi échoué :", e && e.message);
       b.classList.remove("typing"); if (!text_) b.innerHTML = render(C.error);
     }).then(function () {
       busy = false; send.disabled = false; box.removeAttribute("data-busy");
