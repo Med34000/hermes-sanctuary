@@ -143,6 +143,61 @@ body.bands .log li { grid-template-columns: 70px 1fr; }
 #headline span { transition: opacity .4s ease; }
 body.bands #headline { display: block; }
 @media (prefers-reduced-motion: reduce) { .actor .breath, .rays, .actor::before { animation: none !important; } }
+
+/* ---- chat : colonne à droite (grand écran), feuille qui monte du bas (petit écran) ---- */
+@media (min-width: 1100px) { :root { --chat-w: 400px; } }
+#chat {
+  position: fixed; z-index: 20; display: flex; flex-direction: column; gap: 10px;
+  background: var(--glass); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  box-shadow: -10px 0 40px rgba(20, 12, 4, .35); color: var(--ink);
+}
+@media (min-width: 1100px) {
+  #chat { top: 0; right: 0; bottom: 0; width: var(--chat-w); padding: calc(env(safe-area-inset-top, 0px) + 14px) 14px calc(env(safe-area-inset-bottom, 0px) + 14px); border-left: 1px solid rgba(255, 255, 255, .6); }
+  #chat-toggle { display: none; }
+}
+@media (max-width: 1099px) {
+  #chat { left: 0; right: 0; bottom: 0; height: 68px; padding: 10px 14px calc(env(safe-area-inset-bottom, 0px) + 10px); border-radius: 22px 22px 0 0; transition: height .35s ease; overflow: hidden; }
+  #chat.open { height: min(64vh, 620px); }
+  .log { display: none !important; }
+}
+.chat-head { display: flex; align-items: center; gap: 12px; flex: none; }
+.chat-avatar { width: 48px; height: 48px; border-radius: 14px; overflow: hidden; flex: none; background: #F8D9A8; border: 2px solid #fff; box-shadow: 0 3px 10px rgba(60, 35, 10, .25); }
+.chat-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 0%; transform: scale(3); transform-origin: 44% 17%; display: block; }
+#chat[data-busy="1"] .chat-avatar { animation: pulse-ring 1.6s ease-in-out infinite; }
+@keyframes pulse-ring { 0%, 100% { box-shadow: 0 0 0 0 rgba(228, 128, 47, .5); } 50% { box-shadow: 0 0 0 7px rgba(228, 128, 47, 0); } }
+.chat-who { flex: 1; min-width: 0; }
+#chat-title { margin: 0; font: 600 18px/1.1 var(--display); color: var(--bark); }
+#chat-status { margin: 3px 0 0; font: 700 11px/1.2 var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--accent2); }
+.chat-btn { font: 700 11px/1 var(--body); letter-spacing: .05em; text-transform: uppercase; padding: 8px 10px; border-radius: 999px; border: 1px solid rgba(63, 42, 24, .15); background: #fff; color: var(--bark); cursor: pointer; }
+#chat-list { list-style: none; margin: 0; padding: 4px 2px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.msg { display: flex; flex-direction: column; max-width: 92%; }
+.msg.user { align-self: flex-end; align-items: flex-end; }
+.msg.assistant { align-self: flex-start; }
+.bubble { padding: 10px 13px; border-radius: 16px; font: 600 14.5px/1.45 var(--body); word-wrap: break-word; overflow-wrap: anywhere; }
+.msg.user .bubble { background: var(--bark); color: var(--cream); border-bottom-right-radius: 5px; white-space: pre-wrap; }
+.msg.assistant .bubble { background: #fff; color: var(--ink); border-bottom-left-radius: 5px; box-shadow: 0 2px 8px rgba(40, 24, 8, .1); }
+.bubble a { color: #1F7F7B; }
+.bubble code { font: 13px var(--mono); background: rgba(63, 42, 24, .08); padding: 1px 5px; border-radius: 5px; }
+.bubble ul { margin: 4px 0; padding-left: 18px; }
+.bubble.typing::after { content: "Kitsune lit ta lettre…"; color: var(--muted); font-style: italic; }
+.activity { margin-top: 6px; font: 600 12.5px/1.4 var(--body); color: var(--muted); }
+.activity summary { cursor: pointer; list-style: none; padding: 4px 9px; border-radius: 999px; background: rgba(255, 255, 255, .6); display: inline-block; }
+.activity summary::before { content: "▸ "; }
+.activity[open] summary::before { content: "▾ "; }
+.activity ul { margin: 6px 0 0; padding-left: 4px; list-style: none; }
+.activity li::before { content: "• "; color: var(--accent); }
+.activity li.run::before { content: "◌ "; }
+.activity li.ok::before { content: "✓ "; color: var(--moss); }
+.activity li.fail::before { content: "⚠ "; color: #C0473A; }
+#chat-shortcuts { display: flex; gap: 6px; flex-wrap: wrap; flex: none; }
+.chip { font: 700 11.5px/1 var(--body); padding: 8px 11px; border-radius: 999px; border: 1px solid rgba(43, 167, 163, .35); background: rgba(43, 167, 163, .1); color: #1F6F6C; cursor: pointer; }
+.chip:hover { background: rgba(43, 167, 163, .2); }
+.chat-input { display: flex; gap: 8px; align-items: flex-end; flex: none; }
+#chat-input { flex: 1; resize: none; min-height: 44px; max-height: 160px; padding: 11px 13px; border-radius: 16px; border: 1px solid rgba(63, 42, 24, .2); background: #fff; color: var(--ink); font: 600 14.5px/1.4 var(--body); }
+#chat-input:focus { outline: 3px solid rgba(43, 167, 163, .45); outline-offset: 0; }
+#chat-send { flex: none; width: 46px; height: 46px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 4px 12px rgba(228, 128, 47, .4); }
+#chat-send:disabled { opacity: .5; cursor: default; }
+#chat[data-offline="1"] #chat-status::after { content: " · démo"; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -164,6 +219,22 @@ body.bands #headline { display: block; }
 <p id="headline" aria-live="polite"><span id="hl-txt">Chargement…</span><small id="hl-sub">Démo · événements simulés</small></p>
 <aside class="log" aria-label="Journal"><h2>Sous le capot <span id="log-src">flux simulé</span></h2><ol id="log"></ol></aside>
 
+<aside id="chat" aria-label="Discussion avec Kitsune">
+  <div class="chat-head">
+    <div class="chat-avatar" aria-hidden="true"><img src="renard-rest.webp" alt=""></div>
+    <div class="chat-who"><h2 id="chat-title">Parler à Kitsune</h2><p id="chat-status" aria-live="polite">Prêt</p></div>
+    <button class="chat-btn" id="chat-new" type="button" title="Commencer une nouvelle conversation">Nouvelle</button>
+    <button class="chat-btn" id="chat-toggle" type="button" aria-expanded="false" aria-controls="chat">Ouvrir</button>
+  </div>
+  <ol id="chat-list" aria-live="polite"></ol>
+  <div id="chat-shortcuts"></div>
+  <div class="chat-input">
+    <textarea id="chat-input" rows="1" aria-label="Ton message pour Kitsune"></textarea>
+    <button id="chat-send" type="button" aria-label="Envoyer">➤</button>
+  </div>
+</aside>
+
 <script src="moteur.js"></script>
+<script src="chat.js"></script>
 </body>
 </html>

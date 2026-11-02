@@ -54,6 +54,28 @@
     }
   },
 
+  "chat": {
+    "title": "Parler à Kitsune",
+    "placeholder": "Écris ta lettre à Kitsune…",
+    "hello": "Bonjour ! Je suis Kitsune Hermes. Écris-moi ce dont tu as besoin, je réveille le bon compagnon.",
+    "reading": "Lit ta lettre…",
+    "thinking": "Réfléchit…",
+    "writing": "Écrit la réponse…",
+    "listening": "T'écoute…",
+    "ready": "Prêt",
+    "offline": "Ici, je ne peux pas joindre Hermes : ouvre le Sanctuaire depuis ton serveur pour discuter pour de vrai.",
+    "error": "Oups, la lettre s'est perdue en route. Réessaie dans un instant.",
+    "shortcuts": ["Cherche sur le web : ", "Résume-moi : ", "Rappelle-moi de ", "Explique-moi simplement : "],
+    "activityTitle": "Ce qu'ont fait les compagnons",
+    "activity": {
+      "recherche": "{short} a cherché : « {preview} »",
+      "fabrication": "{short} a travaillé à la forge ({tool})",
+      "analyse": "{short} a fouillé ({tool})",
+      "coordination": "{short} a transmis un message ({tool})",
+      "failed": "{guard} a repéré un souci avec {tool}"
+    }
+  },
+
   "texts": {
     "start": "La grande clairière s'éveille.",
     "live": "Connecté à Hermes.",

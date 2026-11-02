@@ -12,6 +12,19 @@
   /* noms des clés écrites par le hook Hermes (historiques) → rôles */
   var KEY2ROLE = { renard: "coordination", castor: "fabrication", chouette: "recherche", taupe: "analyse", shiba: "securite" };
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /* outils de Hermes → rôle (même répartition que le hook côté serveur) */
+  var TOOL_ROLE = {
+    fabrication: ["write_file", "patch", "terminal", "process", "execute_code", "skill_manage"],
+    analyse: ["read_file", "search_files", "memory", "session_search", "skill_view", "skills_list", "todo"],
+    recherche: ["web_search", "web_extract", "vision_analyze"],
+    coordination: ["send_message", "delegate_task", "clarify", "cronjob"]
+  };
+  function roleOfTool(name) {
+    name = String(name || "");
+    for (var r in TOOL_ROLE) if (TOOL_ROLE[r].indexOf(name) >= 0) return r;
+    if (/^(browser_|web_)/.test(name)) return "recherche";
+    return "fabrication";
+  }
 
   function $(id) { return document.getElementById(id); }
   function el(tag, cls, parent) { var e = document.createElement(tag); if (cls) e.className = cls; if (parent) parent.appendChild(e); return e; }
@@ -224,7 +237,7 @@
     var SRC = (meta && meta.content) || "etat.json", SRC_SENT = SRC.replace(/etat\.json/, "sentinelle.json");
     var POLL = 2000, WORK_HOLD = 9000, DONE_HOLD = 4000, STALE = 15 * 60;
     var prev = null, prevSen = null, isLive = false, fails = 0, lastWork = {}, phase = {}, inFlight = {}, approval = false, alertUntil = 0;
-    var coordBusy = false, coordDoneAt = 0, demoOn = false, demoTimer = null;
+    var coordBusy = false, chatBusyFlag = false, coordDoneAt = 0, demoOn = false, demoTimer = null, chatActive = false;
     function badge(m) {
       var pill = $("src-pill"); if (pill) pill.setAttribute("data-src", m);
       if ($("src-txt")) $("src-txt").textContent = m === "live" ? "En direct · Hermes" : m === "lost" ? "Connexion perdue · Hermes" : "Démo · événements simulés";
@@ -270,7 +283,8 @@
       var now = Date.now();
       if (!demoOn && A.securite) A.securite.el.setAttribute("data-alert", now < alertUntil ? "1" : "0");
       if (approval) lastWork.securite = now;
-      set("coordination", coordBusy ? "work" : now - coordDoneAt < DONE_HOLD ? "done" : "rest");
+      var cs = (coordBusy || chatBusyFlag) ? "work" : now - coordDoneAt < DONE_HOLD ? "done" : "rest";
+      if (!(cs === "rest" && A.coordination && A.coordination.state === "listen")) set("coordination", cs);
       WORKERS.forEach(function (role) {
         if (!lastWork[role]) return;
         var age = now - lastWork[role];
@@ -290,7 +304,16 @@
         .catch(function () { fails++; if (isLive && fails === 3) { badge("lost"); log("RESEAU", say("lost")); } })
         .then(function () { setTimeout(poll, isLive || fails < 2 ? POLL : 30000); });
     }
-    setInterval(function () { if (isLive) tick(); }, 1000);
+    setInterval(function () { if (isLive || chatActive) tick(); }, 1000);
+    /* un compagnon se met au travail (événement venu du chat) : même logique que le mode direct */
+    function pulse(role) {
+      if (!A[role]) return;
+      chatActive = true; if (demoOn) stopDemo();
+      var now = Date.now(); lastWork[role] = now;
+      if (role === "coordination") { tick(); return; }
+      if (phase[role] !== "work") { phase[role] = "work"; inFlight[role] = true; deliver(role, function () { inFlight[role] = false; set(role, phase[role]); }); }
+      else set(role, "work");
+    }
 
     /* ---- démo : le coordinateur distribue des tâches au hasard ---- */
     var demoBtn = $("demo");
@@ -333,7 +356,14 @@
       alert: function (on) { if (A.securite) A.securite.el.setAttribute("data-alert", on ? "1" : "0"); },
       /* le futur chat : Kitsune écoute pendant qu'on écrit */
       listen: function (on) { var a = A.coordination; if (!a) return; if (on && a.state === "rest") setState("coordination", "listen"); else if (!on && a.state === "listen") setState("coordination", "rest"); },
-      isLive: function () { return isLive; }
+      isLive: function () { return isLive; },
+      roleOfTool: roleOfTool, pulse: pulse,
+      chatBusy: function (on) {
+        chatActive = true; if (demoOn) stopDemo();
+        chatBusyFlag = !!on; if (!on) coordDoneAt = Date.now(); tick();
+      },
+      toolFailed: function () { chatActive = true; alertUntil = Date.now() + WORK_HOLD; lastWork.securite = Date.now(); if (A.securite) A.securite.el.setAttribute("data-alert", "1"); set("securite", "work"); },
+      demoOn: function () { return demoOn; }
     };
 
     log("DEBUT", say("start"));

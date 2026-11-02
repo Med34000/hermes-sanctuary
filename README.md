@@ -32,6 +32,8 @@ Les outils non reconnus sont listés dans `etat.json` → `inconnus` (noms seule
 - `hermes-hook/` — le hook gateway, installé dans `/opt/data/hooks/sanctuaire/` (HERMES_HOME=/opt/data).
 - `hermes-plugin/sanctuaire-sentinelle/` — plugin Shiba (erreurs d'outils, erreurs API, approbations) → `/var/lib/sanctuaire/sentinelle.json`, installé dans `/opt/data/plugins/`.
 - `sources/` — fichiers sources : vidéos Grok (renard, castor, chouette, taupe) et panorama Gemini, pour pouvoir refaire les animations.
+- `web/chat.js` — **chat** sur le côté du panorama (Kitsune écoute, lit, réfléchit ; fil d'activité ; raccourcis).
+- `deploy/sanctuaire_server.py` — serveur interne : sert la page et **relaie le chat** vers l'API de Hermes (127.0.0.1:9119), clé côté serveur, routes limitées, protection contre les sites tiers, aucun contenu enregistré.
 - `deploy/sanctuaire-web.service` — service systemd du mini serveur (127.0.0.1 seulement, utilisateur dynamique, lecture seule).
 
 ## Sur le VPS
