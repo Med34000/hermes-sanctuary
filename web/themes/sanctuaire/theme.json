@@ -11,9 +11,15 @@
 
   "roles": {
     "coordination": {
-      "name": "Kitsune Hermes", "short": "Kitsune", "work": "Messages",
+      "name": "Kitsune Hermes", "short": "Kitsune", "work": "Réfléchit", "listening": "Écoute",
       "pos": { "x": 56.2, "y": 79, "h": 22 }, "aspect": [760, 826],
       "sprites": { "rest": "renard-rest.webp", "work": "renard-work.webp" },
+      "intro": { "src": "kitsune-lecture-video.webp", "frames": 51, "cols": 13, "rows": 4, "fps": 12,
+                 "place": { "left": 4.71, "top": -6.44, "width": 94.3, "height": 104.61 } },
+      "loop": { "src": "kitsune-reflexion-video.webp", "frames": 19, "cols": 10, "rows": 2, "fps": 12, "pingpong": true,
+                "place": { "left": 5.05, "top": 2.49, "width": 92.63, "height": 95.69 } },
+      "listen": { "src": "kitsune-ecoute-video.webp", "frames": 34, "cols": 12, "rows": 3, "fps": 12, "pingpong": true,
+                  "place": { "left": 4.38, "top": -4.59, "width": 102.66, "height": 102.77 } },
       "walk": { "src": "renard-marche-video.webp", "frames": 42, "cols": 14, "rows": 3, "fps": 31, "aspect": [340, 322], "h": 24, "speed": 6 }
     },
     "fabrication": {

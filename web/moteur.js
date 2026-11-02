@@ -78,11 +78,13 @@
       }
       if (c.loop) a.vMain = addLoop(c.loop, "main");
       if (c.alertLoop) a.vAlert = addLoop(c.alertLoop, "alert");
+      if (c.intro) a.vIntro = addLoop(c.intro, "intro");
+      if (c.listen) a.vListen = addLoop(c.listen, "listen");
       if (c.loop) {
         var im = new Image();
         im.onload = function () { e.classList.add("has-video"); clearInterval(a.hit); };
         im.src = url(c.loop.src);
-        if (c.alertLoop) new Image().src = url(c.alertLoop.src);
+        [c.alertLoop, c.intro, c.listen].forEach(function (l) { if (l) new Image().src = url(l.src); });
       }
       if (T.scenes) {
         var go = function () { location.href = T.scenes + "#" + (Object.keys(KEY2ROLE).filter(function (k) { return KEY2ROLE[k] === role; })[0] || ""); };
@@ -113,9 +115,9 @@
       var a = A[role]; if (!a || a.state === s) return;
       a.state = s; a.el.setAttribute("data-state", s); a.el.setAttribute("data-hit", "0");
       var c = a.c, alarm = a.el.getAttribute("data-alert") === "1" && c.alert;
-      a.label.textContent = s === "work" ? c.short + " · " + (alarm ? c.alert : c.work) : s === "done" ? c.short + " · Terminé" : c.name;
+      a.label.textContent = s === "work" ? c.short + " · " + (alarm ? c.alert : c.work) : s === "done" ? c.short + " · Terminé" : s === "listen" ? c.short + " · " + (c.listening || "Écoute") : c.name;
       clearInterval(a.hit);
-      if (s === "work") a.vStart = performance.now();
+      if (s === "work" || s === "listen") a.vStart = performance.now();
       if (s === "work" && c.sprites.hit && !reduce && !a.el.classList.contains("has-video"))
         a.hit = setInterval(function () { a.el.setAttribute("data-hit", "1"); setTimeout(function () { a.el.setAttribute("data-hit", "0"); }, 180); }, 1000);
       if (fly[role]) fly[role].state(s);
@@ -126,9 +128,15 @@
     /* ---- boucles animées (fabrication, analyse, sécurité…) ---- */
     function loops(now) {
       ROLES.forEach(function (role) {
-        var a = A[role]; if (!a || !a.vMain || a.state !== "work" || reduce || !a.el.classList.contains("has-video")) return;
-        var alarm = a.vAlert && a.el.getAttribute("data-alert") === "1", l = alarm ? a.c.alertLoop : a.c.loop, v = alarm ? a.vAlert : a.vMain;
-        var f = frameOf(now - a.vStart, l), key = (alarm ? "a" : "m") + f;
+        var a = A[role]; if (!a || !a.vMain || reduce || !a.el.classList.contains("has-video")) return;
+        var c = a.c, el2 = now - a.vStart, l, v, ph;
+        if (a.state === "listen" && a.vListen) { l = c.listen; v = a.vListen; ph = "listen"; }
+        else if (a.state !== "work") return;
+        else if (a.vAlert && a.el.getAttribute("data-alert") === "1") { l = c.alertLoop; v = a.vAlert; ph = "alert"; }
+        else if (a.vIntro && el2 < c.intro.frames * 1000 / c.intro.fps) { l = c.intro; v = a.vIntro; ph = "intro"; }
+        else { l = c.loop; v = a.vMain; ph = "main"; if (a.vIntro) el2 -= c.intro.frames * 1000 / c.intro.fps; }
+        if (a.el.getAttribute("data-vphase") !== ph) a.el.setAttribute("data-vphase", ph);
+        var f = frameOf(el2, l), key = ph + f;
         if (key !== a.vLast) { a.vLast = key; v.style.backgroundPosition = sheetPos(f, l.cols, l.rows); }
       });
       requestAnimationFrame(loops);
@@ -323,6 +331,8 @@
     window.Sanctuaire = {
       theme: T, setState: setState, deliver: deliver, log: log,
       alert: function (on) { if (A.securite) A.securite.el.setAttribute("data-alert", on ? "1" : "0"); },
+      /* le futur chat : Kitsune écoute pendant qu'on écrit */
+      listen: function (on) { var a = A.coordination; if (!a) return; if (on && a.state === "rest") setState("coordination", "listen"); else if (!on && a.state === "listen") setState("coordination", "rest"); },
       isLive: function () { return isLive; }
     };
 
