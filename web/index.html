@@ -369,6 +369,7 @@ button.pill:hover { filter: brightness(.97); }
     <div class="pills">
       <span class="pill" id="src-pill" title="Source des événements"><span class="dot"></span><span id="src-txt">Démo · événements simulés</span></span>
       <button class="pill" id="v-grid" type="button" aria-pressed="true" title="Voir les 5 scènes en même temps">Vue d'ensemble</button>
+      <a class="pill" href="panorama.html" title="Tous les compagnons dans la grande clairière" style="text-decoration:none">Panorama</a>
       <button class="pill" id="v-auto" type="button" aria-pressed="false" title="Démo : les compagnons s'activent tout seuls">Démo auto</button>
       <button class="pill" id="kid" type="button" aria-pressed="false">Mode enfant / école : off</button>
       <button class="pill" id="snd" type="button" aria-pressed="false">Son : off</button>
@@ -958,6 +959,8 @@ button.pill:hover { filter: brightness(.97); }
   };
   buildTiles(); syncTiles(); applyGeometry(); applyOff(); applyA11y(); syncUI();
   addLog("CLAIRIERE", "Le Sanctuaire Solaire est éveillé. Plein soleil, 5 compagnons.");
+  var wanted = location.hash.slice(1);
+  if (ACTORS[wanted]) setTimeout(function () { enterScene(wanted); }, 60);
   setTimeout(function () { if (!auto && !window.__sanctuaireLive) startAuto(); }, 900);
 })();
 </script>

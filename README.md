@@ -23,6 +23,7 @@ Les outils non reconnus sont listés dans `etat.json` → `inconnus` (noms seule
 
 ## Contenu
 
+- `web/panorama.html` — vue panorama : tous les compagnons dans la grande clairière, Kitsune Hermes marche porter les lettres (même source live).
 - `web/` — la page (même fichier que l'artefact claude.ai) et ses images. Sans `etat.json` joignable, elle tourne en démo.
   Source réglable : `<meta name="sanctuaire-source" content="etat.json">`.
 - `hermes-hook/` — le hook gateway, installé dans `/opt/data/hooks/sanctuaire/` (HERMES_HOME=/opt/data).
