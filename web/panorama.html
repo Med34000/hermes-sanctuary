@@ -123,6 +123,18 @@ button:focus-visible, a:focus-visible, .actor:focus-visible { outline: 3px solid
 .log time { color: var(--muted); }
 .log .k { color: #B4571C; }
 @media (max-width: 700px) { .log { display: none; } }
+/* tall screens: the journal fills the band under the clearing, a headline fills the band above */
+body.bands .log { left: 50%; right: auto; transform: translateX(-50%); width: min(820px, calc(100vw - 32px)); display: block; }
+body.bands .log ol { font-size: 12.5px; }
+body.bands .log li { grid-template-columns: 70px 1fr; }
+#headline {
+  position: fixed; z-index: 9; left: 50%; transform: translate(-50%, -50%); width: min(900px, calc(100vw - 32px));
+  text-align: center; margin: 0; display: none; pointer-events: none;
+  font: 600 clamp(18px, 2.2vw, 28px)/1.25 var(--display); color: var(--cream); text-shadow: 0 2px 14px rgba(0, 0, 0, .55);
+}
+#headline small { display: block; margin-top: 6px; font: 700 11px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: rgba(255, 244, 222, .7); }
+#headline span { transition: opacity .4s ease; }
+body.bands #headline { display: block; }
 @media (prefers-reduced-motion: reduce) { .actor .breath, .rays, .actor::before { animation: none !important; } }
 </style>
 </head>
@@ -167,6 +179,7 @@ button:focus-visible, a:focus-visible, .actor:focus-visible { outline: 3px solid
   </div>
 </main>
 
+<p id="headline" aria-live="polite"><span id="hl-txt">La grande clairière s'éveille.</span><small id="hl-sub">Démo · événements simulés</small></p>
 <aside class="log" aria-label="Journal"><h2>Sous le capot <span id="log-src">flux simulé</span></h2><ol id="log"></ol></aside>
 
 <script>
@@ -187,7 +200,13 @@ button:focus-visible, a:focus-visible, .actor:focus-visible { outline: 3px solid
     A[id] = { el: el, state: "rest", label: el.querySelector(".tag b"), hit: null };
   });
 
+  var hlTxt = document.getElementById("hl-txt");
+  function headline(t) {
+    hlTxt.style.opacity = "0";
+    setTimeout(function () { hlTxt.textContent = t; hlTxt.style.opacity = "1"; }, 250);
+  }
   function log(k, t) {
+    headline(t);
     var li = document.createElement("li"), tm = document.createElement("time"), s = document.createElement("span"), g = document.createElement("span");
     var d = new Date(); tm.textContent = d.toTimeString().slice(0, 8);
     g.className = "k"; g.textContent = "[" + k + "] "; s.appendChild(g); s.appendChild(document.createTextNode(t));
@@ -252,6 +271,7 @@ button:focus-visible, a:focus-visible, .actor:focus-visible { outline: 3px solid
     pill.setAttribute("data-src", m);
     txt.textContent = m === "live" ? "En direct · Hermes" : m === "lost" ? "Connexion perdue · Hermes" : "Démo · événements simulés";
     logSrc.textContent = m === "live" ? "flux en direct" : m === "lost" ? "connexion perdue" : "flux simulé";
+    document.getElementById("hl-sub").textContent = m === "live" ? "En direct de Hermes" : m === "lost" ? "Connexion perdue · nouvelle tentative" : "Démo · événements simulés";
   }
   function set(id, s) { phase[id] = s; if (!inFlight[id] && !demoOn) setState(id, s); }
   function apply(e) {
@@ -339,6 +359,20 @@ button:focus-visible, a:focus-visible, .actor:focus-visible { outline: 3px solid
   /* center the oak on narrow screens */
   var vp = document.getElementById("viewport");
   requestAnimationFrame(function () { vp.scrollLeft = (pano.offsetWidth - vp.clientWidth) * .5; });
+  var bar = document.querySelector(".bar"), logBox = document.querySelector(".log"), hl = document.getElementById("headline");
+  function layout() {
+    var r = pano.getBoundingClientRect(), hb = bar.getBoundingClientRect().bottom;
+    var top = r.top - hb, bottom = window.innerHeight - r.bottom;
+    var ok = top >= 90 && bottom >= logBox.offsetHeight + 24 && window.innerWidth > 700;
+    document.body.classList.toggle("bands", ok);
+    if (ok) {
+      hl.style.top = (hb + top / 2) + "px";
+      logBox.style.bottom = Math.max(12, (bottom - logBox.offsetHeight) / 2) + "px";
+    } else { logBox.style.bottom = ""; }
+  }
+  window.addEventListener("resize", layout);
+  new MutationObserver(layout).observe(logEl, { childList: true });
+  layout();
 
   log("CLAIRIERE", "La grande clairière s'éveille.");
   poll();
