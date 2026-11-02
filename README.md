@@ -29,6 +29,7 @@ Les outils non reconnus sont listés dans `etat.json` → `inconnus` (noms seule
   Source réglable : `<meta name="sanctuaire-source" content="etat.json">`.
 - `hermes-hook/` — le hook gateway, installé dans `/opt/data/hooks/sanctuaire/` (HERMES_HOME=/opt/data).
 - `hermes-plugin/sanctuaire-sentinelle/` — plugin Shiba (erreurs d'outils, erreurs API, approbations) → `/var/lib/sanctuaire/sentinelle.json`, installé dans `/opt/data/plugins/`.
+- `sources/` — fichiers sources : vidéos Grok (renard, castor, chouette, taupe) et panorama Gemini, pour pouvoir refaire les animations.
 - `deploy/sanctuaire-web.service` — service systemd du mini serveur (127.0.0.1 seulement, utilisateur dynamique, lecture seule).
 
 ## Sur le VPS
