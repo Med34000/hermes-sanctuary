@@ -3,3 +3,4 @@ web/etat.json
 *.tmp
 __pycache__/
 .DS_Store
+web/sentinelle.json

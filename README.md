@@ -17,7 +17,7 @@ Hermes (gateway) ──hook──> /var/lib/sanctuaire/etat.json ──> page we
 | Data-Taupe (alcôve) | `read_file`, `search_files`, `memory`, `session_search`, `skill_view`, `skills_list`, `todo` |
 | Chouette Céleste (cabane) | `web_search`, `web_extract`, `vision_analyze`, `browser_*`, `web_*` |
 | Kitsune Hermes (chêne) | début/fin de chaque tour, `send_message`, `delegate_task`, `clarify`, `cronjob` |
-| Shiba Sentinel (belvédère) | commandes slash (`/stop`, `/approve`…) — v2 : erreurs via plugin |
+| Shiba Sentinel (belvédère) | commandes slash, erreurs d'outils, erreurs API (modèle/fournisseur), demandes d'approbation (plugin) |
 
 Les outils non reconnus sont listés dans `etat.json` → `inconnus` (noms seulement).
 
@@ -26,6 +26,7 @@ Les outils non reconnus sont listés dans `etat.json` → `inconnus` (noms seule
 - `web/` — la page (même fichier que l'artefact claude.ai) et ses images. Sans `etat.json` joignable, elle tourne en démo.
   Source réglable : `<meta name="sanctuaire-source" content="etat.json">`.
 - `hermes-hook/` — le hook gateway, installé dans `/opt/data/hooks/sanctuaire/` (HERMES_HOME=/opt/data).
+- `hermes-plugin/sanctuaire-sentinelle/` — plugin Shiba (erreurs d'outils, erreurs API, approbations) → `/var/lib/sanctuaire/sentinelle.json`, installé dans `/opt/data/plugins/`.
 - `deploy/sanctuaire-web.service` — service systemd du mini serveur (127.0.0.1 seulement, utilisateur dynamique, lecture seule).
 
 ## Sur le VPS

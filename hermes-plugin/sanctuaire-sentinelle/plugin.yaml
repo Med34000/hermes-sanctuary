@@ -1,0 +1,10 @@
+# 2026-11-02 ≈11:40 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5
+name: sanctuaire-sentinelle
+version: 1.0.0
+description: "Sanctuaire Solaire - Shiba Sentinel : note erreurs d'outils, erreurs API et demandes d'approbation (noms et horodatages uniquement, aucun contenu)."
+author: "Médéric Morin"
+provides_hooks:
+  - post_tool_call
+  - api_request_error
+  - pre_approval_request
+  - post_approval_response

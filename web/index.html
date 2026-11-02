@@ -475,9 +475,9 @@ button.pill:hover { filter: brightness(.97); }
       text: {
         rest: { normal: "Tout est calme au belvédère. Shiba Sentinel somnole, lunette contre lui, lanterne en veille.", kid: "Shiba Sentinel fait une petite sieste. Il veille sur tout le monde, même en dormant." },
         work: { normal: "Ronde en cours : Shiba Sentinel scrute l'horizon, accès, erreurs et alertes.", kid: "Shiba Sentinel regarde au loin avec sa lunette pour protéger tous ses amis." },
-        done: { normal: "Ronde terminée : aucune alerte, tout est en sécurité.", kid: "Tout va bien ! Shiba Sentinel a vérifié : personne n'est en danger." }
+        done: { normal: "Ronde terminée : situation sous contrôle, tout est en sécurité.", kid: "Tout va bien ! Shiba Sentinel a vérifié : personne n'est en danger." }
       },
-      logs: { rest: ["BELVEDERE", "Shiba Sentinel somnole, lanterne en veille."], work: ["GARDE", "Ronde de surveillance : accès, erreurs, alertes."], done: ["SECURITE", "Ronde terminée : aucune alerte."] }
+      logs: { rest: ["BELVEDERE", "Shiba Sentinel somnole, lanterne en veille."], work: ["GARDE", "Ronde de surveillance : accès, erreurs, alertes."], done: ["SECURITE", "Ronde terminée : situation sous contrôle."] }
     }
   };
   var view = "grid", active = "castor";
@@ -971,8 +971,10 @@ button.pill:hover { filter: brightness(.97); }
   var S = window.Sanctuaire; if (!S) return;
   var meta = document.querySelector('meta[name="sanctuaire-source"]');
   var SRC = (meta && meta.content) || "etat.json";
+  var SRC_SENT = SRC.replace(/etat\.json/, "sentinelle.json");
   var POLL = 2000, WORK_HOLD = 9000, DONE_HOLD = 4000, RENARD_STALE = 15 * 60;
   var IDS = ["castor", "chouette", "taupe", "renard", "shiba"];
+  var prevSen = null, approval = false;
   var prev = null, isLive = false, fails = 0, lastWork = {}, phase = {};
   var pill = document.getElementById("src-pill"), txt = document.getElementById("src-txt");
   var hint = document.getElementById("hint-src"), logSrc = document.getElementById("log-src");
@@ -987,6 +989,23 @@ button.pill:hover { filter: brightness(.97); }
   var inFlight = {};
   function set(id, s) { phase[id] = s; if (!inFlight[id] && !S.isAuto() && S.state(id) !== s) S.setState(id, s); }
 
+  function applySen(sen) {
+    if (!sen || !sen.approbation) return;
+    approval = !!sen.approbation.en_attente && (sen.maj - (sen.approbation.debut || 0) < RENARD_STALE);
+    if (!prevSen) { prevSen = sen; return; }
+    if (sen.dernier !== prevSen.dernier) {
+      lastWork.shiba = Date.now();
+      if (sen.erreurs_api > prevSen.erreurs_api) S.log("ALERTE", "Shiba Sentinel aboie : le modèle ou le fournisseur ne répond pas.");
+      if (sen.erreurs_outils > prevSen.erreurs_outils) {
+        var o = sen.outils_en_erreur || {}, po = prevSen.outils_en_erreur || {}, nom = "";
+        Object.keys(o).forEach(function (k) { if (o[k] > (po[k] || 0)) nom = k; });
+        S.log("ALERTE", "Shiba Sentinel a repéré une erreur" + (nom ? " sur l'outil « " + nom + " »." : "."));
+      }
+      if (sen.approbation.n > prevSen.approbation.n) S.log("GARDE", "Hermes attend ton approbation : Shiba Sentinel monte la garde.");
+      if (prevSen.approbation.en_attente && !sen.approbation.en_attente) S.log("GARDE", "Approbation reçue : Shiba Sentinel relâche la garde.");
+    }
+    prevSen = sen;
+  }
   function apply(e) {
     var now = Date.now(), a = e.animaux || {}, r = e.renard || {};
     if (!prev) { prev = e; IDS.forEach(function (id) { phase[id] = "rest"; }); return; }
@@ -1017,6 +1036,7 @@ button.pill:hover { filter: brightness(.97); }
       renardState.busy = renardBusy;
       if (justEnded) renardState.doneAt = now;
     }
+    if (approval) { lastWork.shiba = now; }
     if (renardState.busy) set("renard", "work");
     else if (now - renardState.doneAt < DONE_HOLD) set("renard", "done");
     else set("renard", "rest");
@@ -1040,6 +1060,9 @@ button.pill:hover { filter: brightness(.97); }
           S.log("EN DIRECT", "Connecté à Hermes : les compagnons suivent sa vraie activité.");
         }
         badge("live"); apply(e);
+        return fetch(SRC_SENT + "?t=" + Date.now(), { cache: "no-store" })
+          .then(function (r2) { return r2.ok ? r2.json() : null; })
+          .then(applySen, function () {});
       })
       .catch(function () {
         fails++;
