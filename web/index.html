@@ -140,6 +140,11 @@ body {
 #stage-lookout.has-video[data-state="work"] .vsheet { opacity: 1; }
 #stage-lookout.has-video[data-state="work"] .p-work, #stage-lookout.has-video[data-state="work"] .p-rest { opacity: 0 !important; }
 #stage-lookout.has-video[data-state="work"] #glow-look-lens { opacity: 0 !important; }
+/* Shiba Sentinel alarm: barking loop (22 frames at 24 fps), shown on errors */
+#shiba .vsheet-alert { left: 4.85%; top: 1.55%; width: 89.57%; height: 97.33%; background-image: url("shiba-alerte-video.webp"); background-size: 1100% 200%; }
+#stage-lookout.has-video[data-state="work"] .vsheet-alert { opacity: 0; }
+#stage-lookout.has-video[data-state="work"][data-alert="1"] .vsheet-alert { opacity: 1; }
+#stage-lookout.has-video[data-state="work"][data-alert="1"] .vsheet:not(.vsheet-alert) { opacity: 0; }
 .stage[data-state="work"] .p-work { opacity: 1; }
 .stage[data-state="work"] .p-rest { opacity: 0; }
 #stage-forge[data-state="work"][data-hit="1"] .p-hit { opacity: 1; }
@@ -369,6 +374,7 @@ button.pill:hover { filter: brightness(.97); }
         <img class="p-rest" src="shiba-rest.webp" alt="Shiba Sentinel, un chien Shiba avec casquette d'éclaireur et écharpe verte, assis sur un rocher, les yeux fermés">
         <img class="p-work" src="shiba-work.webp" alt="" aria-hidden="true">
         <div class="vsheet" aria-hidden="true"></div>
+        <div class="vsheet vsheet-alert" aria-hidden="true"></div>
       </div>
     </div>
     <div class="glow" id="glow-look-lantern" aria-hidden="true"></div>
@@ -495,6 +501,7 @@ button.pill:hover { filter: brightness(.97); }
       name: "Shiba Sentinel", role: "Rocher Belvédère · sécurité & surveillance", avatar: "shiba-rest.webp", avatarClass: "shiba",
       labels: { work: "Ronde en cours" },
       video: { frames: 43, cols: 11, rows: 4, fps: 12, pingpong: true, src: "shiba-garde-video.webp" },
+      video2: { frames: 22, cols: 11, rows: 2, fps: 24, src: "shiba-alerte-video.webp" },
       emit: { x: 0.062, y: 0.173 }, hitEvery: 2200, firstHit: 500, state: "rest", hitTimer: null, kickTimer: null,
       palette: ["255,236,170", "255,255,235"],
       text: {
@@ -763,14 +770,16 @@ button.pill:hover { filter: brightness(.97); }
   var last = performance.now();
   function videoTick(now) {
     ["castor", "taupe", "shiba"].forEach(function (id) {
-      var a = ACTORS[id], v = a.video;
+      var a = ACTORS[id], alarm = !!a.video2 && a.stage.getAttribute("data-alert") === "1", v = alarm ? a.video2 : a.video;
       if (!v || a.state !== "work" || !a.vStart || !a.stage.classList.contains("has-video")) return;
+      if (a.vMode !== alarm) { a.vMode = alarm; a.vLast = -1; }
+      var sheetEl = alarm ? a.vsheet2 : a.vsheet;
       var raw = Math.floor((now - a.vStart) / (1000 / v.fps)), f;
       if (v.pingpong) { var per = 2 * (v.frames - 1), r = raw % per; f = r < v.frames ? r : per - r; }
       else f = raw % v.frames;
       if (f === a.vLast) return;
       a.vLast = f;
-      a.vsheet.style.backgroundPosition = ((f % v.cols) / (v.cols - 1) * 100) + "% " + (Math.floor(f / v.cols) / (v.rows - 1) * 100) + "%";
+      sheetEl.style.backgroundPosition = ((f % v.cols) / (v.cols - 1) * 100) + "% " + (Math.floor(f / v.cols) / (v.rows - 1) * 100) + "%";
       if (f === v.strike && live(id)) { hit(a); if (id === "castor") a.stage.setAttribute("data-hit", "0"); }
     });
   }
@@ -946,6 +955,7 @@ button.pill:hover { filter: brightness(.97); }
     busy[id] = true;
     var dur = 5200 + Math.random() * 3600;
     function startWork() {
+      if (id === "shiba") ACTORS.shiba.stage.setAttribute("data-alert", Math.random() < .5 ? "1" : "0");
       setState(id, "work");
       later(dur, function () { setState(id, "done"); later(2800, function () { setState(id, "rest"); busy[id] = false; }); });
     }
@@ -993,6 +1003,7 @@ button.pill:hover { filter: brightness(.97); }
   ["castor", "taupe", "shiba"].forEach(function (id) {
     var a = ACTORS[id], img = new Image();
     a.vsheet = a.el.querySelector(".vsheet");
+    if (a.video2) { a.vsheet2 = a.el.querySelector(".vsheet-alert"); new Image().src = a.video2.src; }
     img.onload = function () { a.stage.classList.add("has-video"); if (a.state === "work") { a.vStart = performance.now(); a.vLast = -1; clearInterval(a.hitTimer); clearTimeout(a.kickTimer); } };
     img.src = a.video.src;
   });
@@ -1012,7 +1023,8 @@ button.pill:hover { filter: brightness(.97); }
     stopAuto: stopAuto, isAuto: function () { return auto; },
     state: function (id) { return ACTORS[id] ? ACTORS[id].state : ""; },
     mail: function (from, to, cb) { if (!reduce) sendMail(from, to, cb); else if (cb) cb(); },
-    log: addLog
+    log: addLog,
+    alert: function (on) { ACTORS.shiba.stage.setAttribute("data-alert", on ? "1" : "0"); }
   };
   buildTiles(); syncTiles(); applyGeometry(); applyOff(); applyA11y(); syncUI();
   addLog("CLAIRIERE", "Le Sanctuaire Solaire est éveillé. Plein soleil, 5 compagnons.");
@@ -1034,7 +1046,7 @@ button.pill:hover { filter: brightness(.97); }
   var SRC_SENT = SRC.replace(/etat\.json/, "sentinelle.json");
   var POLL = 2000, WORK_HOLD = 9000, DONE_HOLD = 4000, RENARD_STALE = 15 * 60;
   var IDS = ["castor", "chouette", "taupe", "renard", "shiba"];
-  var prevSen = null, approval = false;
+  var prevSen = null, approval = false, alertUntil = 0;
   var prev = null, isLive = false, fails = 0, lastWork = {}, phase = {};
   var pill = document.getElementById("src-pill"), txt = document.getElementById("src-txt");
   var hint = document.getElementById("hint-src"), logSrc = document.getElementById("log-src");
@@ -1055,6 +1067,8 @@ button.pill:hover { filter: brightness(.97); }
     if (!prevSen) { prevSen = sen; return; }
     if (sen.dernier !== prevSen.dernier) {
       lastWork.shiba = Date.now();
+      if (sen.erreurs_api > prevSen.erreurs_api || sen.erreurs_outils > prevSen.erreurs_outils) alertUntil = Date.now() + WORK_HOLD;
+      if (sen.approbation.n > prevSen.approbation.n) alertUntil = 0;
       if (sen.erreurs_api > prevSen.erreurs_api) S.log("ALERTE", "Shiba Sentinel aboie : le modèle ou le fournisseur ne répond pas.");
       if (sen.erreurs_outils > prevSen.erreurs_outils) {
         var o = sen.outils_en_erreur || {}, po = prevSen.outils_en_erreur || {}, nom = "";
@@ -1092,6 +1106,7 @@ button.pill:hover { filter: brightness(.97); }
   var renardState = { busy: false, doneAt: 0 };
   function tick(renardBusy, justEnded) {
     var now = Date.now();
+    if (S.alert && !S.isAuto()) S.alert(now < alertUntil);
     if (renardBusy !== undefined) {
       renardState.busy = renardBusy;
       if (justEnded) renardState.doneAt = now;

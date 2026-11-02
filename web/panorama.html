@@ -88,6 +88,10 @@ body { background: var(--night); color: var(--ink); font-family: var(--body); ov
 #a-shiba .vsheet { position: absolute; left: -8.66%; top: 1.21%; width: 118.65%; height: 98.87%; background: url("shiba-garde-video.webp") 0 0 / 1100% 400% no-repeat; opacity: 0; pointer-events: none; }
 #a-shiba.has-video[data-state="work"] .vsheet { opacity: 1; }
 #a-shiba.has-video[data-state="work"] .breath { opacity: 0; animation: none; }
+#a-shiba .vsheet-alert { left: 4.85%; top: 1.55%; width: 89.57%; height: 97.33%; background-image: url("shiba-alerte-video.webp"); background-size: 1100% 200%; }
+#a-shiba.has-video[data-state="work"] .vsheet-alert { opacity: 0; }
+#a-shiba.has-video[data-state="work"][data-alert="1"] .vsheet-alert { opacity: 1; }
+#a-shiba.has-video[data-state="work"][data-alert="1"] .vsheet:not(.vsheet-alert) { opacity: 0; }
 /* positions on the panorama: left = feet x, top = feet y, height = sprite canvas height (all in %) */
 #a-castor   { left: 26.5%; top: 84%; height: 27%; aspect-ratio: 840 / 900; }
 #a-chouette { left: 40.6%; top: 55%; height: 18%; aspect-ratio: 760 / 864; }
@@ -184,7 +188,7 @@ body.bands #headline { display: block; }
     </div>
     <div class="actor" id="a-shiba" data-state="rest" tabindex="0" title="Shiba Sentinel · sécurité">
       <span class="tag"><i></i><b>Shiba Sentinel</b></span>
-      <div class="sprite"><div class="breath"><img class="p-rest" src="shiba-rest.webp" alt=""><img class="p-work" src="shiba-work.webp" alt=""></div><div class="vsheet"></div></div>
+      <div class="sprite"><div class="breath"><img class="p-rest" src="shiba-rest.webp" alt=""><img class="p-work" src="shiba-work.webp" alt=""></div><div class="vsheet"></div><div class="vsheet vsheet-alert"></div></div>
     </div>
     <div id="walker" aria-hidden="true"><div class="flip"><div class="sheet"></div></div></div>
   </div>
@@ -203,7 +207,7 @@ body.bands #headline { display: block; }
   var IDS = ["castor", "chouette", "taupe", "renard", "shiba"];
   var A = {}, NAMES = { castor: "Brico-Castor", chouette: "Chouette Céleste", taupe: "Data-Taupe", renard: "Kitsune Hermes", shiba: "Shiba Sentinel" };
   var SHORT = { castor: "Castor", chouette: "Chouette", taupe: "Taupe", renard: "Kitsune", shiba: "Shiba" };
-  var WORK = { castor: "Forge le code", chouette: "En vol", taupe: "Fouille", renard: "Messages", shiba: "Alerte !" };
+  var WORK = { castor: "Forge le code", chouette: "En vol", taupe: "Fouille", renard: "Messages", shiba: "Garde" };
   /* where the fox stops to hand over the letter (feet position in %) */
   var VISIT = { castor: [33.5, 84], chouette: [37, 79], taupe: [62, 80], shiba: [77, 84] };
   var HOME = [56.2, 79];
@@ -229,7 +233,7 @@ body.bands #headline { display: block; }
     var a = A[id]; if (!a || a.state === s) return;
     a.state = s; a.el.setAttribute("data-state", s);
     if (id === "chouette" && owl) owl.state(s); a.el.setAttribute("data-hit", "0");
-    a.label.textContent = s === "work" ? SHORT[id] + " · " + WORK[id] : s === "done" ? SHORT[id] + " · Terminé" : NAMES[id];
+    a.label.textContent = s === "work" ? SHORT[id] + " · " + (id === "shiba" && a.el.getAttribute("data-alert") === "1" ? "Alerte !" : WORK[id]) : s === "done" ? SHORT[id] + " · Terminé" : NAMES[id];
     clearInterval(a.hit);
     if ((id === "castor" || id === "taupe" || id === "shiba") && s === "work") a.vStart = performance.now();
     if (id === "castor" && s === "work" && !reduce && !a.el.classList.contains("has-video")) a.hit = setInterval(function () { a.el.setAttribute("data-hit", "1"); setTimeout(function () { a.el.setAttribute("data-hit", "0"); }, 180); }, 1000);
@@ -247,8 +251,8 @@ body.bands #headline { display: block; }
 
   /* ---- video loops cut from generated videos: Castor hammering, Taupe digging (24 fps) ---- */
   [["castor", "castor-forge-video.webp", 24, 12, 2, 24], ["taupe", "taupe-pioche-video.webp", 53, 14, 4, 24],
-   ["shiba", "shiba-garde-video.webp", 43, 11, 4, 12, true]].forEach(function (c) {
-    var a = A[c[0]], vs = a.el.querySelector(".vsheet"), img = new Image(), last = -1, N = c[2], COLS = c[3], ROWS = c[4], FPS = c[5], PING = c[6];
+   ["shiba", "shiba-garde-video.webp", 43, 11, 4, 12, true], ["shiba", "shiba-alerte-video.webp", 22, 11, 2, 24, false, true]].forEach(function (c) {
+    var a = A[c[0]], vs = a.el.querySelectorAll(".vsheet")[c[7] ? 1 : 0], img = new Image(), last = -1, N = c[2], COLS = c[3], ROWS = c[4], FPS = c[5], PING = c[6];
     img.onload = function () { a.el.classList.add("has-video"); clearInterval(a.hit); requestAnimationFrame(loop); };
     img.src = c[1];
     function loop(now) {
@@ -330,12 +334,16 @@ body.bands #headline { display: block; }
     prev = e; ren.busy = busy; if (r.fin !== pr.fin && !r.en_cours) ren.doneAt = now;
     tick();
   }
+  var alertUntil = 0;
   function applySen(sen) {
     if (!sen || !sen.approbation) return;
     approval = !!sen.approbation.en_attente && (sen.maj - (sen.approbation.debut || 0) < STALE);
     if (!prevSen) { prevSen = sen; return; }
     if (sen.dernier !== prevSen.dernier) {
-      lastWork.shiba = Date.now(); set("shiba", "work");
+      lastWork.shiba = Date.now();
+      if (sen.erreurs_api > prevSen.erreurs_api || sen.erreurs_outils > prevSen.erreurs_outils) alertUntil = Date.now() + WORK_HOLD;
+      if (sen.approbation.n > prevSen.approbation.n) alertUntil = 0;
+      set("shiba", "work");
       if (sen.erreurs_api > prevSen.erreurs_api) log("ALERTE", "Le modèle ou le fournisseur ne répond pas.");
       if (sen.erreurs_outils > prevSen.erreurs_outils) log("ALERTE", "Shiba Sentinel a repéré une erreur d'outil.");
       if (sen.approbation.n > prevSen.approbation.n) log("GARDE", "Hermes attend ton approbation.");
@@ -344,6 +352,7 @@ body.bands #headline { display: block; }
   }
   function tick() {
     var now = Date.now();
+    if (!demoOn) A.shiba.el.setAttribute("data-alert", now < alertUntil ? "1" : "0");
     if (approval) lastWork.shiba = now;
     set("renard", ren.busy ? "work" : now - ren.doneAt < DONE_HOLD ? "done" : "rest");
     IDS.forEach(function (id) {
@@ -374,6 +383,7 @@ body.bands #headline { display: block; }
     var idle = ["castor", "chouette", "taupe", "shiba"].filter(function (k) { return A[k].state === "rest" && !inFlight[k]; });
     if (idle.length) {
       var id = idle[Math.floor(Math.random() * idle.length)]; inFlight[id] = true;
+      if (id === "shiba") A.shiba.el.setAttribute("data-alert", Math.random() < .5 ? "1" : "0");
       setState("renard", "work");
       deliver(id, function () {
         inFlight[id] = false; setState(id, "work"); setState("renard", "rest");
