@@ -85,6 +85,9 @@ body { background: var(--night); color: var(--ink); font-family: var(--body); ov
 #a-taupe .vsheet { position: absolute; left: 16.16%; top: -13.27%; width: 97.95%; height: 112.52%; background: url("taupe-pioche-video.webp") 0 0 / 1400% 400% no-repeat; opacity: 0; pointer-events: none; }
 #a-taupe.has-video[data-state="work"] .vsheet { opacity: 1; }
 #a-taupe.has-video[data-state="work"] .breath { opacity: 0; animation: none; }
+#a-shiba .vsheet { position: absolute; left: -8.66%; top: 1.21%; width: 118.65%; height: 98.87%; background: url("shiba-garde-video.webp") 0 0 / 1100% 400% no-repeat; opacity: 0; pointer-events: none; }
+#a-shiba.has-video[data-state="work"] .vsheet { opacity: 1; }
+#a-shiba.has-video[data-state="work"] .breath { opacity: 0; animation: none; }
 /* positions on the panorama: left = feet x, top = feet y, height = sprite canvas height (all in %) */
 #a-castor   { left: 26.5%; top: 84%; height: 27%; aspect-ratio: 840 / 900; }
 #a-chouette { left: 40.6%; top: 55%; height: 18%; aspect-ratio: 760 / 864; }
@@ -181,7 +184,7 @@ body.bands #headline { display: block; }
     </div>
     <div class="actor" id="a-shiba" data-state="rest" tabindex="0" title="Shiba Sentinel · sécurité">
       <span class="tag"><i></i><b>Shiba Sentinel</b></span>
-      <div class="sprite"><div class="breath"><img class="p-rest" src="shiba-rest.webp" alt=""><img class="p-work" src="shiba-work.webp" alt=""></div></div>
+      <div class="sprite"><div class="breath"><img class="p-rest" src="shiba-rest.webp" alt=""><img class="p-work" src="shiba-work.webp" alt=""></div><div class="vsheet"></div></div>
     </div>
     <div id="walker" aria-hidden="true"><div class="flip"><div class="sheet"></div></div></div>
   </div>
@@ -228,7 +231,7 @@ body.bands #headline { display: block; }
     if (id === "chouette" && owl) owl.state(s); a.el.setAttribute("data-hit", "0");
     a.label.textContent = s === "work" ? SHORT[id] + " · " + WORK[id] : s === "done" ? SHORT[id] + " · Terminé" : NAMES[id];
     clearInterval(a.hit);
-    if ((id === "castor" || id === "taupe") && s === "work") a.vStart = performance.now();
+    if ((id === "castor" || id === "taupe" || id === "shiba") && s === "work") a.vStart = performance.now();
     if (id === "castor" && s === "work" && !reduce && !a.el.classList.contains("has-video")) a.hit = setInterval(function () { a.el.setAttribute("data-hit", "1"); setTimeout(function () { a.el.setAttribute("data-hit", "0"); }, 180); }, 1000);
     if (s === "work" && id !== "renard") log(NAMES[id].toUpperCase().split(" ")[0], NAMES[id] + " se met au travail.");
     if (s === "done") log("TERMINE", NAMES[id] + " a fini sa tâche.");
@@ -243,13 +246,15 @@ body.bands #headline { display: block; }
   }) : null;
 
   /* ---- video loops cut from generated videos: Castor hammering, Taupe digging (24 fps) ---- */
-  [["castor", "castor-forge-video.webp", 24, 12, 2], ["taupe", "taupe-pioche-video.webp", 53, 14, 4]].forEach(function (c) {
-    var a = A[c[0]], vs = a.el.querySelector(".vsheet"), img = new Image(), last = -1, N = c[2], COLS = c[3], ROWS = c[4];
+  [["castor", "castor-forge-video.webp", 24, 12, 2, 24], ["taupe", "taupe-pioche-video.webp", 53, 14, 4, 24],
+   ["shiba", "shiba-garde-video.webp", 43, 11, 4, 12, true]].forEach(function (c) {
+    var a = A[c[0]], vs = a.el.querySelector(".vsheet"), img = new Image(), last = -1, N = c[2], COLS = c[3], ROWS = c[4], FPS = c[5], PING = c[6];
     img.onload = function () { a.el.classList.add("has-video"); clearInterval(a.hit); requestAnimationFrame(loop); };
     img.src = c[1];
     function loop(now) {
       if (a.state === "work" && !reduce) {
-        var f = Math.floor((now - (a.vStart || now)) / (1000 / 24)) % N;
+        var raw = Math.floor((now - (a.vStart || now)) / (1000 / FPS)), f;
+        if (PING) { var per = 2 * (N - 1), r = raw % per; f = r < N ? r : per - r; } else f = raw % N;
         if (f !== last) { last = f; vs.style.backgroundPosition = ((f % COLS) / (COLS - 1) * 100) + "% " + (Math.floor(f / COLS) / (ROWS - 1) * 100) + "%"; }
       }
       requestAnimationFrame(loop);

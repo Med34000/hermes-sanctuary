@@ -135,6 +135,11 @@ body {
 #stage-cave.has-video[data-state="work"] .vsheet { opacity: 1; }
 #stage-cave.has-video[data-state="work"] .p-work, #stage-cave.has-video[data-state="work"] .p-rest { opacity: 0 !important; }
 #stage-cave.has-video[data-state="work"] #glow-cave-head { opacity: 0 !important; }
+/* Shiba Sentinel on guard: spyglass scan (43 frames at 12 fps, played back and forth) */
+#shiba .vsheet { position: absolute; left: -8.66%; top: 1.21%; width: 118.65%; height: 98.87%; background: url("shiba-garde-video.webp") 0 0 / 1100% 400% no-repeat; opacity: 0; pointer-events: none; }
+#stage-lookout.has-video[data-state="work"] .vsheet { opacity: 1; }
+#stage-lookout.has-video[data-state="work"] .p-work, #stage-lookout.has-video[data-state="work"] .p-rest { opacity: 0 !important; }
+#stage-lookout.has-video[data-state="work"] #glow-look-lens { opacity: 0 !important; }
 .stage[data-state="work"] .p-work { opacity: 1; }
 .stage[data-state="work"] .p-rest { opacity: 0; }
 #stage-forge[data-state="work"][data-hit="1"] .p-hit { opacity: 1; }
@@ -363,6 +368,7 @@ button.pill:hover { filter: brightness(.97); }
       <div class="actor-inner">
         <img class="p-rest" src="shiba-rest.webp" alt="Shiba Sentinel, un chien Shiba avec casquette d'éclaireur et écharpe verte, assis sur un rocher, les yeux fermés">
         <img class="p-work" src="shiba-work.webp" alt="" aria-hidden="true">
+        <div class="vsheet" aria-hidden="true"></div>
       </div>
     </div>
     <div class="glow" id="glow-look-lantern" aria-hidden="true"></div>
@@ -488,6 +494,7 @@ button.pill:hover { filter: brightness(.97); }
       id: "shiba", scene: "lookout", stage: document.getElementById("stage-lookout"), el: document.getElementById("shiba"), fx: "scan",
       name: "Shiba Sentinel", role: "Rocher Belvédère · sécurité & surveillance", avatar: "shiba-rest.webp", avatarClass: "shiba",
       labels: { work: "Ronde en cours" },
+      video: { frames: 43, cols: 11, rows: 4, fps: 12, pingpong: true, src: "shiba-garde-video.webp" },
       emit: { x: 0.062, y: 0.173 }, hitEvery: 2200, firstHit: 500, state: "rest", hitTimer: null, kickTimer: null,
       palette: ["255,236,170", "255,255,235"],
       text: {
@@ -755,10 +762,12 @@ button.pill:hover { filter: brightness(.97); }
   }
   var last = performance.now();
   function videoTick(now) {
-    ["castor", "taupe"].forEach(function (id) {
+    ["castor", "taupe", "shiba"].forEach(function (id) {
       var a = ACTORS[id], v = a.video;
       if (!v || a.state !== "work" || !a.vStart || !a.stage.classList.contains("has-video")) return;
-      var f = Math.floor((now - a.vStart) / (1000 / v.fps)) % v.frames;
+      var raw = Math.floor((now - a.vStart) / (1000 / v.fps)), f;
+      if (v.pingpong) { var per = 2 * (v.frames - 1), r = raw % per; f = r < v.frames ? r : per - r; }
+      else f = raw % v.frames;
       if (f === a.vLast) return;
       a.vLast = f;
       a.vsheet.style.backgroundPosition = ((f % v.cols) / (v.cols - 1) * 100) + "% " + (Math.floor(f / v.cols) / (v.rows - 1) * 100) + "%";
@@ -981,7 +990,7 @@ button.pill:hover { filter: brightness(.97); }
     if (soundOn) clink();
   });
 
-  ["castor", "taupe"].forEach(function (id) {
+  ["castor", "taupe", "shiba"].forEach(function (id) {
     var a = ACTORS[id], img = new Image();
     a.vsheet = a.el.querySelector(".vsheet");
     img.onload = function () { a.stage.classList.add("has-video"); if (a.state === "work") { a.vStart = performance.now(); a.vLast = -1; clearInterval(a.hitTimer); clearTimeout(a.kickTimer); } };
