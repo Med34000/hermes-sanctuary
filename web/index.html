@@ -130,6 +130,11 @@ body {
 #castor .vsheet { position: absolute; left: 1.8%; top: 1.15%; width: 94.51%; height: 97.32%; background: url("castor-forge-video.webp") 0 0 / 1200% 200% no-repeat; opacity: 0; pointer-events: none; }
 #stage-forge.has-video[data-state="work"] .vsheet { opacity: 1; }
 #stage-forge.has-video[data-state="work"] .p-work, #stage-forge.has-video[data-state="work"] .p-hit { opacity: 0 !important; }
+/* Data-Taupe at work: real pickaxe loop (53 frames from a generated video, green screen removed) */
+#taupe .vsheet { position: absolute; left: 16.16%; top: -13.27%; width: 97.95%; height: 112.52%; background: url("taupe-pioche-video.webp") 0 0 / 1400% 400% no-repeat; opacity: 0; pointer-events: none; }
+#stage-cave.has-video[data-state="work"] .vsheet { opacity: 1; }
+#stage-cave.has-video[data-state="work"] .p-work, #stage-cave.has-video[data-state="work"] .p-rest { opacity: 0 !important; }
+#stage-cave.has-video[data-state="work"] #glow-cave-head { opacity: 0 !important; }
 .stage[data-state="work"] .p-work { opacity: 1; }
 .stage[data-state="work"] .p-rest { opacity: 0; }
 #stage-forge[data-state="work"][data-hit="1"] .p-hit { opacity: 1; }
@@ -332,6 +337,7 @@ button.pill:hover { filter: brightness(.97); }
       <div class="actor-inner">
         <img class="p-rest" src="taupe-rest.webp" alt="La Data-Taupe, une taupe mineuse avec casque à lampe de cristal, au repos sur son monticule">
         <img class="p-work" src="taupe-work.webp" alt="" aria-hidden="true">
+        <div class="vsheet" aria-hidden="true"></div>
       </div>
     </div>
     <div class="glow" id="glow-cave-head" aria-hidden="true"></div>
@@ -428,7 +434,7 @@ button.pill:hover { filter: brightness(.97); }
       id: "castor", scene: "forge", stage: document.getElementById("stage-forge"), el: document.getElementById("castor"),
       name: "Brico-Castor", role: "Forge du code · terminal & patch", avatar: "castor-rest.webp", avatarClass: "",
       labels: { work: "Code en cours" },
-      video: { frames: 24, cols: 12, rows: 2, fps: 24, strike: 9 },
+      video: { frames: 24, cols: 12, rows: 2, fps: 24, strike: 9, src: "castor-forge-video.webp" },
       emit: { x: 0.726, y: 0.6195 }, hitEvery: 1100, firstHit: 420, state: "rest", hitTimer: null, kickTimer: null,
       text: {
         rest: { normal: "En attente d'une tâche. Brico-Castor se repose contre l'enclume.", kid: "Brico-Castor se repose près de son enclume. Il attend qu'on lui confie un projet." },
@@ -453,6 +459,7 @@ button.pill:hover { filter: brightness(.97); }
       id: "taupe", scene: "cave", stage: document.getElementById("stage-cave"), el: document.getElementById("taupe"), fx: "crystals",
       name: "Data-Taupe", role: "Alcôve aux Géodes · données & analyse", avatar: "taupe-rest.webp", avatarClass: "mole",
       labels: { work: "Analyse en cours" },
+      video: { frames: 53, cols: 14, rows: 4, fps: 24, strike: 1, src: "taupe-pioche-video.webp" },
       emit: { x: 0.30, y: 0.86 }, hitEvery: 2200, firstHit: 500, state: "rest", hitTimer: null, kickTimer: null,
       palette: ["140,205,255", "190,150,255", "255,240,170"],
       text: {
@@ -748,13 +755,15 @@ button.pill:hover { filter: brightness(.97); }
   }
   var last = performance.now();
   function videoTick(now) {
-    var a = ACTORS.castor, v = a.video;
-    if (!v || a.state !== "work" || !a.vStart || !a.stage.classList.contains("has-video")) return;
-    var f = Math.floor((now - a.vStart) / (1000 / v.fps)) % v.frames;
-    if (f === a.vLast) return;
-    a.vLast = f;
-    a.vsheet.style.backgroundPosition = ((f % v.cols) / (v.cols - 1) * 100) + "% " + (Math.floor(f / v.cols) / (v.rows - 1) * 100) + "%";
-    if (f === v.strike && live("castor")) { hit(a); a.stage.setAttribute("data-hit", "0"); }
+    ["castor", "taupe"].forEach(function (id) {
+      var a = ACTORS[id], v = a.video;
+      if (!v || a.state !== "work" || !a.vStart || !a.stage.classList.contains("has-video")) return;
+      var f = Math.floor((now - a.vStart) / (1000 / v.fps)) % v.frames;
+      if (f === a.vLast) return;
+      a.vLast = f;
+      a.vsheet.style.backgroundPosition = ((f % v.cols) / (v.cols - 1) * 100) + "% " + (Math.floor(f / v.cols) / (v.rows - 1) * 100) + "%";
+      if (f === v.strike && live(id)) { hit(a); if (id === "castor") a.stage.setAttribute("data-hit", "0"); }
+    });
   }
   function frame(now) {
     videoTick(now);
@@ -972,12 +981,12 @@ button.pill:hover { filter: brightness(.97); }
     if (soundOn) clink();
   });
 
-  (function () {
-    var a = ACTORS.castor, img = new Image();
+  ["castor", "taupe"].forEach(function (id) {
+    var a = ACTORS[id], img = new Image();
     a.vsheet = a.el.querySelector(".vsheet");
     img.onload = function () { a.stage.classList.add("has-video"); if (a.state === "work") { a.vStart = performance.now(); a.vLast = -1; clearInterval(a.hitTimer); clearTimeout(a.kickTimer); } };
-    img.src = "castor-forge-video.webp";
-  })();
+    img.src = a.video.src;
+  });
   /* the owl flies away to search, and comes back to read what she found */
   var owl = window.ChouetteVol ? window.ChouetteVol({
     container: ACTORS.chouette.stage, perch: [67.8, 58], away: [118, -35], height: 55,
