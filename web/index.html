@@ -1,0 +1,1055 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Sanctuaire Solaire</title>
+<meta name="sanctuaire-source" content="etat.json">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout concept: full-bleed 3D-style scenes (Forge au Ruisseau, Cabane Canopée) on fixed-ratio stages,
+   one companion sprite per scene with several poses crossfaded on top, glass panels floating over it.
+   Single warm look by design: the scene is the page. */
+:root {
+  --cream: #FFF4DE;
+  --glass: rgba(255, 247, 229, 0.88);
+  --bark: #3F2A18;
+  --ink: #2C1D10;
+  --muted: #7A5A3C;
+  --ember: #E4802F;
+  --moss: #3F7A4A;
+  --aqua: #2BA7A3;
+  --night: #1B2A1C;
+  --font-display: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --ratio: 1.7913; /* background image width / height */
+  color-scheme: light;
+}
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--night);
+  color: var(--ink);
+  font-family: var(--font-body);
+  overflow: hidden;
+}
+.scene { position: fixed; inset: 0; overflow: hidden; background: var(--night); }
+.scene[data-view="grid"] { background: radial-gradient(120% 90% at 50% 0%, #2d3f2b 0%, #1b261c 55%, #121a13 100%); }
+.scene[data-view="grid"][data-layout="stack"] { overflow-y: auto; overflow-x: hidden; }
+.scene[data-view="grid"] .backdrop, .scene[data-view="grid"] .backdrop.off { opacity: 0; }
+#spacer { position: absolute; left: 0; top: 0; width: 1px; pointer-events: none; }
+
+/* blurred copy fills any area the stage does not cover (portrait screens) */
+.backdrop {
+  position: absolute; inset: -4%;
+  background: center / cover no-repeat;
+  filter: blur(18px) saturate(1.1);
+  transition: opacity .7s ease, visibility 0s;
+}
+.backdrop[data-for="forge"] { background-image: url("atelier-bg.webp"); }
+.backdrop[data-for="cabin"] { background-image: url("canopee-bg.webp"); }
+.backdrop[data-for="cave"] { background-image: url("geodes-bg.webp"); }
+.backdrop[data-for="oak"] { background-image: url("chene-bg.webp"); }
+.backdrop[data-for="lookout"] { background-image: url("belvedere-bg.webp"); }
+.backdrop.off, .stage.off { opacity: 0; visibility: hidden; transition: opacity .7s ease, visibility 0s .7s; }
+
+/* the stage keeps image and sprite in the same coordinates at every size.
+   Its position and size are set from JS: full scene, or one tile of the overview grid. */
+.stage {
+  position: absolute; left: 0; top: 0; width: 100vw; height: calc(100vw / var(--ratio));
+  transition: opacity .7s ease, visibility 0s, transform .25s ease, box-shadow .25s ease;
+}
+.scene[data-view="grid"] .stage {
+  border-radius: 20px; overflow: hidden; cursor: pointer;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .4); outline: 2px solid rgba(255, 244, 222, .14);
+}
+.scene[data-view="grid"] .stage:hover { transform: translateY(-3px); box-shadow: 0 18px 38px rgba(0, 0, 0, .5); outline-color: rgba(255, 200, 120, .75); }
+.scene[data-view="grid"] .stage:focus-visible { outline: 3px solid var(--aqua); }
+.tile-ui {
+  display: none; left: 0; right: 0; bottom: 0; padding: 30px 12px 10px;
+  background: linear-gradient(to top, rgba(26, 16, 6, .85), rgba(26, 16, 6, 0));
+  color: var(--cream); align-items: flex-end; justify-content: space-between; gap: 8px; pointer-events: none;
+}
+.scene[data-view="grid"] .tile-ui { display: flex; }
+.tu-name { font: 600 clamp(14px, 1.5vw, 19px)/1.1 var(--font-display); }
+.tu-role { font: 700 10px/1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; opacity: .85; margin-top: 3px; }
+.tu-badge { display: inline-flex; align-items: center; gap: 6px; font: 700 11px/1 var(--font-body); letter-spacing: .06em; text-transform: uppercase; padding: 6px 9px; border-radius: 999px; background: rgba(255, 247, 229, .92); color: var(--bark); white-space: nowrap; }
+.tu-badge i { width: 8px; height: 8px; border-radius: 50%; background: #8aa0a6; flex: none; }
+.tu-badge[data-st="work"] i { background: var(--ember); animation: pulse 1s ease-in-out infinite; }
+.tu-badge[data-st="done"] i { background: var(--moss); }
+@keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.6); opacity: .5; } }
+.hint {
+  position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); margin: 0; text-align: center;
+  font: 700 12px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: rgba(255, 244, 222, .65);
+  display: none; pointer-events: none;
+}
+.scene[data-view="grid"][data-layout="wide"] .hint { display: block; }
+.scene[data-view="grid"] .card.caption { display: none; }
+.scene[data-view="grid"][data-layout="stack"] .card.log { display: none; }
+.scene[data-view="grid"] .card.log { overflow: hidden; box-sizing: border-box; max-width: none; margin: 0; bottom: auto; }
+.stage > * { position: absolute; }
+.bg { inset: 0; width: 100%; height: 100%; display: block; will-change: transform; }
+
+.rays {
+  inset: 0;
+  mix-blend-mode: screen;
+  background:
+    linear-gradient(112deg, transparent 52%, rgba(255, 226, 150, .20) 58%, transparent 64%),
+    linear-gradient(112deg, transparent 68%, rgba(255, 226, 150, .14) 73%, transparent 79%),
+    linear-gradient(112deg, transparent 80%, rgba(255, 226, 150, .12) 85%, transparent 90%);
+  animation: rays 7s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes rays { from { opacity: .45; transform: translateX(-1%); } to { opacity: 1; transform: translateX(1%); } }
+
+.twinkle {
+  width: .3%; aspect-ratio: 1; border-radius: 50%;
+  background: #fff; box-shadow: 0 0 .5vw .15vw rgba(255, 255, 255, .85);
+  opacity: 0; animation: twinkle 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(.4); } 50% { opacity: .95; transform: scale(1); } }
+
+/* companions: sprite + shadow + glow, geometry per scene (stage coordinates) */
+.actor { transform-origin: 50% 100%; will-change: transform; }
+#castor { left: 56%; top: 30.6%; width: 29.9%; aspect-ratio: 840 / 900; }
+#chouette { left: 57%; top: 39.5%; width: 21.6%; aspect-ratio: 760 / 864; }
+#shiba { left: 61.55%; top: 33%; width: 22.45%; aspect-ratio: 760 / 945; }
+#renard { left: 56.6%; top: 38%; width: 29.8%; aspect-ratio: 760 / 826; }
+#taupe { left: 57.7%; top: 43.2%; width: 22.9%; aspect-ratio: 760 / 854; }
+.shadow { background: radial-gradient(ellipse at center, rgba(35, 22, 8, .55), rgba(35, 22, 8, 0) 70%); filter: blur(2px); }
+#sh-castor { left: 56%; top: 85.5%; width: 30%; height: 4.5%; }
+#sh-chouette { left: 61.5%; top: 78.2%; width: 17%; height: 3.6%; background: radial-gradient(ellipse at center, rgba(30, 18, 6, .5), rgba(30, 18, 6, 0) 70%); }
+.actor img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  display: block; user-select: none; -webkit-user-drag: none;
+  transition: opacity .28s ease;
+}
+.actor .p-work, .actor .p-hit, .actor .p-done { opacity: 0; }
+.stage[data-state="work"] .p-work { opacity: 1; }
+.stage[data-state="work"] .p-rest { opacity: 0; }
+#stage-forge[data-state="work"][data-hit="1"] .p-hit { opacity: 1; }
+#stage-forge[data-state="work"][data-hit="1"] .p-work { opacity: 0; }
+#stage-forge[data-state="work"] .actor img { transition-duration: .07s; }
+#stage-forge[data-state="done"] .p-done { opacity: 1; }
+#stage-forge[data-state="done"] .p-rest { opacity: 0; }
+#stage-cabin .actor img, #stage-cave .actor img, #stage-oak .actor img, #stage-lookout .actor img { transition-duration: .6s; }
+#sh-shiba { left: 60%; top: 79%; width: 26%; height: 5%; background: radial-gradient(ellipse at center, rgba(40, 24, 8, .5), rgba(40, 24, 8, 0) 70%); }
+#sh-renard { left: 59%; top: 91.5%; width: 25%; height: 4.5%; background: radial-gradient(ellipse at center, rgba(12, 24, 6, .55), rgba(12, 24, 6, 0) 70%); }
+#sh-taupe { left: 59%; top: 85.5%; width: 22%; height: 5%; background: radial-gradient(ellipse at center, rgba(20, 10, 4, .6), rgba(20, 10, 4, 0) 70%); }
+
+.actor-inner { position: absolute; inset: 0; } /* sprite and its base stay perfectly still: motion comes from pose frames, particles and glow */
+.glow { transform: translate(-50%, -50%); mix-blend-mode: screen; opacity: 0; pointer-events: none; }
+#glow-forge {
+  left: 77.7%; top: 66.2%; width: 9%; aspect-ratio: 1.6;
+  background: radial-gradient(ellipse at center, rgba(255, 190, 70, .85), rgba(255, 140, 30, 0) 68%);
+}
+#stage-forge[data-state="work"] .glow { opacity: .12; transition: opacity .3s ease-out; }
+#stage-forge[data-state="work"][data-hit="1"] .glow { opacity: 1; transition-duration: .05s; }
+#stage-forge[data-state="done"] .glow { opacity: .35; transition: opacity .6s ease-out; }
+#glow-cabin {
+  left: 61.2%; top: 56.2%; width: 11%; aspect-ratio: 1.2;
+  background: radial-gradient(ellipse at center, rgba(255, 236, 150, .8), rgba(255, 220, 110, 0) 68%);
+}
+#stage-cabin[data-state="work"] .glow { opacity: .5; transition: opacity .5s ease; }
+#stage-cabin[data-state="work"][data-hit="1"] .glow { opacity: 1; transition: opacity .25s ease; }
+
+#glow-cave-head {
+  left: 68.1%; top: 45.7%; width: 8%; aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(190, 235, 255, .9), rgba(120, 190, 255, 0) 66%);
+}
+#glow-cave-cart {
+  left: 28.5%; top: 66.8%; width: 10%; aspect-ratio: 1.3;
+  background: radial-gradient(ellipse at center, rgba(170, 160, 255, .85), rgba(120, 140, 255, 0) 68%);
+}
+#stage-cave[data-state="work"] .glow { opacity: .5; transition: opacity .5s ease; }
+#stage-cave[data-state="work"][data-hit="1"] .glow { opacity: 1; transition: opacity .25s ease; }
+#stage-cave[data-state="done"] .glow { opacity: .3; transition: opacity .6s ease-out; }
+.gem {
+  transform: translate(-50%, -50%); aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, rgba(150, 170, 255, .6), rgba(150, 120, 255, 0) 66%);
+  mix-blend-mode: screen; pointer-events: none; opacity: .4;
+  animation: flicker 4.2s ease-in-out infinite;
+}
+
+#glow-oak {
+  left: 68.8%; top: 61.6%; width: 9%; aspect-ratio: 1.2;
+  background: radial-gradient(ellipse at center, rgba(255, 232, 160, .85), rgba(255, 210, 110, 0) 68%);
+}
+#stage-oak[data-state="work"] .glow { opacity: .55; transition: opacity .5s ease; }
+#stage-oak[data-state="work"][data-hit="1"] .glow { opacity: 1; transition: opacity .25s ease; }
+
+#glow-look-lantern {
+  left: 69.6%; top: 54.2%; width: 6%; aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(255, 220, 120, .9), rgba(255, 190, 80, 0) 66%);
+}
+#glow-look-lens {
+  left: 62.9%; top: 41.7%; width: 4%; aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(255, 255, 235, .95), rgba(255, 240, 190, 0) 62%);
+}
+#stage-lookout[data-state="work"] .glow { opacity: .55; transition: opacity .5s ease; }
+#stage-lookout[data-state="work"][data-hit="1"] .glow { opacity: 1; transition: opacity .2s ease; }
+#stage-lookout[data-state="rest"] #glow-look-lantern { opacity: .22; }
+#stage-lookout[data-state="done"] #glow-look-lantern { opacity: .4; transition: opacity .6s ease-out; }
+
+/* cabin lamps and windows: slow warm flicker */
+.lamp {
+  transform: translate(-50%, -50%); aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 214, 130, .75), rgba(255, 190, 90, 0) 66%);
+  mix-blend-mode: screen; pointer-events: none; opacity: .5;
+  animation: flicker 3.4s ease-in-out infinite;
+}
+@keyframes flicker { 0%, 100% { opacity: .35; } 35% { opacity: .75; } 60% { opacity: .5; } 80% { opacity: .85; } }
+
+#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+/* UI */
+.bar, .card {
+  position: fixed;
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, .7);
+  box-shadow: 0 10px 30px rgba(30, 18, 5, .22);
+}
+.bar {
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  left: max(16px, env(safe-area-inset-left, 0px));
+  right: max(16px, env(safe-area-inset-right, 0px));
+  border-radius: 22px;
+  padding: 10px 14px;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.logo { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(145deg, #F7B24A, var(--ember)); display: grid; place-items: center; flex: none; }
+.logo svg { width: 24px; height: 24px; }
+.titles { min-width: 0; flex: 1 1 220px; }
+h1 { margin: 0; font: 600 clamp(17px, 2.2vw, 24px)/1.1 var(--font-display); letter-spacing: .01em; color: var(--bark); text-wrap: balance; }
+.sub { margin: 3px 0 0; font: 700 11px/1.2 var(--font-body); letter-spacing: .09em; text-transform: uppercase; color: var(--aqua); }
+.pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.pill {
+  font: 700 12px/1 var(--font-body); letter-spacing: .06em; text-transform: uppercase;
+  padding: 10px 14px; border-radius: 999px;
+  border: 1px solid rgba(63, 42, 24, .14); background: #fff; color: var(--bark);
+  cursor: default; display: inline-flex; align-items: center; gap: 8px;
+}
+button.pill { cursor: pointer; }
+.pill .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ember); }
+#src-pill[data-src="live"] .dot { background: #3FB45A; animation: pulse 1.6s ease-in-out infinite; }
+#src-pill[data-src="lost"] .dot { background: #C0473A; }
+.pill[aria-pressed="true"] { background: var(--bark); color: var(--cream); border-color: var(--bark); }
+button:focus-visible { outline: 3px solid var(--aqua); outline-offset: 2px; }
+button.pill:hover { filter: brightness(.97); }
+
+.card.caption {
+  left: max(16px, env(safe-area-inset-left, 0px));
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+  width: min(560px, calc(100vw - 32px));
+  border-radius: 24px; padding: 14px 16px 16px;
+  display: grid; grid-template-columns: 64px 1fr; gap: 6px 14px; align-items: start;
+}
+.avatar { width: 64px; height: 64px; border-radius: 18px; overflow: hidden; background: #F8D9A8; grid-row: span 2; border: 2px solid #fff; box-shadow: 0 3px 10px rgba(60, 35, 10, .25); }
+.avatar img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 14%; transform: scale(1.8); transform-origin: 56% 22%; display: block; }
+.avatar.shiba img { object-position: 50% 0%; transform: scale(1.9); transform-origin: 38% 16%; }
+.avatar.fox img { object-position: 50% 0%; transform: scale(3); transform-origin: 44% 17%; }
+.avatar.mole img { object-position: 50% 0%; transform: scale(1.5); transform-origin: 38% 14%; }
+.avatar.owl img { object-position: 50% 0%; transform: scale(1.55); transform-origin: 52% 20%; }
+.who { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.name { font: 600 20px/1 var(--font-display); color: #9A4B14; }
+.role { font: 700 11px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: #fff; background: var(--aqua); padding: 5px 9px; border-radius: 999px; }
+.msg { margin: 0; font: 700 15px/1.4 var(--font-body); color: var(--ink); min-height: 2.8em; }
+.ctrl { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; align-items: center; }
+.ctrl.team { margin-top: 8px; gap: 6px; }
+.ctrl.team .pill { padding: 10px 11px; }
+.ctrl .lbl { font: 700 11px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-right: 2px; }
+
+.card.log {
+  right: max(16px, env(safe-area-inset-right, 0px));
+  top: calc(env(safe-area-inset-top, 0px) + 96px);
+  width: min(340px, 26vw);
+  border-radius: 20px; padding: 12px 14px;
+}
+.log h2 { margin: 0 0 8px; font: 700 11px/1 var(--font-body); letter-spacing: .09em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+.log h2 span { color: var(--moss); }
+.log ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font: 400 12px/1.4 var(--font-mono); color: var(--ink); }
+.log li { display: grid; grid-template-columns: auto 1fr; gap: 8px; }
+.log time { color: var(--muted); }
+.log .tag { color: #B2561A; font-weight: 500; }
+@media (max-width: 900px), (max-aspect-ratio: 1/1) { .card.log { display: none; } }
+@media (max-width: 520px) { .sub { display: none; } .pill { padding: 9px 11px; font-size: 11px; } }
+@media (max-width: 520px) { .card.caption { padding: 10px 12px 12px; gap: 4px 12px; } .msg { font-size: 14px; min-height: 0; } .ctrl .lbl { display: none; } .ctrl { gap: 6px; margin-top: 4px; } .ctrl.team .pill { padding: 9px 11px; } }
+@media (prefers-reduced-motion: reduce) {
+  .rays, .twinkle, .lamp, .gem, .actor-inner, .glow { animation: none !important; }
+  .actor img { transition: none; }
+}
+</style>
+
+<main class="scene" id="scene" data-scene="forge" data-view="grid" data-layout="wide">
+  <div class="backdrop off" data-for="forge" aria-hidden="true"></div>
+  <div class="backdrop off" data-for="cabin" aria-hidden="true"></div>
+  <div class="backdrop off" data-for="cave" aria-hidden="true"></div>
+  <div class="backdrop off" data-for="oak" aria-hidden="true"></div>
+  <div class="backdrop off" data-for="lookout" aria-hidden="true"></div>
+
+  <div class="stage" id="stage-forge" data-state="rest" data-hit="0">
+    <img class="bg" src="atelier-bg.webp" alt="Une clairière ensoleillée avec une forge en pierre, un moulin à eau et un ruisseau turquoise">
+    <div class="rays" aria-hidden="true"></div>
+    <div class="shadow" id="sh-castor" aria-hidden="true"></div>
+    <div class="actor" id="castor">
+      <div class="actor-inner">
+        <img class="p-rest" src="castor-rest.webp" alt="Brico-Castor, un castor en tablier bleu, appuyé sur son enclume">
+        <img class="p-work" src="castor-work.webp" alt="" aria-hidden="true">
+        <img class="p-hit" src="castor-hit.webp" alt="" aria-hidden="true">
+        <img class="p-done" src="castor-victory.webp" alt="" aria-hidden="true">
+      </div>
+    </div>
+    <div class="glow" id="glow-forge" aria-hidden="true"></div>
+  </div>
+
+  <div class="stage off" id="stage-cabin" data-state="rest" data-hit="0">
+    <img class="bg" src="canopee-bg.webp" alt="Une cabane-bibliothèque dans la canopée, au coucher du soleil, avec une terrasse en bois">
+    <div class="shadow" id="sh-chouette" aria-hidden="true"></div>
+    <div class="actor" id="chouette">
+      <div class="actor-inner">
+        <img class="p-rest" src="chouette-rest.webp" alt="La Chouette Céleste, une chouette à lunettes et écharpe étoilée, perchée sur une souche">
+        <img class="p-work" src="chouette-read.webp" alt="" aria-hidden="true">
+      </div>
+    </div>
+    <div class="glow" id="glow-cabin" aria-hidden="true"></div>
+  </div>
+
+  <div class="stage off" id="stage-cave" data-state="rest" data-hit="0">
+    <img class="bg" src="geodes-bg.webp" alt="Une alcôve souterraine aux géodes de cristal bleu et violet, avec un chariot de mine et des lanternes">
+    <div class="shadow" id="sh-taupe" aria-hidden="true"></div>
+    <div class="actor" id="taupe">
+      <div class="actor-inner">
+        <img class="p-rest" src="taupe-rest.webp" alt="La Data-Taupe, une taupe mineuse avec casque à lampe de cristal, au repos sur son monticule">
+        <img class="p-work" src="taupe-work.webp" alt="" aria-hidden="true">
+      </div>
+    </div>
+    <div class="glow" id="glow-cave-head" aria-hidden="true"></div>
+    <div class="glow" id="glow-cave-cart" aria-hidden="true"></div>
+  </div>
+
+  <div class="stage off" id="stage-oak" data-state="rest" data-hit="0">
+    <img class="bg" src="chene-bg.webp" alt="Le Grand Chêne : un arbre immense avec une petite porte ronde, une boîte aux lettres, des lanternes de papier colorées et une clairière de mousse">
+    <div class="shadow" id="sh-renard" aria-hidden="true"></div>
+    <div class="actor" id="renard">
+      <div class="actor-inner">
+        <img class="p-rest" src="renard-rest.webp" alt="Kitsune Hermes, un renard à trois queues avec chapeau ailé, endormi debout sur une racine moussue">
+        <img class="p-work" src="renard-work.webp" alt="" aria-hidden="true">
+      </div>
+    </div>
+    <div class="glow" id="glow-oak" aria-hidden="true"></div>
+  </div>
+
+  <div class="stage off" id="stage-lookout" data-state="rest" data-hit="0">
+    <img class="bg" src="belvedere-bg.webp" alt="Un belvédère de montagne au soleil couchant, avec une petite tour de pierre, une barrière en bois et une vallée alpine avec un lac turquoise">
+    <div class="shadow" id="sh-shiba" aria-hidden="true"></div>
+    <div class="actor" id="shiba">
+      <div class="actor-inner">
+        <img class="p-rest" src="shiba-rest.webp" alt="Shiba Sentinel, un chien Shiba avec casquette d'éclaireur et écharpe verte, assis sur un rocher, les yeux fermés">
+        <img class="p-work" src="shiba-work.webp" alt="" aria-hidden="true">
+      </div>
+    </div>
+    <div class="glow" id="glow-look-lantern" aria-hidden="true"></div>
+    <div class="glow" id="glow-look-lens" aria-hidden="true"></div>
+  </div>
+  <div id="spacer" aria-hidden="true"></div>
+  <canvas id="fx" aria-hidden="true"></canvas>
+  <p class="hint">Clique sur une scène pour y entrer · <span id="hint-src">événements simulés</span></p>
+
+  <header class="bar">
+    <div class="logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2" fill="#fff"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M18.7 5.3l-1.8 1.8M7.1 16.9l-1.8 1.8"/></svg>
+    </div>
+    <div class="titles">
+      <h1>Le Sanctuaire Solaire de Hermes</h1>
+      <p class="sub">Clairière vivante · 5 compagnons automates</p>
+    </div>
+    <div class="pills">
+      <span class="pill" id="src-pill" title="Source des événements"><span class="dot"></span><span id="src-txt">Démo · événements simulés</span></span>
+      <button class="pill" id="v-grid" type="button" aria-pressed="true" title="Voir les 5 scènes en même temps">Vue d'ensemble</button>
+      <button class="pill" id="v-auto" type="button" aria-pressed="false" title="Démo : les compagnons s'activent tout seuls">Démo auto</button>
+      <button class="pill" id="kid" type="button" aria-pressed="false">Mode enfant / école : off</button>
+      <button class="pill" id="snd" type="button" aria-pressed="false">Son : off</button>
+    </div>
+  </header>
+
+  <section class="card caption" aria-live="polite">
+    <div class="avatar" id="avatar"><img id="avatar-img" src="castor-rest.webp" alt=""></div>
+    <div class="who"><span class="name" id="who-name">Brico-Castor</span><span class="role" id="who-role">Forge du code · terminal &amp; patch</span></div>
+    <p class="msg" id="msg"></p>
+    <div class="ctrl team" role="group" aria-label="Choisir un compagnon">
+      <span class="lbl">Compagnon</span>
+      <button class="pill" id="t-castor" type="button" aria-pressed="true" title="Brico-Castor · Forge du code">Castor</button>
+      <button class="pill" id="t-chouette" type="button" aria-pressed="false" title="Chouette Céleste · Cabane Canopée">Chouette</button>
+      <button class="pill" id="t-taupe" type="button" aria-pressed="false" title="Data-Taupe · Alcôve aux Géodes">Taupe</button>
+      <button class="pill" id="t-renard" type="button" aria-pressed="false" title="Kitsune Hermes · Grand Chêne">Renard</button>
+      <button class="pill" id="t-shiba" type="button" aria-pressed="false" title="Shiba Sentinel · Rocher Belvédère">Shiba</button>
+    </div>
+    <div class="ctrl">
+      <span class="lbl">Simuler</span>
+      <button class="pill" id="b-rest" type="button" aria-pressed="true">Repos</button>
+      <button class="pill" id="b-work" type="button" aria-pressed="false">Code en cours</button>
+      <button class="pill" id="b-done" type="button" aria-pressed="false">Tâche finie</button>
+    </div>
+  </section>
+
+  <aside class="card log" aria-label="Journal des événements">
+    <h2>Sous le capot <span id="log-src">flux simulé</span></h2>
+    <ol id="log"></ol>
+  </aside>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  var scene = document.getElementById("scene");
+  var msg = document.getElementById("msg");
+  var logEl = document.getElementById("log");
+  var cv = document.getElementById("fx");
+  var ctx = cv.getContext("2d");
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var kidMode = false, soundOn = false, auto = false, autoTimer = null, audio = null;
+
+  /* ---- companions: one per scene. Add a new one here (config only) ---- */
+  var ACTORS = {
+    castor: {
+      id: "castor", scene: "forge", stage: document.getElementById("stage-forge"), el: document.getElementById("castor"),
+      name: "Brico-Castor", role: "Forge du code · terminal & patch", avatar: "castor-rest.webp", avatarClass: "",
+      labels: { work: "Code en cours" },
+      emit: { x: 0.726, y: 0.6195 }, hitEvery: 1100, firstHit: 420, state: "rest", hitTimer: null, kickTimer: null,
+      text: {
+        rest: { normal: "En attente d'une tâche. Brico-Castor se repose contre l'enclume.", kid: "Brico-Castor se repose près de son enclume. Il attend qu'on lui confie un projet." },
+        work: { normal: "Application du patch en cours : le code est écrit à l'établi, puis validé.", kid: "Brico-Castor martèle son enclume d'or pour assembler ton jeu." },
+        done: { normal: "Tâche terminée : le patch est validé et prêt. Brico-Castor lève son marteau.", kid: "Hourra ! Brico-Castor a fini ! Ton jeu est prêt, bravo à toute l'équipe !" }
+      },
+      logs: { rest: ["CLAIRIERE", "Brico-Castor est au repos."], work: ["CODE:PATCH", "Brico-Castor s'active à l'établi : fichier écrit et validé."], done: ["TERMINE", "Tâche terminée : patch validé, Brico-Castor célèbre."] }
+    },
+    chouette: {
+      id: "chouette", scene: "cabin", stage: document.getElementById("stage-cabin"), el: document.getElementById("chouette"),
+      name: "Chouette Céleste", role: "Cabane Canopée · recherche & sources", avatar: "chouette-rest.webp", avatarClass: "owl",
+      labels: { work: "Recherche en cours" },
+      emit: { x: 0.197, y: 0.382 }, hitEvery: 2600, firstHit: 500, state: "rest", hitTimer: null, kickTimer: null,
+      text: {
+        rest: { normal: "Cabane calme. La Chouette Céleste somnole, livre refermé, en attendant une recherche.", kid: "La Chouette Céleste fait une petite sieste avec son livre. Elle attend ta question." },
+        work: { normal: "Recherche en cours : lecture des sources et extraction des faits clés.", kid: "La Chouette Céleste lit son livre magique pour trouver la réponse à ta question." },
+        done: { normal: "Recherche terminée : synthèse prête, sources vérifiées.", kid: "Trouvé ! La Chouette Céleste a la réponse et sourit, toute contente." }
+      },
+      logs: { rest: ["CABANE", "La Chouette Céleste somnole, livre refermé."], work: ["RECHERCHE", "Lecture des sources et extraction des faits."], done: ["SYNTHESE", "Recherche terminée, sources vérifiées."] }
+    },
+    taupe: {
+      id: "taupe", scene: "cave", stage: document.getElementById("stage-cave"), el: document.getElementById("taupe"), fx: "crystals",
+      name: "Data-Taupe", role: "Alcôve aux Géodes · données & analyse", avatar: "taupe-rest.webp", avatarClass: "mole",
+      labels: { work: "Analyse en cours" },
+      emit: { x: 0.30, y: 0.86 }, hitEvery: 2200, firstHit: 500, state: "rest", hitTimer: null, kickTimer: null,
+      palette: ["140,205,255", "190,150,255", "255,240,170"],
+      text: {
+        rest: { normal: "Alcôve paisible. La Data-Taupe fait une pause, son piolet appuyé contre l'épaule.", kid: "La Data-Taupe fait une petite pause. Son piolet se repose avec elle." },
+        work: { normal: "Analyse en cours : exploration des données et extraction des éléments utiles.", kid: "La Data-Taupe fouille la montagne pour trouver des cristaux de réponses." },
+        done: { normal: "Analyse terminée : données triées, résultats rangés dans le chariot.", kid: "Super ! La Data-Taupe a trouvé tous les cristaux et les a bien rangés." }
+      },
+      logs: { rest: ["ALCOVE", "La Data-Taupe se repose, lampe tamisée."], work: ["DONNEES", "Exploration des données : extraction des éléments utiles."], done: ["TRIE", "Analyse terminée : résultats triés et rangés."] }
+    }
+    ,
+    renard: {
+      id: "renard", scene: "oak", stage: document.getElementById("stage-oak"), el: document.getElementById("renard"), fx: "letters",
+      name: "Kitsune Hermes", role: "Grand Chêne · messages & coordination", avatar: "renard-rest.webp", avatarClass: "fox",
+      labels: { work: "Messages en cours" },
+      emit: { x: 0.41, y: 0.40 }, hitEvery: 2400, firstHit: 500, state: "rest", hitTimer: null, kickTimer: null,
+      palette: ["255,226,150", "255,244,205"],
+      text: {
+        rest: { normal: "Le Grand Chêne est calme. Kitsune Hermes veille, sa lettre rangée dans la sacoche.", kid: "Kitsune Hermes fait une petite sieste au pied du Grand Chêne." },
+        work: { normal: "Messages en cours : Kitsune Hermes distribue les tâches et transmet les réponses.", kid: "Kitsune Hermes court porter les lettres magiques à tous ses amis." },
+        done: { normal: "Messagerie à jour : toutes les lettres sont distribuées.", kid: "Toutes les lettres sont arrivées ! Kitsune Hermes est content." }
+      },
+      logs: { rest: ["CHENE", "Kitsune Hermes veille, sacoche fermée."], work: ["MESSAGE", "Distribution des tâches et transmission des réponses."], done: ["LIVRE", "Messages distribués : tout est à jour."] }
+    }
+    ,
+    shiba: {
+      id: "shiba", scene: "lookout", stage: document.getElementById("stage-lookout"), el: document.getElementById("shiba"), fx: "scan",
+      name: "Shiba Sentinel", role: "Rocher Belvédère · sécurité & surveillance", avatar: "shiba-rest.webp", avatarClass: "shiba",
+      labels: { work: "Ronde en cours" },
+      emit: { x: 0.062, y: 0.173 }, hitEvery: 2200, firstHit: 500, state: "rest", hitTimer: null, kickTimer: null,
+      palette: ["255,236,170", "255,255,235"],
+      text: {
+        rest: { normal: "Tout est calme au belvédère. Shiba Sentinel somnole, lunette contre lui, lanterne en veille.", kid: "Shiba Sentinel fait une petite sieste. Il veille sur tout le monde, même en dormant." },
+        work: { normal: "Ronde en cours : Shiba Sentinel scrute l'horizon, accès, erreurs et alertes.", kid: "Shiba Sentinel regarde au loin avec sa lunette pour protéger tous ses amis." },
+        done: { normal: "Ronde terminée : aucune alerte, tout est en sécurité.", kid: "Tout va bien ! Shiba Sentinel a vérifié : personne n'est en danger." }
+      },
+      logs: { rest: ["BELVEDERE", "Shiba Sentinel somnole, lanterne en veille."], work: ["GARDE", "Ronde de surveillance : accès, erreurs, alertes."], done: ["SECURITE", "Ronde terminée : aucune alerte."] }
+    }
+  };
+  var view = "grid", active = "castor";
+  var ORDER = ["castor", "renard", "chouette", "taupe", "shiba"];
+  var SHORT = { castor: "Forge du code", renard: "Grand Chêne · messages", chouette: "Cabane Canopée · recherche", taupe: "Alcôve aux Géodes · données", shiba: "Belvédère · sécurité" };
+  var RATIO = 1.7913, GAP = 14;
+  var busy = {}, pending = [], mails = [];
+  var spacer = document.getElementById("spacer");
+  var logCard = document.querySelector(".card.log");
+  var bar = document.querySelector(".bar");
+  function A() { return ACTORS[active]; }
+  function later(ms, fn) { var h = setTimeout(fn, ms); pending.push(h); return h; }
+  function clearPending() { pending.forEach(clearTimeout); pending.length = 0; }
+  function live(id) { return view === "grid" || id === active; }
+
+  /* ---- single entry point for real events later: setState("castor" | "chouette" | "taupe" | "renard" | "shiba", "work" | "rest" | "done") ---- */
+  function setState(id, s, quiet) {
+    var a = ACTORS[id]; if (!a || (s === a.state && !quiet)) return;
+    a.state = s;
+    a.stage.setAttribute("data-state", s);
+    a.stage.setAttribute("data-hit", "0");
+    clearInterval(a.hitTimer); clearTimeout(a.kickTimer);
+    syncTiles();
+    if (id === active) syncUI();
+    if (!live(id)) return;
+    if (!quiet) { addLog(a.logs[s][0], a.logs[s][1]); if (s === "done") celebrate(a); else burst(a, 14); }
+    if (s === "work" && !reduce) {
+      a.hitTimer = setInterval(function () { hit(a); }, a.hitEvery);
+      a.kickTimer = setTimeout(function () { hit(a); }, a.firstHit);
+    }
+  }
+  function syncUI() {
+    var a = A();
+    msg.textContent = a.text[a.state || "rest"][kidMode ? "kid" : "normal"];
+    ["rest", "work", "done"].forEach(function (k) { document.getElementById("b-" + k).setAttribute("aria-pressed", String(a.state === k)); });
+    document.getElementById("b-work").textContent = a.labels.work;
+    document.getElementById("who-name").textContent = a.name;
+    document.getElementById("who-role").textContent = a.role;
+    var av = document.getElementById("avatar"); av.className = "avatar " + a.avatarClass;
+    document.getElementById("avatar-img").src = a.avatar;
+    Object.keys(ACTORS).forEach(function (k) { document.getElementById("t-" + k).setAttribute("aria-pressed", String(k === active)); });
+    document.getElementById("v-grid").setAttribute("aria-pressed", String(view === "grid"));
+  }
+
+  /* ---- overview tiles: name, role and live state badge on top of each scene ---- */
+  function buildTiles() {
+    ORDER.forEach(function (k) {
+      var a = ACTORS[k], ui = document.createElement("div"); ui.className = "tile-ui"; ui.setAttribute("aria-hidden", "true");
+      var left = document.createElement("div");
+      var n = document.createElement("div"); n.className = "tu-name"; n.textContent = a.name;
+      var r = document.createElement("div"); r.className = "tu-role"; r.textContent = SHORT[k];
+      left.appendChild(n); left.appendChild(r);
+      var b = document.createElement("span"); b.className = "tu-badge"; b.setAttribute("data-st", "rest");
+      b.appendChild(document.createElement("i")); b.appendChild(document.createElement("b"));
+      ui.appendChild(left); ui.appendChild(b); a.stage.appendChild(ui); a.badge = b;
+      a.stage.addEventListener("click", function () { if (view === "grid") enterScene(k); });
+      a.stage.addEventListener("keydown", function (e) { if (view === "grid" && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); enterScene(k); } });
+    });
+  }
+  function syncTiles() {
+    ORDER.forEach(function (k) {
+      var a = ACTORS[k]; if (!a.badge) return;
+      a.badge.setAttribute("data-st", a.state || "rest");
+      a.badge.lastChild.textContent = a.state === "work" ? a.labels.work : a.state === "done" ? "Terminé" : "Repos";
+    });
+  }
+
+  /* ---- geometry: every stage is placed from JS, either full scene or overview tile ---- */
+  var tileRects = {}, logRect = null, contentH = 0;
+  function isStack() { return W < 900 || W / H < 1; }
+  function fullRect() {
+    var Wd, Hd, L, T;
+    if (W / H < 1) { Wd = H * 1.3; Hd = Wd / RATIO; L = W / 2 - 0.66 * Wd; T = -48; }
+    else { Wd = Math.max(W, H * RATIO); Hd = Wd / RATIO; L = (W - Wd) / 2; T = (H - Hd) / 2; }
+    return { left: L, top: T, width: Wd, height: Hd };
+  }
+  function computeTiles() {
+    var topArea = Math.max(100, bar.getBoundingClientRect().bottom + 14);
+    if (isStack()) {
+      var w = Math.min(W - 32, 560), h = w / RATIO, g = 12, left = (W - w) / 2;
+      ORDER.forEach(function (k, n) { tileRects[k] = { left: left, top: topArea + n * (h + g), width: w, height: h }; });
+      contentH = topArea + ORDER.length * (h + g) + 56; logRect = null;
+    } else {
+      var aw = W - 32, ah = H - topArea - 40;
+      var w2 = Math.min((aw - 2 * GAP) / 3, ((ah - GAP) / 2) * RATIO), h2 = w2 / RATIO;
+      var left0 = (W - (3 * w2 + 2 * GAP)) / 2, top0 = topArea + Math.max(0, (ah - (2 * h2 + GAP)) / 2);
+      ORDER.concat(["log"]).forEach(function (k, n) {
+        var r = { left: left0 + (n % 3) * (w2 + GAP), top: top0 + Math.floor(n / 3) * (h2 + GAP), width: w2, height: h2 };
+        if (k === "log") logRect = r; else tileRects[k] = r;
+      });
+      contentH = 0;
+    }
+  }
+  function setRect(el, r) { el.style.left = r.left + "px"; el.style.top = r.top + "px"; el.style.width = r.width + "px"; el.style.height = r.height + "px"; }
+  function applyGeometry() {
+    computeTiles();
+    var F = fullRect();
+    scene.setAttribute("data-layout", isStack() ? "stack" : "wide");
+    ORDER.forEach(function (k) { setRect(ACTORS[k].stage, view === "grid" ? tileRects[k] : F); });
+    spacer.style.height = view === "grid" ? contentH + "px" : "0px";
+    if (view === "grid" && logRect) { setRect(logCard, logRect); logCard.style.right = "auto"; }
+    else { logCard.style.left = logCard.style.top = logCard.style.width = logCard.style.height = logCard.style.right = ""; }
+  }
+  function applyOff() {
+    ORDER.forEach(function (k) {
+      var a = ACTORS[k];
+      a.stage.classList.toggle("off", !(view === "grid" || k === active));
+      document.querySelector('.backdrop[data-for="' + a.scene + '"]').classList.toggle("off", !(view === "scene" && k === active));
+    });
+  }
+  function applyA11y() {
+    ORDER.forEach(function (k) {
+      var st = ACTORS[k].stage;
+      if (view === "grid") { st.setAttribute("role", "button"); st.setAttribute("tabindex", "0"); st.setAttribute("aria-label", "Ouvrir la scène : " + ACTORS[k].name + ", " + SHORT[k]); }
+      else { st.removeAttribute("role"); st.removeAttribute("tabindex"); st.removeAttribute("aria-label"); }
+    });
+  }
+  function animateRect(el, from, to, r0, r1) {
+    if (!el.animate || reduce) return;
+    el.style.zIndex = 5;
+    var an = el.animate([
+      { left: from.left + "px", top: from.top + "px", width: from.width + "px", height: from.height + "px", borderRadius: r0 },
+      { left: to.left + "px", top: to.top + "px", width: to.width + "px", height: to.height + "px", borderRadius: r1 }
+    ], { duration: 650, easing: "cubic-bezier(.2,.8,.2,1)" });
+    an.onfinish = an.oncancel = function () { el.style.zIndex = ""; };
+  }
+  function clearFx() { sparks.length = 0; confetti.length = 0; rings.length = 0; mails.length = 0; }
+
+  function enterScene(id) {
+    if (view === "scene") return;
+    var st = ACTORS[id].stage, r1 = st.getBoundingClientRect();
+    var from = { left: r1.left, top: r1.top, width: r1.width, height: r1.height };
+    var wasAuto = auto; stopAuto(false); busy = {};
+    ORDER.forEach(function (k) { if (k !== id) setState(k, "rest", true); });
+    clearFx();
+    view = "scene"; active = id;
+    scene.setAttribute("data-view", "scene"); scene.setAttribute("data-scene", A().scene); scene.scrollTop = 0;
+    applyGeometry(); applyOff(); applyA11y(); syncUI();
+    animateRect(st, from, fullRect(), "20px", "0px");
+    addLog(A().logs.rest[0], A().name + " : scène ouverte.");
+    if (wasAuto) startAuto();
+  }
+  function backToGrid() {
+    if (view === "grid") return;
+    var st = A().stage, r1 = st.getBoundingClientRect();
+    var wasAuto = auto; stopAuto(false); busy = {};
+    clearFx();
+    view = "grid"; scene.setAttribute("data-view", "grid");
+    document.querySelectorAll(".bg").forEach(function (b) { b.style.transform = ""; });
+    ORDER.forEach(function (k) { ACTORS[k].el.style.translate = ""; });
+    applyGeometry(); applyOff(); applyA11y(); syncTiles(); syncUI();
+    if (isStack()) scene.scrollTop = Math.max(0, tileRects[active].top - 90);
+    var to = tileRects[active];
+    animateRect(st, { left: r1.left, top: r1.top + scene.scrollTop, width: r1.width, height: r1.height }, to, "0px", "20px");
+    if (wasAuto) startAuto();
+  }
+  function selectActor(id) {
+    if (view !== "scene") { enterScene(id); return; }
+    if (id === active) return;
+    var wasAuto = auto; stopAuto(false);
+    var prev = A(); setState(prev.id, "rest", true);
+    clearInterval(prev.hitTimer); clearTimeout(prev.kickTimer);
+    active = id; scene.setAttribute("data-scene", A().scene);
+    applyOff(); clearFx();
+    A().state = ""; setState(id, "rest", true);
+    addLog(A().logs.rest[0], A().name + " : vue active.");
+    if (wasAuto) startAuto();
+  }
+
+  function addLog(tag, text) {
+    var li = document.createElement("li");
+    var t = document.createElement("time");
+    var d = new Date();
+    t.textContent = ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2) + ":" + ("0" + d.getSeconds()).slice(-2);
+    var s = document.createElement("span");
+    var g = document.createElement("span"); g.className = "tag"; g.textContent = "[" + tag + "] ";
+    s.appendChild(g); s.appendChild(document.createTextNode(text));
+    li.appendChild(t); li.appendChild(s);
+    logEl.insertBefore(li, logEl.firstChild);
+    while (logEl.children.length > 5) logEl.removeChild(logEl.lastChild);
+  }
+
+  /* ---- particles ---- */
+  var W = 0, H = 0, dpr = 1;
+  var sparks = [], motes = [], confetti = [], rings = [];
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener("resize", resize); resize();
+
+  function emitPoint(a) {
+    var r = a.el.getBoundingClientRect();
+    return { x: r.left + r.width * a.emit.x, y: r.top + r.height * a.emit.y, s: r.width / (a.id === "castor" ? 600 : 420) };
+  }
+  function hit(a) {
+    a.stage.setAttribute("data-hit", "1");
+    setTimeout(function () { a.stage.setAttribute("data-hit", "0"); }, a.id === "castor" ? 190 : 900);
+    var p = emitPoint(a), i;
+    if (a.id === "castor") {
+      var n = 26 + Math.floor(Math.random() * 10);
+      for (i = 0; i < n; i++) {
+        var an = -Math.PI / 2 + (Math.random() - 0.5) * 2.3;
+        var v = (2 + Math.random() * 5.5) * p.s;
+        sparks.push({ x: p.x, y: p.y, vx: Math.cos(an) * v, vy: Math.sin(an) * v, life: 1, decay: .018 + Math.random() * .02, r: (1 + Math.random() * 2.2) * Math.max(p.s, .6) });
+      }
+      clink();
+    } else {
+      /* soft motes rising from the book (owl) or from the crystals (mole) */
+      var pal = a.palette || ["255,240,170"];
+      for (i = 0; i < 12; i++) {
+        sparks.push({ x: p.x + (Math.random() - .5) * 50 * p.s, y: p.y + (Math.random() - .5) * 30 * p.s, vx: (Math.random() - .5) * .8, vy: -.4 - Math.random() * 1.1, g: -.004, col: pal[i % pal.length], life: 1, decay: .008 + Math.random() * .008, r: (1.2 + Math.random() * 2) * Math.max(p.s, .7) });
+      }
+      if (a.fx === "scan") rings.push({ x: p.x, y: p.y, r: 4 * Math.max(p.s, .7), life: 1, k: Math.max(p.s, .7) });
+      if (a.fx === "letters") {
+        for (i = 0; i < 3; i++) {
+          confetti.push({ x: p.x + (Math.random() - .5) * 20, y: p.y, vx: .5 + Math.random() * 1.1, vy: -1.3 - Math.random() * .8, g: -.004, rot: (Math.random() - .5) * .8, vr: (Math.random() - .5) * .08, w: 15 * Math.max(p.s, .7), h: 10 * Math.max(p.s, .7), c: "#FFF4DE", life: 1, decay: .006 + Math.random() * .004 });
+        }
+      }
+      chime();
+    }
+  }
+  function burst(a, n) {
+    if (reduce) return;
+    var r = a.el.getBoundingClientRect();
+    for (var i = 0; i < n; i++) {
+      var an = Math.random() * Math.PI * 2, v = (1 + Math.random() * 3) * (r.width / 540);
+      sparks.push({ x: r.left + r.width * (0.3 + Math.random() * 0.5), y: r.top + r.height * (0.35 + Math.random() * 0.4), vx: Math.cos(an) * v, vy: Math.sin(an) * v - 1, life: 1, decay: .02 + Math.random() * .02, r: 1 + Math.random() * 2 });
+    }
+  }
+  /* victory: golden sparkles + confetti falling around the companion */
+  var CONF = ["#FFC84A", "#E4802F", "#2BA7A3", "#FFF4DE", "#F06B5B", "#7FCF6B"];
+  function celebrate(a) {
+    if (reduce) return;
+    var r = a.el.getBoundingClientRect(), k = Math.max(r.width / 600, .6), i;
+    for (i = 0; i < 70; i++) {
+      confetti.push({
+        x: r.left + r.width * (0.1 + Math.random() * 0.8), y: r.top - r.height * (0.05 + Math.random() * 0.25),
+        vx: (Math.random() - 0.5) * 2.2, vy: 1.2 + Math.random() * 2.6,
+        rot: Math.random() * 6.28, vr: (Math.random() - 0.5) * 0.3,
+        w: (5 + Math.random() * 6) * k, h: (3 + Math.random() * 4) * k,
+        c: CONF[i % CONF.length], life: 1, decay: .004 + Math.random() * .004
+      });
+    }
+    for (i = 0; i < 36; i++) {
+      var an = -Math.PI / 2 + (Math.random() - 0.5) * 2.8, v = (2 + Math.random() * 4) * (r.width / 600);
+      sparks.push({ x: r.left + r.width * (a.id === "castor" ? 0.28 : 0.5), y: r.top + r.height * 0.2, vx: Math.cos(an) * v, vy: Math.sin(an) * v, life: 1, decay: .014 + Math.random() * .014, r: 1.2 + Math.random() * 2 });
+    }
+    if (a.id === "castor") clink(); else chime();
+  }
+  for (var m = 0; m < 46; m++) {
+    motes.push({ x: Math.random(), y: Math.random(), r: .6 + Math.random() * 1.8, vx: .00006 + Math.random() * .00012, vy: -.00003 - Math.random() * .00008, ph: Math.random() * 6.28, sp: .4 + Math.random() * .9 });
+  }
+  var last = performance.now();
+  function frame(now) {
+    var dt = Math.min((now - last) / 16.67, 3); last = now;
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalCompositeOperation = "lighter";
+    if (!reduce) {
+      for (var i = 0; i < motes.length; i++) {
+        var o = motes[i];
+        o.x += o.vx * dt * 16; o.y += o.vy * dt * 16;
+        if (o.x > 1.02) o.x = -.02; if (o.y < -.02) o.y = 1.02;
+        var tw = .35 + .65 * Math.abs(Math.sin(now / 1000 * o.sp + o.ph));
+        var gx = o.x * W, gy = o.y * H;
+        var boost = Math.max(0, 1 - Math.abs((gx / W) - .72) * 1.6);
+        ctx.fillStyle = "rgba(255, 233, 168," + (.10 + .35 * tw * (.4 + boost)) + ")";
+        ctx.beginPath(); ctx.arc(gx, gy, o.r * 2.2, 0, 6.283); ctx.fill();
+        ctx.fillStyle = "rgba(255, 246, 214," + (.35 * tw) + ")";
+        ctx.beginPath(); ctx.arc(gx, gy, o.r * .8, 0, 6.283); ctx.fill();
+      }
+    }
+    for (var k = sparks.length - 1; k >= 0; k--) {
+      var s = sparks[k];
+      s.vy += (s.g === undefined ? .16 : s.g) * dt; s.x += s.vx * dt; s.y += s.vy * dt; s.life -= s.decay * dt;
+      if (s.life <= 0) { sparks.splice(k, 1); continue; }
+      if (s.col) {
+        ctx.fillStyle = "rgba(" + s.col + "," + s.life + ")";
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r * (.5 + s.life), 0, 6.283); ctx.fill();
+        ctx.fillStyle = "rgba(" + s.col + "," + (s.life * .22) + ")";
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 3 * s.life, 0, 6.283); ctx.fill();
+      } else {
+        ctx.fillStyle = "rgba(255," + (170 + 70 * s.life | 0) + "," + (60 + 90 * s.life | 0) + "," + s.life + ")";
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r * (.5 + s.life), 0, 6.283); ctx.fill();
+        ctx.fillStyle = "rgba(255, 190, 80," + (s.life * .25) + ")";
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r * 3 * s.life, 0, 6.283); ctx.fill();
+      }
+    }
+    for (var z = rings.length - 1; z >= 0; z--) {
+      var rg = rings[z]; rg.r += 1.7 * rg.k * dt; rg.life -= .02 * dt;
+      if (rg.life <= 0) { rings.splice(z, 1); continue; }
+      ctx.strokeStyle = "rgba(255,236,170," + (rg.life * .75) + ")"; ctx.lineWidth = 2.2 * rg.k;
+      ctx.beginPath(); ctx.arc(rg.x, rg.y, rg.r, 0, 6.283); ctx.stroke();
+    }
+    ctx.globalCompositeOperation = "source-over";
+    for (var ml = mails.length - 1; ml >= 0; ml--) {
+      var mm = mails[ml]; mm.t += dt * 16.67 / mm.dur;
+      var tt = Math.min(mm.t, 1), uu = 1 - tt;
+      var mx = uu * uu * mm.x0 + 2 * uu * tt * mm.cx + tt * tt * mm.x1, my = uu * uu * mm.y0 + 2 * uu * tt * mm.cy + tt * tt * mm.y1;
+      sparks.push({ x: mx, y: my, vx: (Math.random() - .5) * .5, vy: (Math.random() - .5) * .5, g: 0, col: "255,226,150", life: 1, decay: .045, r: 1.6 * mm.k });
+      ctx.save(); ctx.translate(mx, my); ctx.rotate(Math.sin(tt * 9) * .25);
+      ctx.fillStyle = "#FFF4DE"; ctx.strokeStyle = "#D9983C"; ctx.lineWidth = 1.2;
+      ctx.fillRect(-9 * mm.k, -6 * mm.k, 18 * mm.k, 12 * mm.k); ctx.strokeRect(-9 * mm.k, -6 * mm.k, 18 * mm.k, 12 * mm.k);
+      ctx.beginPath(); ctx.moveTo(-9 * mm.k, -6 * mm.k); ctx.lineTo(0, 1 * mm.k); ctx.lineTo(9 * mm.k, -6 * mm.k); ctx.stroke(); ctx.restore();
+      if (mm.t >= 1) { mails.splice(ml, 1); for (var bi = 0; bi < 18; bi++) { var ba = Math.random() * 6.283, bv = (1 + Math.random() * 2.5) * mm.k; sparks.push({ x: mx, y: my, vx: Math.cos(ba) * bv, vy: Math.sin(ba) * bv, g: .02, col: "255,226,150", life: 1, decay: .03, r: 1.8 * mm.k }); } if (mm.cb) mm.cb(); }
+    }
+    for (var q = confetti.length - 1; q >= 0; q--) {
+      var f = confetti[q];
+      f.vy += (f.g === undefined ? .02 : f.g) * dt; f.vx *= .995; f.x += (f.vx + Math.sin(now / 400 + q) * .6) * dt; f.y += f.vy * dt; f.rot += f.vr * dt; f.life -= f.decay * dt;
+      if (f.life <= 0 || f.y > H + 20) { confetti.splice(q, 1); continue; }
+      ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.rot); ctx.globalAlpha = Math.min(1, f.life * 2.2);
+      ctx.fillStyle = f.c; ctx.fillRect(-f.w / 2, -f.h / 2, f.w, f.h); ctx.restore();
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  /* ---- ambience, placed in stage coordinates ---- */
+  var forgeStage = ACTORS.castor.stage, cabinStage = ACTORS.chouette.stage;
+  [[8,80],[14,86],[20,90],[27,93],[33,95],[11,92],[22,84],[30,88],[38,96],[17,95],[6,88],[25,97]].forEach(function (p, i) {
+    var d = document.createElement("div");
+    d.className = "twinkle";
+    d.style.left = p[0] + "%"; d.style.top = p[1] + "%";
+    d.style.animationDelay = (i * .37) + "s";
+    d.style.animationDuration = (2.4 + (i % 4) * .6) + "s";
+    forgeStage.appendChild(d);
+  });
+  /* cabin windows and lanterns: [x%, y%, size%] */
+  [[12.5,35.4,9],[23.3,34,7],[31.3,18.4,8],[20.5,30.5,5],[43.5,32.2,4.5],[44.9,15.4,4],[54,13.9,4],[6.5,12.5,3.5]].forEach(function (p, i) {
+    var d = document.createElement("div");
+    d.className = "lamp";
+    d.style.left = p[0] + "%"; d.style.top = p[1] + "%"; d.style.width = p[2] + "%";
+    d.style.animationDelay = (i * .7) + "s";
+    d.style.animationDuration = (3 + (i % 3) * .8) + "s";
+    cabinStage.appendChild(d);
+  });
+
+  /* cave lanterns and glowing geodes: [x%, y%, size%, kind] */
+  var caveStage = ACTORS.taupe.stage;
+  [[39.5,29.6,5,"lamp"],[90,25.1,6,"lamp"],[59.9,36.7,4,"lamp"],[88.9,34.3,4,"lamp"],
+   [15,22.4,12,"gem"],[3,46.6,10,"gem"],[52,19.3,7,"gem"],[56.5,59,6,"gem"],[38.5,50.6,5,"gem"],[95,93,9,"gem"],[24.5,10,5,"gem"]].forEach(function (p, i) {
+    var d = document.createElement("div");
+    d.className = p[3];
+    d.style.left = p[0] + "%"; d.style.top = p[1] + "%"; d.style.width = p[2] + "%";
+    d.style.animationDelay = (i * .6) + "s";
+    d.style.animationDuration = (3.2 + (i % 4) * .9) + "s";
+    caveStage.appendChild(d);
+  });
+
+  /* oak lanterns and windows: [x%, y%, size%] */
+  var oakStage = ACTORS.renard.stage;
+  [[2.4,26.9,5],[6.5,30.3,5],[9.9,32.7,4.5],[38.5,32.2,5],[43,34.2,5],[47.6,31.8,5],[51,26.5,5],[54,24,5],[57.3,27.6,5],
+   [19.25,41.8,8],[25.9,63.2,4],[32.2,50,4]].forEach(function (p, i) {
+    var d = document.createElement("div");
+    d.className = "lamp";
+    d.style.left = p[0] + "%"; d.style.top = p[1] + "%"; d.style.width = p[2] + "%";
+    d.style.animationDelay = (i * .55) + "s";
+    d.style.animationDuration = (3 + (i % 4) * .9) + "s";
+    oakStage.appendChild(d);
+  });
+
+  /* lookout tower lantern and window: [x%, y%, size%] */
+  var lookStage = ACTORS.shiba.stage;
+  [[20.75,20,7],[22.35,31.1,2.6]].forEach(function (p, i) {
+    var d = document.createElement("div");
+    d.className = "lamp";
+    d.style.left = p[0] + "%"; d.style.top = p[1] + "%"; d.style.width = p[2] + "%";
+    d.style.animationDelay = (i * .8) + "s";
+    lookStage.appendChild(d);
+  });
+
+  /* ---- parallax (mouse) ---- */
+  if (!reduce && window.matchMedia("(pointer: fine)").matches) {
+    var bgs = document.querySelectorAll(".bg");
+    window.addEventListener("pointermove", function (e) {
+      if (view !== "scene") return;
+      var nx = e.clientX / W - .5, ny = e.clientY / H - .5;
+      for (var i = 0; i < bgs.length; i++) bgs[i].style.transform = "translate(" + (-nx * 10) + "px," + (-ny * 6) + "px) scale(1.012)";
+      Object.keys(ACTORS).forEach(function (k) { ACTORS[k].el.style.translate = (nx * 6) + "px " + (ny * 3) + "px"; });
+    });
+  }
+
+  /* ---- sound (Web Audio, off by default) ---- */
+  function tone(freqs, gain, dur) {
+    if (!soundOn) return;
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      var t = audio.currentTime;
+      freqs.forEach(function (f, i) {
+        var o = audio.createOscillator(), g = audio.createGain();
+        o.type = "sine"; o.frequency.value = f * (1 + Math.random() * .02);
+        g.gain.setValueAtTime(gain / (i + 1), t); g.gain.exponentialRampToValueAtTime(.0001, t + dur - i * .06);
+        o.connect(g); g.connect(audio.destination); o.start(t); o.stop(t + dur + .05);
+      });
+    } catch (e) { /* audio unavailable */ }
+  }
+  function clink() { tone([1180, 1760, 2490], .05, .35); }
+  function chime() { tone([880, 1320], .035, .9); }
+
+  /* ---- letters flown by the fox between scenes (a task handed to another companion) ---- */
+  function centerOf(el) { var r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width }; }
+  function sendMail(fromId, toId, cb) {
+    var a = ACTORS[fromId], p = emitPoint(a), t = centerOf(ACTORS[toId].el), d = Math.hypot(t.x - p.x, t.y - p.y);
+    mails.push({ x0: p.x, y0: p.y, x1: t.x, y1: t.y, cx: (p.x + t.x) / 2, cy: Math.min(p.y, t.y) - Math.max(60, d * .25), t: 0, dur: 1100 + d * .6, cb: cb, k: Math.max(.9, Math.min(1.6, centerOf(a.el).w / 420)) });
+    chime();
+  }
+
+  /* ---- demo ---- */
+  var autoBtn = document.getElementById("v-auto");
+  function stopAuto(resetGrid) {
+    var was = auto; auto = false; clearTimeout(autoTimer); clearPending(); autoBtn.setAttribute("aria-pressed", "false");
+    if (was && resetGrid !== false && view === "grid") { busy = {}; mails.length = 0; ORDER.forEach(function (k) { setState(k, "rest", true); }); }
+  }
+  var NEXT = { rest: "work", work: "done", done: "rest" }, WAIT = { rest: 3500, work: 7000, done: 5000 };
+  function loopAuto() {
+    if (!auto || view !== "scene") return;
+    autoTimer = setTimeout(function () {
+      setState(active, NEXT[A().state || "rest"]);
+      loopAuto();
+    }, WAIT[A().state || "rest"]);
+  }
+  function runTask(id) {
+    busy[id] = true;
+    var dur = 5200 + Math.random() * 3600;
+    function startWork() {
+      setState(id, "work");
+      later(dur, function () { setState(id, "done"); later(2800, function () { setState(id, "rest"); busy[id] = false; }); });
+    }
+    if (id === "renard") { startWork(); return; }
+    if (ACTORS.renard.state === "rest" && !busy.renard && !reduce) {
+      busy.renard = true; setState("renard", "work");
+      sendMail("renard", id, startWork);
+      later(2300, function () { setState("renard", "rest"); busy.renard = false; });
+    } else startWork();
+  }
+  function gridAuto() {
+    if (!auto || view !== "grid") return;
+    var idle = ORDER.filter(function (k) { return ACTORS[k].state === "rest" && !busy[k]; });
+    if (idle.length > 2 || (idle.length && Math.random() < .5)) runTask(idle[Math.floor(Math.random() * idle.length)]);
+    autoTimer = setTimeout(gridAuto, 1700 + Math.random() * 2300);
+  }
+  function startAuto() {
+    auto = true; autoBtn.setAttribute("aria-pressed", "true");
+    if (view === "grid") { busy = {}; gridAuto(); }
+    else { setState(active, "work"); loopAuto(); }
+  }
+  document.getElementById("b-rest").addEventListener("click", function () { stopAuto(false); setState(active, "rest"); });
+  document.getElementById("b-work").addEventListener("click", function () { stopAuto(false); setState(active, "work"); });
+  document.getElementById("b-done").addEventListener("click", function () { stopAuto(false); setState(active, "done"); });
+  autoBtn.addEventListener("click", function () { if (auto) stopAuto(); else startAuto(); });
+  document.getElementById("v-grid").addEventListener("click", function () { if (view === "scene") backToGrid(); });
+  window.addEventListener("keydown", function (e) { if (e.key === "Escape" && view === "scene") backToGrid(); });
+  window.addEventListener("resize", function () { applyGeometry(); });
+  Object.keys(ACTORS).forEach(function (k) {
+    document.getElementById("t-" + k).addEventListener("click", function () { selectActor(k); });
+  });
+  document.getElementById("kid").addEventListener("click", function () {
+    kidMode = !kidMode;
+    this.setAttribute("aria-pressed", String(kidMode));
+    this.textContent = "Mode enfant / école : " + (kidMode ? "on" : "off");
+    syncUI();
+  });
+  document.getElementById("snd").addEventListener("click", function () {
+    soundOn = !soundOn;
+    this.setAttribute("aria-pressed", String(soundOn));
+    this.textContent = "Son : " + (soundOn ? "on" : "off");
+    if (soundOn) clink();
+  });
+
+  window.Sanctuaire = {
+    setState: setState, open: enterScene, overview: backToGrid,
+    stopAuto: stopAuto, isAuto: function () { return auto; },
+    state: function (id) { return ACTORS[id] ? ACTORS[id].state : ""; },
+    mail: function (from, to, cb) { if (!reduce) sendMail(from, to, cb); else if (cb) cb(); },
+    log: addLog
+  };
+  buildTiles(); syncTiles(); applyGeometry(); applyOff(); applyA11y(); syncUI();
+  addLog("CLAIRIERE", "Le Sanctuaire Solaire est éveillé. Plein soleil, 5 compagnons.");
+  setTimeout(function () { if (!auto && !window.__sanctuaireLive) startAuto(); }, 900);
+})();
+</script>
+<script>
+/* ---- Mode live : lit l'etat ecrit par le hook Hermes (noms d'outils uniquement, aucun contenu).
+   Source reglable via <meta name="sanctuaire-source">. Si la source est injoignable (ex. apercu claude.ai),
+   la page reste en demo. Detection par changement de valeur : aucun souci de decalage d'horloge.
+   2026-11-02 ≈11:00 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5 ---- */
+(function () {
+  "use strict";
+  var S = window.Sanctuaire; if (!S) return;
+  var meta = document.querySelector('meta[name="sanctuaire-source"]');
+  var SRC = (meta && meta.content) || "etat.json";
+  var POLL = 2000, WORK_HOLD = 9000, DONE_HOLD = 4000, RENARD_STALE = 15 * 60;
+  var IDS = ["castor", "chouette", "taupe", "renard", "shiba"];
+  var prev = null, isLive = false, fails = 0, lastWork = {}, phase = {};
+  var pill = document.getElementById("src-pill"), txt = document.getElementById("src-txt");
+  var hint = document.getElementById("hint-src"), logSrc = document.getElementById("log-src");
+
+  function badge(mode) {
+    pill.setAttribute("data-src", mode);
+    var t = mode === "live" ? "En direct · Hermes" : mode === "lost" ? "Connexion perdue · Hermes" : "Démo · événements simulés";
+    txt.textContent = t;
+    if (hint) hint.textContent = mode === "live" ? "en direct" : "événements simulés";
+    if (logSrc) logSrc.textContent = mode === "live" ? "flux en direct" : mode === "lost" ? "connexion perdue" : "flux simulé";
+  }
+  var inFlight = {};
+  function set(id, s) { phase[id] = s; if (!inFlight[id] && !S.isAuto() && S.state(id) !== s) S.setState(id, s); }
+
+  function apply(e) {
+    var now = Date.now(), a = e.animaux || {}, r = e.renard || {};
+    if (!prev) { prev = e; IDS.forEach(function (id) { phase[id] = "rest"; }); return; }
+    var pa = prev.animaux || {}, pr = prev.renard || {};
+    var renardBusy = !!r.en_cours && (e.maj - (r.debut || 0) < RENARD_STALE);
+    if (r.debut !== pr.debut && r.en_cours) S.log("HERMES", "Nouvelle demande reçue : Kitsune Hermes ouvre sa sacoche.");
+    IDS.forEach(function (id) {
+      if (id === "renard") return;
+      var cur = a[id] || {}, old = pa[id] || {};
+      if (cur.dernier && cur.dernier !== old.dernier) {
+        var wasIdle = phase[id] !== "work";
+        lastWork[id] = now;
+        if (wasIdle && renardBusy && !S.isAuto()) {
+          phase[id] = "work"; inFlight[id] = true;
+          S.mail("renard", id, function () { inFlight[id] = false; set(id, phase[id]); });
+          setTimeout(function () { if (inFlight[id]) { inFlight[id] = false; set(id, phase[id]); } }, 4000);
+        }
+        else set(id, "work");
+      }
+    });
+    prev = e;
+    tick(renardBusy, r.fin !== pr.fin && !r.en_cours);
+  }
+  var renardState = { busy: false, doneAt: 0 };
+  function tick(renardBusy, justEnded) {
+    var now = Date.now();
+    if (renardBusy !== undefined) {
+      renardState.busy = renardBusy;
+      if (justEnded) renardState.doneAt = now;
+    }
+    if (renardState.busy) set("renard", "work");
+    else if (now - renardState.doneAt < DONE_HOLD) set("renard", "done");
+    else set("renard", "rest");
+    IDS.forEach(function (id) {
+      if (id === "renard" || !lastWork[id]) return;
+      var age = now - lastWork[id];
+      if (age < WORK_HOLD) set(id, "work");
+      else if (age < WORK_HOLD + DONE_HOLD) set(id, "done");
+      else set(id, "rest");
+    });
+  }
+
+  function poll() {
+    fetch(SRC + (SRC.indexOf("?") < 0 ? "?" : "&") + "t=" + Date.now(), { cache: "no-store" })
+      .then(function (res) { if (!res.ok) throw new Error(res.status); return res.json(); })
+      .then(function (e) {
+        if (!e || !e.animaux) throw new Error("format");
+        fails = 0;
+        if (!isLive) {
+          isLive = true; window.__sanctuaireLive = true; S.stopAuto(); IDS.forEach(function (id) { S.setState(id, "rest", true); });
+          S.log("EN DIRECT", "Connecté à Hermes : les compagnons suivent sa vraie activité.");
+        }
+        badge("live"); apply(e);
+      })
+      .catch(function () {
+        fails++;
+        if (isLive && fails === 3) { badge("lost"); S.log("RESEAU", "Hermes injoignable : nouvelle tentative en cours."); }
+      })
+      .then(function () { setTimeout(poll, isLive || fails < 2 ? POLL : 30000); });
+  }
+  setInterval(function () { if (isLive) tick(); }, 1000);
+  poll();
+})();
+</script>
+
+</body></html>

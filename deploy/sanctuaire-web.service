@@ -1,0 +1,22 @@
+# Sanctuaire Solaire — mini serveur web interne (127.0.0.1 uniquement, acces par tunnel SSH)
+# 2026-11-02 ≈11:00 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5
+[Unit]
+Description=Sanctuaire Solaire - page web interne (127.0.0.1:8787)
+After=network.target
+
+[Service]
+Type=simple
+DynamicUser=yes
+ExecStart=/usr/bin/python3 -m http.server 8787 --bind 127.0.0.1 --directory /opt/sanctuaire/web
+Restart=on-failure
+RestartSec=5
+# Durcissement : lecture seule, aucun privilege
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+NoNewPrivileges=yes
+ReadOnlyPaths=/opt/sanctuaire /var/lib/sanctuaire
+MemoryMax=64M
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,5 @@
+# Etat genere sur le VPS par le hook : ne jamais versionner
+web/etat.json
+*.tmp
+__pycache__/
+.DS_Store
