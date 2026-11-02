@@ -251,6 +251,12 @@
       if ($("log-src")) $("log-src").textContent = m === "live" ? "flux en direct" : m === "lost" ? "connexion perdue" : "flux simulé";
       if ($("hl-sub")) $("hl-sub").textContent = m === "live" ? "En direct de Hermes" : m === "lost" ? "Connexion perdue · nouvelle tentative" : "Démo · événements simulés";
     }
+    /* Kitsune arrive chez le compagnon : il travaille au moins un moment, même si la réponse est déjà arrivée */
+    function arrived(role) {
+      inFlight[role] = false;
+      lastWork[role] = Math.max(lastWork[role] || 0, Date.now() - WORK_HOLD + 3000);
+      phase[role] = "work"; tick();
+    }
     function set(role, s) { phase[role] = s; if (!inFlight[role] && !demoOn) setState(role, s); }
     function apply(e) {
       var now = Date.now(), r = e.renard || {};
@@ -263,7 +269,7 @@
         var cur = (e.animaux || {})[key] || {}, old = (prev.animaux || {})[key] || {};
         if (cur.dernier && cur.dernier !== old.dernier) {
           var idle = phase[role] !== "work"; lastWork[role] = now;
-          if (idle && !demoOn) { phase[role] = "work"; inFlight[role] = true; deliver(role, function () { inFlight[role] = false; if (lastWork[role] && phase[role] === "work") lastWork[role] = Math.max(lastWork[role], Date.now() - 1500); set(role, phase[role]); }); }
+          if (idle && !demoOn) { phase[role] = "work"; inFlight[role] = true; deliver(role, function () { arrived(role); }); }
           else set(role, "work");
         }
       });
@@ -318,7 +324,7 @@
       chatActive = true; if (demoOn) stopDemo();
       var now = Date.now(); lastWork[role] = now;
       if (role === "coordination") { tick(); return; }
-      if (phase[role] !== "work") { phase[role] = "work"; inFlight[role] = true; deliver(role, function () { inFlight[role] = false; if (lastWork[role] && phase[role] === "work") lastWork[role] = Math.max(lastWork[role], Date.now() - 1500); set(role, phase[role]); }); }
+      if (phase[role] !== "work") { phase[role] = "work"; inFlight[role] = true; deliver(role, function () { arrived(role); }); }
       else set(role, "work");
     }
 
@@ -332,7 +338,8 @@
         if (role === "securite") A.securite.el.setAttribute("data-alert", Math.random() < .5 ? "1" : "0");
         setState("coordination", "work");
         deliver(role, function () {
-          inFlight[role] = false; setState(role, "work"); setState("coordination", "rest");
+          inFlight[role] = false; if (!demoOn) return;
+          setState(role, "work"); setState("coordination", "rest");
           setTimeout(function () { if (demoOn) { setState(role, "done"); setTimeout(function () { if (demoOn) setState(role, "rest"); }, 3000); } }, 5000 + Math.random() * 4000);
         });
       }
