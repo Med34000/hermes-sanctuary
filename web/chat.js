@@ -13,7 +13,7 @@
   function store(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { /* stockage indisponible */ } }
   function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function fmt(t, v) { return String(t || "").replace(/\{(\w+)\}/g, function (_, k) { return v[k] != null ? v[k] : ""; }); }
-  function setStatus(t) { status.textContent = t; }
+  function setStatus(t) { status.textContent = t; var w = list.querySelector(".bubble.typing"); if (w) w.setAttribute("data-wait", t); }
 
   /* rendu sûr : on échappe tout, puis on autorise gras, code, liens et listes simples */
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
@@ -78,10 +78,18 @@
           S.pulse(role);
           setStatus((c.short || "") + " · " + (c.work || "au travail"));
           var line = fmt((C.activity || {})[role] || "{short} ({tool})", { short: c.short || role, tool: d.tool_name, preview: d.preview || d.tool_name });
-          pending[d.tool_name] = addActivity(act, line, "run");
+          /* le même outil plusieurs fois de suite → une seule ligne avec un compteur */
+          if (act.last && act.last.tool === d.tool_name && role !== "recherche" && act.last.el.className !== "fail") {
+            act.last.n++; act.last.el.textContent = act.last.text + " ×" + act.last.n; act.last.el.className = "run";
+            pending[d.tool_name] = act.last.el;
+          } else {
+            var el = addActivity(act, line, "run");
+            act.last = { tool: d.tool_name, el: el, text: line, n: 1 };
+            pending[d.tool_name] = el;
+          }
         } else if (ev === "tool.completed" || ev === "tool.failed") {
           var l = pending[d.tool_name]; if (l) l.className = (ev === "tool.failed" || d.error) ? "fail" : "ok";
-          if (ev === "tool.failed" || d.error) { S.toolFailed(); addActivity(act, fmt((C.activity || {}).failed, { guard: guard, tool: d.tool_name }), "fail"); }
+          if (ev === "tool.failed" || d.error) { S.toolFailed(); addActivity(act, fmt((C.activity || {}).failed, { guard: guard, tool: d.tool_name }), "fail"); act.last = null; }
           setStatus(C.thinking);
         } else if (ev === "assistant.delta" && d.delta) {
           text_ += d.delta; b.classList.remove("typing"); b.innerHTML = render(text_.replace(/^\s+/, "")); setStatus(C.writing);
