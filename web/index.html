@@ -137,6 +137,9 @@ body {
 #stage-forge[data-state="work"] .actor img { transition-duration: .07s; }
 #stage-forge[data-state="done"] .p-done { opacity: 1; }
 #stage-forge[data-state="done"] .p-rest { opacity: 0; }
+#stage-cabin[data-state="done"] .p-work { opacity: 1; }
+#stage-cabin[data-state="done"] .p-rest { opacity: 0; }
+#stage-cabin[data-owl="away"] .glow { opacity: 0 !important; }
 #stage-cabin .actor img, #stage-cave .actor img, #stage-oak .actor img, #stage-lookout .actor img { transition-duration: .6s; }
 #sh-shiba { left: 60%; top: 79%; width: 26%; height: 5%; background: radial-gradient(ellipse at center, rgba(40, 24, 8, .5), rgba(40, 24, 8, 0) 70%); }
 #sh-renard { left: 59%; top: 91.5%; width: 25%; height: 4.5%; background: radial-gradient(ellipse at center, rgba(12, 24, 6, .55), rgba(12, 24, 6, 0) 70%); }
@@ -407,6 +410,7 @@ button.pill:hover { filter: brightness(.97); }
   </aside>
 </main>
 
+<script src="chouette-vol.js"></script>
 <script>
 (function () {
   "use strict";
@@ -504,6 +508,7 @@ button.pill:hover { filter: brightness(.97); }
   function setState(id, s, quiet) {
     var a = ACTORS[id]; if (!a || (s === a.state && !quiet)) return;
     a.state = s;
+    if (id === "chouette" && owl) owl.state(s);
     a.stage.setAttribute("data-state", s);
     a.stage.setAttribute("data-hit", "0");
     clearInterval(a.hitTimer); clearTimeout(a.kickTimer);
@@ -973,6 +978,17 @@ button.pill:hover { filter: brightness(.97); }
     img.onload = function () { a.stage.classList.add("has-video"); if (a.state === "work") { a.vStart = performance.now(); a.vLast = -1; clearInterval(a.hitTimer); clearTimeout(a.kickTimer); } };
     img.src = "castor-forge-video.webp";
   })();
+  /* the owl flies away to search, and comes back to read what she found */
+  var owl = window.ChouetteVol ? window.ChouetteVol({
+    container: ACTORS.chouette.stage, perch: [67.8, 58], away: [118, -35], height: 55,
+    hide: function (h) {
+      ACTORS.chouette.el.style.opacity = h ? "0" : "";
+      document.getElementById("sh-chouette").style.opacity = h ? "0" : "";
+      ACTORS.chouette.stage.setAttribute("data-owl", h ? "away" : "home");
+    },
+    onAway: function () { if (live("chouette")) addLog("ENVOL", "La Chouette Céleste s'est envolée chercher des informations."); },
+    onLanded: function () { if (live("chouette")) addLog("RETOUR", "La Chouette Céleste est revenue avec sa trouvaille."); }
+  }) : null;
   window.Sanctuaire = {
     setState: setState, open: enterScene, overview: backToGrid,
     stopAuto: stopAuto, isAuto: function () { return auto; },

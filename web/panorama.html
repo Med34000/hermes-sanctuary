@@ -27,7 +27,7 @@ body { background: var(--night); color: var(--ink); font-family: var(--body); ov
 .viewport { position: fixed; inset: 0; overflow-x: auto; overflow-y: hidden; display: flex; align-items: center; }
 .backdrop { position: fixed; inset: -5%; background: url("panorama-bg.webp") center / cover no-repeat; filter: blur(22px) brightness(.55) saturate(1.1); }
 .pano {
-  position: relative; flex: none; margin: 0 auto;
+  position: relative; flex: none; margin: 0 auto; overflow: hidden;
   width: max(min(100vw, calc((100vh - 140px) * var(--ratio))), 900px);
   aspect-ratio: 2576 / 1093;
   background: url("panorama-bg.webp") center / 100% 100% no-repeat;
@@ -44,6 +44,9 @@ body { background: var(--night); color: var(--ink); font-family: var(--body); ov
 .actor .sprite { position: relative; height: 100%; }
 .actor img { position: absolute; left: 50%; bottom: 0; height: 100%; width: auto; transform: translateX(-50%); transition: opacity .35s ease; user-select: none; -webkit-user-drag: none; }
 .actor .p-work, .actor .p-hit { opacity: 0; }
+#a-chouette[data-state="done"] .p-work { opacity: 1; }
+#a-chouette[data-state="done"] .p-rest { opacity: 0; }
+#a-chouette .sprite { transition: opacity .2s ease; }
 .actor[data-state="work"] .p-work { opacity: 1; }
 .actor[data-state="work"] .p-rest { opacity: 0; }
 .actor[data-state="work"][data-hit="1"] .p-hit { opacity: 1; }
@@ -184,6 +187,7 @@ body.bands #headline { display: block; }
 <p id="headline" aria-live="polite"><span id="hl-txt">La grande clairière s'éveille.</span><small id="hl-sub">Démo · événements simulés</small></p>
 <aside class="log" aria-label="Journal"><h2>Sous le capot <span id="log-src">flux simulé</span></h2><ol id="log"></ol></aside>
 
+<script src="chouette-vol.js"></script>
 <script>
 (function () {
   "use strict";
@@ -193,7 +197,7 @@ body.bands #headline { display: block; }
   var IDS = ["castor", "chouette", "taupe", "renard", "shiba"];
   var A = {}, NAMES = { castor: "Brico-Castor", chouette: "Chouette Céleste", taupe: "Data-Taupe", renard: "Kitsune Hermes", shiba: "Shiba Sentinel" };
   var SHORT = { castor: "Castor", chouette: "Chouette", taupe: "Taupe", renard: "Kitsune", shiba: "Shiba" };
-  var WORK = { castor: "Forge le code", chouette: "Cherche", taupe: "Fouille", renard: "Messages", shiba: "Alerte !" };
+  var WORK = { castor: "Forge le code", chouette: "En vol", taupe: "Fouille", renard: "Messages", shiba: "Alerte !" };
   /* where the fox stops to hand over the letter (feet position in %) */
   var VISIT = { castor: [33.5, 84], chouette: [37, 79], taupe: [62, 80], shiba: [77, 84] };
   var HOME = [56.2, 79];
@@ -217,7 +221,8 @@ body.bands #headline { display: block; }
   }
   function setState(id, s) {
     var a = A[id]; if (!a || a.state === s) return;
-    a.state = s; a.el.setAttribute("data-state", s); a.el.setAttribute("data-hit", "0");
+    a.state = s; a.el.setAttribute("data-state", s);
+    if (id === "chouette" && owl) owl.state(s); a.el.setAttribute("data-hit", "0");
     a.label.textContent = s === "work" ? SHORT[id] + " · " + WORK[id] : s === "done" ? SHORT[id] + " · Terminé" : NAMES[id];
     clearInterval(a.hit);
     if (id === "castor" && s === "work") a.vStart = performance.now();
@@ -225,6 +230,14 @@ body.bands #headline { display: block; }
     if (s === "work" && id !== "renard") log(NAMES[id].toUpperCase().split(" ")[0], NAMES[id] + " se met au travail.");
     if (s === "done") log("TERMINE", NAMES[id] + " a fini sa tâche.");
   }
+
+  /* ---- the owl flies away to search and comes back ---- */
+  var owl = window.ChouetteVol ? window.ChouetteVol({
+    container: pano, perch: [40.6, 45], away: [104, -30], height: 26,
+    hide: function (h) { A.chouette.el.querySelector(".sprite").style.opacity = h ? "0" : ""; },
+    onAway: function () { log("ENVOL", "La Chouette Céleste s'envole chercher des informations."); },
+    onLanded: function () { log("RETOUR", "La Chouette Céleste revient avec sa trouvaille."); }
+  }) : null;
 
   /* ---- Brico-Castor video loop (24 frames, 24 fps) ---- */
   (function () {

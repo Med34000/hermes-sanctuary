@@ -23,6 +23,7 @@ Les outils non reconnus sont listés dans `etat.json` → `inconnus` (noms seule
 
 ## Contenu
 
+- `web/chouette-vol.js` — envol de la Chouette (recherche web) : elle quitte son perchoir, part chercher, revient lire sa trouvaille.
 - `web/panorama.html` — vue panorama : tous les compagnons dans la grande clairière, Kitsune Hermes marche porter les lettres (même source live).
 - `web/` — la page (même fichier que l'artefact claude.ai) et ses images. Sans `etat.json` joignable, elle tourne en démo.
   Source réglable : `<meta name="sanctuaire-source" content="etat.json">`.
