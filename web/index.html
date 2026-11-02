@@ -126,6 +126,10 @@ body {
   transition: opacity .28s ease;
 }
 .actor .p-work, .actor .p-hit, .actor .p-done { opacity: 0; }
+/* Brico-Castor at work: real hammering loop (24 frames from a generated video, green screen removed) */
+#castor .vsheet { position: absolute; left: 1.8%; top: 1.15%; width: 94.51%; height: 97.32%; background: url("castor-forge-video.webp") 0 0 / 1200% 200% no-repeat; opacity: 0; pointer-events: none; }
+#stage-forge.has-video[data-state="work"] .vsheet { opacity: 1; }
+#stage-forge.has-video[data-state="work"] .p-work, #stage-forge.has-video[data-state="work"] .p-hit { opacity: 0 !important; }
 .stage[data-state="work"] .p-work { opacity: 1; }
 .stage[data-state="work"] .p-rest { opacity: 0; }
 #stage-forge[data-state="work"][data-hit="1"] .p-hit { opacity: 1; }
@@ -300,6 +304,7 @@ button.pill:hover { filter: brightness(.97); }
         <img class="p-work" src="castor-work.webp" alt="" aria-hidden="true">
         <img class="p-hit" src="castor-hit.webp" alt="" aria-hidden="true">
         <img class="p-done" src="castor-victory.webp" alt="" aria-hidden="true">
+        <div class="vsheet" aria-hidden="true"></div>
       </div>
     </div>
     <div class="glow" id="glow-forge" aria-hidden="true"></div>
@@ -419,6 +424,7 @@ button.pill:hover { filter: brightness(.97); }
       id: "castor", scene: "forge", stage: document.getElementById("stage-forge"), el: document.getElementById("castor"),
       name: "Brico-Castor", role: "Forge du code · terminal & patch", avatar: "castor-rest.webp", avatarClass: "",
       labels: { work: "Code en cours" },
+      video: { frames: 24, cols: 12, rows: 2, fps: 24, strike: 9 },
       emit: { x: 0.726, y: 0.6195 }, hitEvery: 1100, firstHit: 420, state: "rest", hitTimer: null, kickTimer: null,
       text: {
         rest: { normal: "En attente d'une tâche. Brico-Castor se repose contre l'enclume.", kid: "Brico-Castor se repose près de son enclume. Il attend qu'on lui confie un projet." },
@@ -505,7 +511,8 @@ button.pill:hover { filter: brightness(.97); }
     if (id === active) syncUI();
     if (!live(id)) return;
     if (!quiet) { addLog(a.logs[s][0], a.logs[s][1]); if (s === "done") celebrate(a); else burst(a, 14); }
-    if (s === "work" && !reduce) {
+    if (s === "work" && a.video && a.stage.classList.contains("has-video") && !reduce) { a.vStart = performance.now(); a.vLast = -1; }
+    else if (s === "work" && !reduce) {
       a.hitTimer = setInterval(function () { hit(a); }, a.hitEvery);
       a.kickTimer = setTimeout(function () { hit(a); }, a.firstHit);
     }
@@ -735,7 +742,17 @@ button.pill:hover { filter: brightness(.97); }
     motes.push({ x: Math.random(), y: Math.random(), r: .6 + Math.random() * 1.8, vx: .00006 + Math.random() * .00012, vy: -.00003 - Math.random() * .00008, ph: Math.random() * 6.28, sp: .4 + Math.random() * .9 });
   }
   var last = performance.now();
+  function videoTick(now) {
+    var a = ACTORS.castor, v = a.video;
+    if (!v || a.state !== "work" || !a.vStart || !a.stage.classList.contains("has-video")) return;
+    var f = Math.floor((now - a.vStart) / (1000 / v.fps)) % v.frames;
+    if (f === a.vLast) return;
+    a.vLast = f;
+    a.vsheet.style.backgroundPosition = ((f % v.cols) / (v.cols - 1) * 100) + "% " + (Math.floor(f / v.cols) / (v.rows - 1) * 100) + "%";
+    if (f === v.strike && live("castor")) { hit(a); a.stage.setAttribute("data-hit", "0"); }
+  }
   function frame(now) {
+    videoTick(now);
     var dt = Math.min((now - last) / 16.67, 3); last = now;
     ctx.clearRect(0, 0, W, H);
     ctx.globalCompositeOperation = "lighter";
@@ -950,6 +967,12 @@ button.pill:hover { filter: brightness(.97); }
     if (soundOn) clink();
   });
 
+  (function () {
+    var a = ACTORS.castor, img = new Image();
+    a.vsheet = a.el.querySelector(".vsheet");
+    img.onload = function () { a.stage.classList.add("has-video"); if (a.state === "work") { a.vStart = performance.now(); a.vLast = -1; clearInterval(a.hitTimer); clearTimeout(a.kickTimer); } };
+    img.src = "castor-forge-video.webp";
+  })();
   window.Sanctuaire = {
     setState: setState, open: enterScene, overview: backToGrid,
     stopAuto: stopAuto, isAuto: function () { return auto; },

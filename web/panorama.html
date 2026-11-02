@@ -75,6 +75,10 @@ body { background: var(--night); color: var(--ink); font-family: var(--body); ov
 .actor[data-state="done"] .tag i { background: var(--moss); }
 @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.6); opacity: .5; } }
 
+/* Brico-Castor at work: real hammering loop */
+#a-castor .vsheet { position: absolute; left: 1.8%; top: 1.15%; width: 94.51%; height: 97.32%; background: url("castor-forge-video.webp") 0 0 / 1200% 200% no-repeat; opacity: 0; pointer-events: none; }
+#a-castor.has-video[data-state="work"] .vsheet { opacity: 1; }
+#a-castor.has-video[data-state="work"] .breath { opacity: 0; animation: none; }
 /* positions on the panorama: left = feet x, top = feet y, height = sprite canvas height (all in %) */
 #a-castor   { left: 26.5%; top: 84%; height: 27%; aspect-ratio: 840 / 900; }
 #a-chouette { left: 40.6%; top: 55%; height: 18%; aspect-ratio: 760 / 864; }
@@ -155,7 +159,7 @@ body.bands #headline { display: block; }
     <div class="rays" aria-hidden="true"></div>
     <div class="actor" id="a-castor" data-state="rest" tabindex="0" title="Brico-Castor · forge du code">
       <span class="tag"><i></i><b>Brico-Castor</b></span>
-      <div class="sprite"><div class="breath"><img class="p-rest" src="castor-rest.webp" alt=""><img class="p-work" src="castor-work.webp" alt=""><img class="p-hit" src="castor-hit.webp" alt=""></div></div>
+      <div class="sprite"><div class="breath"><img class="p-rest" src="castor-rest.webp" alt=""><img class="p-work" src="castor-work.webp" alt=""><img class="p-hit" src="castor-hit.webp" alt=""></div><div class="vsheet"></div></div>
     </div>
     <div class="actor" id="a-chouette" data-state="rest" tabindex="0" title="Chouette Céleste · recherche">
       <span class="tag"><i></i><b>Chouette Céleste</b></span>
@@ -216,10 +220,25 @@ body.bands #headline { display: block; }
     a.state = s; a.el.setAttribute("data-state", s); a.el.setAttribute("data-hit", "0");
     a.label.textContent = s === "work" ? SHORT[id] + " · " + WORK[id] : s === "done" ? SHORT[id] + " · Terminé" : NAMES[id];
     clearInterval(a.hit);
-    if (id === "castor" && s === "work" && !reduce) a.hit = setInterval(function () { a.el.setAttribute("data-hit", "1"); setTimeout(function () { a.el.setAttribute("data-hit", "0"); }, 180); }, 1000);
+    if (id === "castor" && s === "work") a.vStart = performance.now();
+    if (id === "castor" && s === "work" && !reduce && !a.el.classList.contains("has-video")) a.hit = setInterval(function () { a.el.setAttribute("data-hit", "1"); setTimeout(function () { a.el.setAttribute("data-hit", "0"); }, 180); }, 1000);
     if (s === "work" && id !== "renard") log(NAMES[id].toUpperCase().split(" ")[0], NAMES[id] + " se met au travail.");
     if (s === "done") log("TERMINE", NAMES[id] + " a fini sa tâche.");
   }
+
+  /* ---- Brico-Castor video loop (24 frames, 24 fps) ---- */
+  (function () {
+    var a = A.castor, vs = a.el.querySelector(".vsheet"), img = new Image(), last = -1;
+    img.onload = function () { a.el.classList.add("has-video"); clearInterval(a.hit); requestAnimationFrame(loop); };
+    img.src = "castor-forge-video.webp";
+    function loop(now) {
+      if (a.state === "work" && !reduce) {
+        var f = Math.floor((now - (a.vStart || now)) / (1000 / 24)) % 24;
+        if (f !== last) { last = f; vs.style.backgroundPosition = ((f % 12) / 11 * 100) + "% " + (Math.floor(f / 12) * 100) + "%"; }
+      }
+      requestAnimationFrame(loop);
+    }
+  })();
 
   /* ---- Kitsune Hermes walks to an animal, hands over the letter, walks back ---- */
   var queue = [], walking = false, pos = HOME.slice(), frameT = 0, frameI = 0;
