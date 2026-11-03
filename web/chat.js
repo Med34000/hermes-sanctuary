@@ -27,7 +27,10 @@
     h = h.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
     h = h.replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
     h = h.replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, '$1<a href="$2" target="_blank" rel="noopener noreferrer">$2</a>');
-    h = h.replace(/^\s*[-•]\s+(.+)$/gm, "<li>$1</li>").replace(/(<li>[\s\S]*?<\/li>)(?!\s*<li>)/g, "<ul>$1</ul>");
+    h = h.replace(/^\s*[-•*]\s+(.+)$/gm, "<li>$1</li>");
+    /* les lignes vides ou retours entre deux puces ne créent pas d'espace (2026-11-03) */
+    h = h.replace(/<\/li>\s*\n\s*(?=<li>)/g, "</li>");
+    h = h.replace(/((?:<li>.*?<\/li>)+)/g, "<ul>$1</ul>").replace(/<\/ul>\n/g, "</ul>").replace(/\n<ul>/g, "<ul>");
     return h.replace(/\n{2,}/g, "<br><br>").replace(/\n/g, "<br>");
   }
 
