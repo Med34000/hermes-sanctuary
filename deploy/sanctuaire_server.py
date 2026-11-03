@@ -128,6 +128,9 @@ class Handler(SimpleHTTPRequestHandler):
                 if len(v) > MAX_INPUT:
                     raise ValueError("trop long")
                 clean[k] = v
+        for k in ("pinned", "archived"):   # dossiers (2026-11-03) : épingler / archiver une conversation
+            if k in data:
+                clean[k] = bool(data[k])
         imgs = data.get("images") if allow_images else None
         if imgs:
             if not isinstance(imgs, list) or len(imgs) > MAX_IMAGES:
