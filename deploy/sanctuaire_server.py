@@ -15,7 +15,11 @@ Réglages par variables d'environnement :
   HERMES_API       adresse de l'API Hermes (défaut http://127.0.0.1:9119)
   Clé : fichier $CREDENTIALS_DIRECTORY/api.key (systemd LoadCredential) ou SANCTUAIRE_KEY_FILE.
 
+Images (2026-11-03) : le flux du chat accepte jusqu'à MAX_IMAGES images (data:image/png|jpeg|webp|gif en base64),
+transmises telles quelles à Hermes dans le message (format image_url) ; jamais écrites sur disque.
+
 2026-11-02 ≈19:30 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5
+2026-11-03 ≈07:40 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5 : images dans le chat
 """
 
 import http.client
@@ -32,6 +36,10 @@ PORT = int(os.environ.get("SANCTUAIRE_PORT", "8787"))
 API = urlsplit(os.environ.get("HERMES_API", "http://127.0.0.1:9119"))
 KEY_FILE = os.environ.get("SANCTUAIRE_KEY_FILE") or os.path.join(os.environ.get("CREDENTIALS_DIRECTORY", "/etc/sanctuaire"), "api.key")
 MAX_INPUT = 20000          # caractères max par message
+MAX_IMAGES = 4             # images max par message
+MAX_IMAGE_CHARS = 2500000  # ≈ 1,8 Mo par image (base64) ; la page réduit les images avant l'envoi
+MAX_IMAGES_TOTAL = 7000000 # toutes images confondues (l'API de Hermes refuse au-delà de 10 Mo par requête)
+IMG = re.compile(r"^data:image/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/]+={0,2}$")
 LOCAL_HOSTS = {"localhost", "127.0.0.1", "[::1]"}
 SID = re.compile(r"^[A-Za-z0-9_.:-]{1,120}$")
 
@@ -103,11 +111,11 @@ class Handler(SimpleHTTPRequestHandler):
                 return ("PATCH", "/api/sessions/%s" % sid, False)
         return ("deny",)
 
-    def _body(self):
+    def _body(self, allow_images=False):
         n = int(self.headers.get("Content-Length") or 0)
         if n <= 0:
             return b"{}"
-        if n > MAX_INPUT * 4 + 2000:
+        if n > MAX_INPUT * 4 + 2000 + (MAX_IMAGES_TOTAL + 4000 if allow_images else 0):
             raise ValueError("trop long")
         raw = self.rfile.read(n)
         data = json.loads(raw.decode("utf-8") or "{}")
@@ -120,6 +128,21 @@ class Handler(SimpleHTTPRequestHandler):
                 if len(v) > MAX_INPUT:
                     raise ValueError("trop long")
                 clean[k] = v
+        imgs = data.get("images") if allow_images else None
+        if imgs:
+            if not isinstance(imgs, list) or len(imgs) > MAX_IMAGES:
+                raise ValueError("images")
+            if sum(len(u) for u in imgs if isinstance(u, str)) > MAX_IMAGES_TOTAL:
+                raise ValueError("images trop lourdes")
+            parts = []
+            text = clean.pop("input", "")
+            if text.strip():
+                parts.append({"type": "text", "text": text})
+            for u in imgs:
+                if not isinstance(u, str) or len(u) > MAX_IMAGE_CHARS or not IMG.match(u):
+                    raise ValueError("image invalide")
+                parts.append({"type": "image_url", "image_url": {"url": u}})
+            clean["message"] = parts
         return json.dumps(clean).encode()
 
     def _proxy(self, method):
@@ -134,7 +157,7 @@ class Handler(SimpleHTTPRequestHandler):
             return True
         verb, target, stream = r
         try:
-            body = self._body() if verb in ("POST", "PATCH") else None
+            body = self._body(allow_images=stream) if verb in ("POST", "PATCH") else None
         except Exception:
             self._json(400, {"error": "requête invalide"})
             return True

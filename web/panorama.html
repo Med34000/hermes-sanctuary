@@ -6,6 +6,7 @@
 <title>Sanctuaire Panorama</title>
 <meta name="sanctuaire-source" content="etat.json">
 <meta name="sanctuaire-theme" content="sanctuaire">
+<!-- 2026-11-03 ≈07:40 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5 : avion en papier, images dans le chat -->
 <!-- Panorama — page commune à tous les environnements. Le moteur (moteur.js) lit l'habillage dans themes/<id>/theme.json
      (choix possible par l'adresse : panorama.html?theme=<id>). La colonne de droite est réservée au futur chat.
      2026-11-02 ≈19:00 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5 -->
@@ -213,6 +214,20 @@ body.bands #headline { display: block; }
 #chat-input:focus { outline: 3px solid rgba(43, 167, 163, .45); outline-offset: 0; }
 #chat-send { flex: none; width: 46px; height: 46px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; font-size: 20px; cursor: pointer; box-shadow: 0 4px 12px rgba(228, 128, 47, .4); }
 #chat-send:disabled { opacity: .5; cursor: default; }
+/* images jointes (2026-11-03) */
+#chat-attach { flex: none; width: 40px; height: 46px; border-radius: 14px; border: 1px solid rgba(63, 42, 24, .2); background: #fff; font-size: 18px; cursor: pointer; }
+#chat-attach:hover { background: var(--cream); }
+#chat-thumbs { display: flex; gap: 8px; flex-wrap: wrap; flex: none; }
+#chat-thumbs[hidden] { display: none; }
+.thumb { position: relative; width: 58px; height: 58px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(63, 42, 24, .2); background: #fff; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb button { position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; border: 0; background: rgba(44, 29, 16, .78); color: #fff; font: 700 12px/20px var(--body); padding: 0; cursor: pointer; }
+.thumb.loading { display: grid; place-items: center; font: 700 11px var(--body); color: var(--muted); }
+#chat.drop { box-shadow: inset 0 0 0 3px var(--accent2); }
+#chat.drop::after { content: "Dépose ton image ici"; position: absolute; inset: 0; display: grid; place-items: center; background: rgba(255, 244, 222, .82); font: 600 18px var(--display); color: var(--bark); pointer-events: none; z-index: 5; }
+.bubble .pics { display: flex; gap: 6px; flex-wrap: wrap; }
+.bubble .pics + .txt:not(:empty) { margin-top: 8px; }
+.bubble .pics img { display: block; max-width: 120px; max-height: 120px; border-radius: 10px; cursor: zoom-in; }
 #chat[data-offline="1"] #chat-status::after { content: " · démo"; color: var(--muted); }
 </style>
 </head>
@@ -244,7 +259,10 @@ body.bands #headline { display: block; }
   </div>
   <ol id="chat-list" aria-live="polite"></ol>
   <div id="chat-shortcuts"></div>
+  <div id="chat-thumbs" hidden></div>
   <div class="chat-input">
+    <button id="chat-attach" type="button" aria-label="Joindre une image" title="Joindre une image (tu peux aussi la coller ou la glisser ici)">📎</button>
+    <input id="chat-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
     <textarea id="chat-input" rows="1" aria-label="Ton message pour Kitsune"></textarea>
     <button id="chat-send" type="button" aria-label="Envoyer">➤</button>
   </div>

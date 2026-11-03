@@ -26,14 +26,14 @@ Les outils non reconnus sont listés dans `etat.json` → `inconnus` (noms seule
 - `web/chouette-vol.js` — envol de la Chouette (recherche web) : elle quitte son perchoir, part chercher, revient lire sa trouvaille.
 - `web/moteur.js` — **moteur commun** à tous les environnements (activité Hermes, rôles, états, marche du coordinateur, envol, boucles animées, journal, démo).
 - `web/themes/<id>/theme.json` — **habillage** d'un environnement (décor, personnages, positions, boucles, textes). Premier : `themes/sanctuaire/`. Choix : `panorama.html?theme=<id>` ou balise `sanctuaire-theme`.
-- `web/panorama.html` — vue panorama : tous les compagnons dans la grande clairière, Kitsune Hermes marche porter les lettres (même source live).
+- `web/panorama.html` — vue panorama : tous les compagnons dans la grande clairière ; Kitsune Hermes crie et lance un avion en papier au compagnon (< 1 s), et se promène quand tout est calme (même source live).
 - `web/` — la page (même fichier que l'artefact claude.ai) et ses images. Sans `etat.json` joignable, elle tourne en démo.
   Source réglable : `<meta name="sanctuaire-source" content="etat.json">`.
 - `hermes-hook/` — le hook gateway, installé dans `/opt/data/hooks/sanctuaire/` (HERMES_HOME=/opt/data).
 - `hermes-plugin/sanctuaire-sentinelle/` — plugin Shiba (erreurs d'outils, erreurs API, approbations) → `/var/lib/sanctuaire/sentinelle.json`, installé dans `/opt/data/plugins/`.
 - `sources/` — fichiers sources : vidéos Grok (renard, castor, chouette, taupe) et panorama Gemini, pour pouvoir refaire les animations.
-- `web/chat.js` — **chat** sur le côté du panorama (Kitsune écoute, lit, réfléchit ; fil d'activité ; raccourcis).
-- `deploy/sanctuaire_server.py` — serveur interne : sert la page et **relaie le chat** vers l'API de Hermes (127.0.0.1:9119), clé côté serveur, routes limitées, protection contre les sites tiers, aucun contenu enregistré.
+- `web/chat.js` — **chat** sur le côté du panorama (Kitsune écoute, lit, réfléchit ; fil d'activité ; raccourcis ; **images** : bouton 📎, coller, glisser — 4 max, réduites à 1600 px dans le navigateur).
+- `deploy/sanctuaire_server.py` — serveur interne : sert la page et **relaie le chat** vers l'API de Hermes (127.0.0.1:9119), clé côté serveur, routes limitées, protection contre les sites tiers, images acceptées (data:image png/jpeg/webp/gif, 4 max), aucun contenu enregistré.
 - `deploy/sanctuaire-web.service` — service systemd du mini serveur (127.0.0.1 seulement, utilisateur dynamique, lecture seule).
 
 ## Sur le VPS

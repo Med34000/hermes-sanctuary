@@ -71,6 +71,7 @@
     "ready": "Prêt",
     "offline": "Ici, je ne peux pas joindre Hermes : ouvre le Sanctuaire depuis ton serveur pour discuter pour de vrai.",
     "error": "Oups, la lettre s'est perdue en route. Réessaie dans un instant.",
+    "tooMany": "{n} images au maximum par lettre.",
     "shortcuts": ["Cherche sur le web : ", "Résume-moi : ", "Rappelle-moi de ", "Explique-moi simplement : "],
     "activityTitle": "Ce qu'ont fait les compagnons",
     "activity": {

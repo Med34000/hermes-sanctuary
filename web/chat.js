@@ -2,13 +2,17 @@
    Envoie les messages à Hermes par le relais du serveur (routes /chat/…), lit la réponse en direct et anime
    les compagnons selon les outils utilisés. Rien n'est enregistré par la page, sauf l'identifiant de la
    conversation en cours (dans le navigateur) pour la retrouver après un rechargement.
-   2026-11-02 ≈19:40 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5 */
+   2026-11-02 ≈19:40 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5
+   2026-11-03 ≈07:40 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5 : images (bouton, coller, glisser),
+   réduites dans le navigateur avant l'envoi (1600 px max), jamais enregistrées par la page. */
 (function () {
   "use strict";
   var S, C, T, sessionId = null, busy = false, online = false;
   var $ = function (id) { return document.getElementById(id); };
   var box = $("chat"), list = $("chat-list"), input = $("chat-input"), send = $("chat-send"), status = $("chat-status");
   var HDR = { "Content-Type": "application/json", "X-Sanctuaire": "1" };
+  var thumbs = $("chat-thumbs"), attach = $("chat-attach"), fileIn = $("chat-file");
+  var pics = [], loadingPics = 0, MAX_PICS = 4, MAX_SIDE = 1600, KEEP_BYTES = 400000;
 
   function store(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { /* stockage indisponible */ } }
   function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
@@ -27,10 +31,20 @@
     return h.replace(/\n{2,}/g, "<br><br>").replace(/\n/g, "<br>");
   }
 
-  function bubble(role, text) {
+  function bubble(role, text, images) {
     var li = document.createElement("li"); li.className = "msg " + role;
     var b = document.createElement("div"); b.className = "bubble"; li.appendChild(b);
-    if (role === "user") b.textContent = text; else b.innerHTML = render(text);
+    var safe = (images || []).filter(function (u) { return /^data:image\/(png|jpeg|webp|gif);base64,/.test(u) || /^https:\/\//.test(u); });
+    if (safe.length) {
+      var g = document.createElement("div"); g.className = "pics"; b.appendChild(g);
+      safe.forEach(function (u) {
+        var im = document.createElement("img"); im.src = u; im.alt = "Image jointe"; im.loading = "lazy";
+        im.addEventListener("click", function () { var w = window.open(); if (w) { w.opener = null; w.document.write('<img src="' + esc(u) + '" style="max-width:100%">'); } });
+        g.appendChild(im);
+      });
+      var t = document.createElement("div"); t.className = "txt"; b.appendChild(t);
+      if (role === "user") t.textContent = text; else t.innerHTML = render(text);
+    } else if (role === "user") b.textContent = text; else b.innerHTML = render(text);
     list.appendChild(li); list.scrollTop = list.scrollHeight;
     return li;
   }
@@ -64,8 +78,9 @@
   }
 
   function submit(text) {
-    text = text.trim(); if (!text || busy) return;
-    bubble("user", text); input.value = ""; autosize(); S.listen(false);
+    text = text.trim(); if ((!text && !pics.length) || busy || loadingPics) return;
+    var images = pics.slice(); pics = []; drawThumbs();
+    bubble("user", text, images); input.value = ""; autosize(); S.listen(false);
     if (!online) { bubble("assistant", C.offline); return; }
     busy = true; send.disabled = true; box.setAttribute("data-busy", "1");
     var li = bubble("assistant", ""), b = li.querySelector(".bubble"), act = activityBox(li), text_ = "", pending = {}, running = 0;
@@ -73,7 +88,7 @@
     S.chatBusy(true); setStatus(C.reading);
     var guard = (T.roles.securite || {}).short || "La sentinelle";
     ensureSession().then(function (sid) {
-      return fetch("chat/sessions/" + encodeURIComponent(sid) + "/stream", { method: "POST", headers: HDR, body: JSON.stringify({ input: text }) });
+      return fetch("chat/sessions/" + encodeURIComponent(sid) + "/stream", { method: "POST", headers: HDR, body: JSON.stringify(images.length ? { input: text, images: images } : { input: text }) });
     }).then(function (r) {
       if (!r.ok || !r.body) throw new Error(r.status);
       var reader = r.body.getReader(), dec = new TextDecoder(), buf = "";
@@ -146,21 +161,83 @@
         sessionId = sid;
         msgs.forEach(function (m) {
           var c = typeof m.content === "string" ? m.content : Array.isArray(m.content) ? m.content.map(function (p) { return p.text || ""; }).join("") : "";
-          if ((m.role === "user" || m.role === "assistant") && c.trim()) bubble(m.role, c.trim());
+          var im = Array.isArray(m.content) ? m.content.map(function (p) { var u = p && (p.image_url && (p.image_url.url || p.image_url)); return typeof u === "string" ? u : ""; }).filter(Boolean) : [];
+          if ((m.role === "user" || m.role === "assistant") && (c.trim() || im.length)) bubble(m.role, c.trim(), im);
         });
       })
       .catch(function () { store("sanctuaire.session", null); });
   }
 
+  /* ---- images jointes : réduites ici (canvas) avant l'envoi, gardées en mémoire seulement ---- */
+  function shrink(file) {
+    return new Promise(function (ok, ko) {
+      var r = new FileReader();
+      r.onerror = function () { ko(new Error("lecture")); };
+      r.onload = function () {
+        var src = r.result, im = new Image();
+        im.onerror = function () { ko(new Error("image illisible")); };
+        im.onload = function () {
+          var w = im.naturalWidth, h = im.naturalHeight, k = Math.min(1, MAX_SIDE / Math.max(w, h));
+          /* petite image déjà légère (ou GIF animé) : on la garde telle quelle */
+          if ((k === 1 && file.size <= KEEP_BYTES && /^image\/(png|jpeg|webp|gif)$/.test(file.type)) || (file.type === "image/gif" && file.size <= 1500000)) { ok(src); return; }
+          var cv = document.createElement("canvas"); cv.width = Math.round(w * k); cv.height = Math.round(h * k);
+          var cx = cv.getContext("2d"); cx.fillStyle = "#fff"; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(im, 0, 0, cv.width, cv.height);
+          ok(cv.toDataURL("image/jpeg", .86));
+        };
+        im.src = src;
+      };
+      r.readAsDataURL(file);
+    });
+  }
+  function drawThumbs() {
+    thumbs.innerHTML = "";
+    pics.forEach(function (u, i) {
+      var d = document.createElement("div"); d.className = "thumb";
+      var im = document.createElement("img"); im.src = u; im.alt = "Image " + (i + 1); d.appendChild(im);
+      var x = document.createElement("button"); x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", "Retirer l'image " + (i + 1));
+      x.addEventListener("click", function () { pics.splice(i, 1); drawThumbs(); input.focus(); });
+      d.appendChild(x); thumbs.appendChild(d);
+    });
+    for (var j = 0; j < loadingPics; j++) { var l = document.createElement("div"); l.className = "thumb loading"; l.textContent = "…"; thumbs.appendChild(l); }
+    thumbs.hidden = !pics.length && !loadingPics;
+    if (S) S.listen(pics.length > 0 || input.value.trim().length > 0);
+  }
+  function addFiles(files) {
+    var list_ = Array.prototype.filter.call(files || [], function (f) { return f && /^image\//.test(f.type); });
+    if (!list_.length) return false;
+    var room = MAX_PICS - pics.length - loadingPics;
+    if (room <= 0) { setStatus(fmt(C.tooMany || "{n} images au maximum", { n: MAX_PICS })); return true; }
+    list_.slice(0, room).forEach(function (f) {
+      loadingPics++; drawThumbs();
+      shrink(f).then(function (u) { pics.push(u); }, function (e) { console.warn("[Sanctuaire] image refusée :", e.message); })
+        .then(function () { loadingPics--; drawThumbs(); });
+    });
+    if (list_.length > room) setStatus(fmt(C.tooMany || "{n} images au maximum", { n: MAX_PICS }));
+    return true;
+  }
+  attach.addEventListener("click", function () { fileIn.click(); });
+  fileIn.addEventListener("change", function () { addFiles(fileIn.files); fileIn.value = ""; input.focus(); });
+  input.addEventListener("paste", function (e) {
+    var items = (e.clipboardData && e.clipboardData.items) || [], files = [];
+    for (var i = 0; i < items.length; i++) if (items[i].kind === "file" && /^image\//.test(items[i].type)) files.push(items[i].getAsFile());
+    if (files.length) { e.preventDefault(); addFiles(files); }
+  });
+  var dragDepth = 0;
+  function hasFiles(e) { return e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], "Files") >= 0; }
+  box.addEventListener("dragenter", function (e) { if (!hasFiles(e)) return; e.preventDefault(); dragDepth++; box.classList.add("drop"); });
+  box.addEventListener("dragover", function (e) { if (hasFiles(e)) e.preventDefault(); });
+  box.addEventListener("dragleave", function () { if (--dragDepth <= 0) { dragDepth = 0; box.classList.remove("drop"); } });
+  box.addEventListener("drop", function (e) { if (!hasFiles(e)) return; e.preventDefault(); dragDepth = 0; box.classList.remove("drop"); addFiles(e.dataTransfer.files); input.focus(); });
+
   /* ---- saisie ---- */
   function autosize() { input.style.height = "auto"; input.style.height = Math.min(input.scrollHeight, 160) + "px"; }
-  input.addEventListener("input", function () { autosize(); S.listen(input.value.trim().length > 0); if (input.value.trim()) setStatus(C.listening); else if (!busy) setStatus(C.ready); });
-  input.addEventListener("blur", function () { if (!input.value.trim()) S.listen(false); });
+  input.addEventListener("input", function () { autosize(); S.listen(input.value.trim().length > 0 || pics.length > 0); if (input.value.trim()) setStatus(C.listening); else if (!busy) setStatus(C.ready); });
+  input.addEventListener("blur", function () { if (!input.value.trim() && !pics.length) S.listen(false); });
   input.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); submit(input.value); } });
   send.addEventListener("click", function () { submit(input.value); });
   $("chat-new").addEventListener("click", function () {
     if (busy) return; sessionId = null; store("sanctuaire.session", null);
-    list.innerHTML = ""; bubble("assistant", C.hello); input.focus();
+    list.innerHTML = ""; pics = []; drawThumbs(); bubble("assistant", C.hello); input.focus();
   });
   var toggle = $("chat-toggle");
   if (toggle) toggle.addEventListener("click", function () {
