@@ -9,7 +9,11 @@
    épinglées (durables, côté serveur) ; « Divers » = conversations rapides. */
 (function () {
   "use strict";
-  var S, C, T, sessionId = null, busy = false, online = false;
+  var S, C, T, sessionId = null, online = false;
+  /* une réponse peut être en cours dans plusieurs dossiers à la fois (2026-11-03) */
+  var runningIn = {}, runs = 0, parked = {};
+  function busyHere() { return !!runningIn[current]; }
+  function busyUi() { var on = busyHere(); send.disabled = on; if (on) box.setAttribute("data-busy", "1"); else box.removeAttribute("data-busy"); }
   var $ = function (id) { return document.getElementById(id); };
   var box = $("chat"), list = $("chat-list"), input = $("chat-input"), send = $("chat-send"), status = $("chat-status");
   var HDR = { "Content-Type": "application/json", "X-Sanctuaire": "1" };
@@ -22,7 +26,7 @@
   function store(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { /* stockage indisponible */ } }
   function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function fmt(t, v) { return String(t || "").replace(/\{(\w+)\}/g, function (_, k) { return v[k] != null ? v[k] : ""; }); }
-  function setStatus(t) { status.textContent = t; var w = list.querySelector(".bubble.typing"); if (w) w.setAttribute("data-wait", t); }
+  function setStatus(t) { status.textContent = t; }
 
   /* rendu sûr : on échappe tout, puis on autorise gras, code, liens et listes simples */
   function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
@@ -83,18 +87,22 @@
     }
     return create({ title: title })
       .catch(function (e) { console.warn("[Sanctuaire]", e.message, "→ nouvel essai sans titre"); return create({}); })
-      .then(function (j) { var s = j.session || j; sessionId = s.id || s.session_id; store("sanctuaire.session", sessionId); return sessionId; });
+      .then(function (j) { var s = j.session || j, id = s.id || s.session_id; store("sanctuaire.session", id); if (current === "divers") sessionId = id; return id; });
   }
 
   function submit(text) {
-    text = text.trim(); if ((!text && !pics.length) || busy || loadingPics) return;
+    text = text.trim(); if ((!text && !pics.length) || busyHere() || loadingPics) return;
+    var key = current;
     var images = pics.slice(); pics = []; drawThumbs();
     bubble("user", text, images); input.value = ""; autosize(); S.listen(false);
     if (!online) { bubble("assistant", C.offline); return; }
-    busy = true; send.disabled = true; box.setAttribute("data-busy", "1");
+    runningIn[key] = true; runs++; busyUi(); drawFolders();
     var li = bubble("assistant", ""), b = li.querySelector(".bubble"), act = activityBox(li), text_ = "", pending = {}, running = 0;
     b.classList.add("typing");
-    S.chatBusy(true); setStatus(C.reading);
+    /* l'état ne s'affiche en haut que si on regarde ce dossier ; la bulle garde le sien */
+    function st(t) { b.setAttribute("data-wait", t); if (current === key) status.textContent = t; }
+    function down() { if (current === key) list.scrollTop = list.scrollHeight; }
+    S.chatBusy(true); st(C.reading);
     var guard = (T.roles.securite || {}).short || "La sentinelle";
     ensureSession().then(function (sid) {
       return fetch("chat/sessions/" + encodeURIComponent(sid) + "/stream", { method: "POST", headers: HDR, body: JSON.stringify(images.length ? { input: text, images: images } : { input: text }) });
@@ -103,11 +111,11 @@
       var reader = r.body.getReader(), dec = new TextDecoder(), buf = "";
       function handle(ev, data) {
         var d; try { d = JSON.parse(data); } catch (e) { return; }
-        if (ev === "run.started") setStatus(C.reading);
+        if (ev === "run.started") st(C.reading);
         else if (ev === "tool.started") {
           var role = S.roleOfTool(d.tool_name), c = T.roles[role] || {};
           S.pulse(role); running++;
-          setStatus((c.short || "") + " · " + (c.work || "au travail"));
+          st((c.short || "") + " · " + (c.work || "au travail"));
           var line = fmt((C.activity || {})[role] || "{short} ({tool})", { short: c.short || role, tool: d.tool_name, preview: d.preview || d.tool_name });
           /* le même outil plusieurs fois de suite → une seule ligne avec un compteur */
           if (act.last && act.last.tool === d.tool_name && role !== "recherche" && act.last.el.className !== "fail") {
@@ -122,11 +130,11 @@
           running = Math.max(0, running - 1);
           var l = pending[d.tool_name]; if (l) l.className = (ev === "tool.failed" || d.error) ? "fail" : "ok";
           if (ev === "tool.failed" || d.error) { S.toolFailed(); addActivity(act, fmt((C.activity || {}).failed, { guard: guard, tool: d.tool_name }), "fail"); act.last = null; }
-          setStatus(C.thinking);
+          st(C.thinking);
         } else if (ev === "assistant.delta" && d.delta) {
           if (!running && S.settle) S.settle();
-          text_ += d.delta; b.classList.remove("typing"); b.innerHTML = render(text_.replace(/^\s+/, "")); setStatus(C.writing);
-          list.scrollTop = list.scrollHeight;
+          text_ += d.delta; b.classList.remove("typing"); b.innerHTML = render(text_.replace(/^\s+/, "")); st(C.writing);
+          down();
         } else if (ev === "assistant.completed" && d.content) {
           text_ = d.content; b.classList.remove("typing"); b.innerHTML = render(text_.replace(/^\s+/, ""));
         } else if (ev === "run.failed" || ev === "run.cancelled" || ev === "run.interrupted") {
@@ -154,9 +162,9 @@
       console.warn("[Sanctuaire] envoi échoué :", e && e.message);
       b.classList.remove("typing"); if (!text_) b.innerHTML = render(C.error);
     }).then(function () {
-      busy = false; send.disabled = false; box.removeAttribute("data-busy"); refreshFolders();
+      runningIn[key] = false; runs = Math.max(0, runs - 1); busyUi(); refreshFolders();
       if (!text_) b.classList.remove("typing");
-      if (S.settle) S.settle(); S.chatBusy(false); setStatus(C.ready); list.scrollTop = list.scrollHeight;
+      if (S.settle && !runs) S.settle(); S.chatBusy(runs > 0); if (current === key) { setStatus(C.ready); down(); }
     });
   }
 
@@ -184,7 +192,8 @@
       if (id === current) bt.setAttribute("aria-current", "true");
       var i = document.createElement("span"); i.className = "ico"; i.textContent = ico; i.setAttribute("aria-hidden", "true"); bt.appendChild(i);
       var n = document.createElement("span"); n.className = "nm"; n.textContent = name; bt.appendChild(n);
-      if (dot) { var d = document.createElement("span"); d.className = "dot"; d.title = C.unread || "Nouvelle réponse"; bt.appendChild(d); }
+      if (runningIn[id] && id !== current) { var r = document.createElement("span"); r.className = "dot run"; r.title = C.working || "Kitsune y travaille"; bt.appendChild(r); }
+      else if (dot) { var d = document.createElement("span"); d.className = "dot"; d.title = C.unread || "Nouvelle réponse"; bt.appendChild(d); }
       bt.addEventListener("click", function () { switchTo(id); });
       li.appendChild(bt); folderList.appendChild(li);
     }
@@ -197,10 +206,20 @@
   }
   function folderName(id) { var f = folders.filter(function (x) { return x.id === id; })[0]; return f ? f.title : ""; }
   function switchTo(id) {
-    if (busy || (id === current && list.children.length)) return;
+    if (id === current && list.children.length) return;
     closeMenu();
+    /* réponse en cours ici : on met la conversation de côté (elle continue de s'écrire) au lieu de l'effacer */
+    if (runningIn[current]) { var fr = document.createDocumentFragment(); while (list.firstChild) fr.appendChild(list.firstChild); parked[current] = fr; }
     current = id; store("sanctuaire.folder", id);
-    list.innerHTML = ""; pics = []; drawThumbs();
+    list.innerHTML = ""; pics = []; drawThumbs(); busyUi();
+    if (parked[id]) {
+      list.appendChild(parked[id]); delete parked[id];
+      if (id !== "divers") sessionId = id; else sessionId = load("sanctuaire.session");
+      var w = list.querySelector(".bubble.typing");
+      setStatus(runningIn[id] && w ? w.getAttribute("data-wait") || C.thinking : C.ready);
+      var f0 = folders.filter(function (x) { return x.id === id; })[0]; if (f0) { seen[id] = f0.last; saveSeen(); }
+      drawFolders(); list.scrollTop = list.scrollHeight; return;
+    }
     if (id === "divers") {
       sessionId = load("sanctuaire.session");
       bubble("assistant", C.hello);
@@ -218,7 +237,6 @@
       .then(function (r) { if (!r.ok) throw new Error(method + " " + r.status); return r.json().catch(function () { return {}; }); });
   }
   folderAdd.addEventListener("click", function () {
-    if (busy) return;
     var name = (window.prompt(C.folderAsk || "Nom du nouveau dossier ?") || "").trim().slice(0, 80);
     if (!name) return;
     if (folders.some(function (f) { return f.title.toLowerCase() === name.toLowerCase(); })) { window.alert(C.folderExists || "Ce dossier existe déjà."); return; }
@@ -337,12 +355,12 @@
 
   /* ---- saisie ---- */
   function autosize() { input.style.height = "auto"; input.style.height = Math.min(input.scrollHeight, 160) + "px"; }
-  input.addEventListener("input", function () { autosize(); S.listen(input.value.trim().length > 0 || pics.length > 0); if (input.value.trim()) setStatus(C.listening); else if (!busy) setStatus(C.ready); });
+  input.addEventListener("input", function () { autosize(); S.listen(input.value.trim().length > 0 || pics.length > 0); if (input.value.trim()) setStatus(C.listening); else if (!busyHere()) setStatus(C.ready); });
   input.addEventListener("blur", function () { if (!input.value.trim() && !pics.length) S.listen(false); });
   input.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); submit(input.value); } });
   send.addEventListener("click", function () { submit(input.value); });
   newBtn.addEventListener("click", function () {
-    if (busy || current !== "divers") return; sessionId = null; store("sanctuaire.session", null);
+    if (busyHere() || current !== "divers") return; sessionId = null; store("sanctuaire.session", null);
     list.innerHTML = ""; pics = []; drawThumbs(); bubble("assistant", C.hello); input.focus();
   });
   var toggle = $("chat-toggle");

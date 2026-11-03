@@ -185,6 +185,8 @@ body.bands #headline { display: block; }
 .folder .ico { flex: none; }
 .folder .nm { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .folder .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-left: auto; }
+.folder .dot.run { background: transparent; border: 2px solid var(--accent2); border-right-color: transparent; width: 10px; height: 10px; animation: spin .9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 .folder.divers { color: var(--muted); }
 .folder.divers[aria-current="true"] { color: var(--cream); }
 #folder-add { flex: none; white-space: nowrap; font: 700 12px/1 var(--body); padding: 8px 11px; border-radius: 12px; border: 1px dashed rgba(63, 42, 24, .35); background: transparent; color: var(--muted); cursor: pointer; }
