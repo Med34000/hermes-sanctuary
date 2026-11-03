@@ -21,7 +21,7 @@
       "listen": { "src": "kitsune-ecoute-video.webp", "frames": 34, "cols": 12, "rows": 3, "fps": 12, "pingpong": true,
                   "place": { "left": 4.38, "top": -4.59, "width": 102.66, "height": 102.77 } },
       "walk": { "src": "renard-marche-video.webp", "frames": 42, "cols": 14, "rows": 3, "fps": 31, "aspect": [340, 322], "h": 24, "speed": 6 },
-      "messenger": { "style": "plane", "duration": 750, "stagger": 160 },
+      "messenger": { "style": "plane", "duration": 750, "stagger": 160, "shoutMs": 3500 },
       "stroll": { "after": 45000, "pause": 2500 }
     },
     "fabrication": {

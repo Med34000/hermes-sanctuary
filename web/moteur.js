@@ -204,7 +204,7 @@
     /* ---- le coordinateur envoie la tâche : il crie (bulle) et lance un avion en papier, en moins d'une seconde.
        La marche ne sert plus qu'aux promenades quand tout est calme (le travail n'attend jamais le trajet). ---- */
     var W = coord.walk, HOME = [coord.pos.x, coord.pos.y], MS = coord.messenger || {}, ST = coord.stroll || null;
-    var FLY_MS = MS.duration || 750, STAGGER = MS.stagger || 160, RATIO = T.background.w / T.background.h;
+    var FLY_MS = MS.duration || 750, STAGGER = MS.stagger || 160, SHOUT_MS = MS.shoutMs || 3500, RATIO = T.background.w / T.background.h;
     var walker = el("div", "walker", pano), flipBox = el("div", "flip", walker), wSheet = el("div", "sheet", flipBox);
     walker.setAttribute("aria-hidden", "true");
     walker.style.height = W.h + "%"; walker.style.aspectRatio = W.aspect[0] + " / " + W.aspect[1];
@@ -244,7 +244,8 @@
       shoutEl.textContent = t;
       shoutEl.style.left = from[0] + "%"; shoutEl.style.top = (from[1] - from[2] * 1.45) + "%";
       shoutEl.classList.remove("show"); void shoutEl.offsetWidth; shoutEl.classList.add("show");
-      clearTimeout(shoutT); shoutT = setTimeout(function () { shoutEl.classList.remove("show"); }, 1900);
+      clearTimeout(shoutT); shoutT = setTimeout(function () { shoutEl.classList.remove("show"); }, SHOUT_MS);
+      return t;
     }
 
     /* avion en papier : arc du coordinateur vers le compagnon, nez dans le sens du vol */
@@ -282,9 +283,9 @@
       if (!jobs.length) return;
       var from = walking ? [pos[0], pos[1], W.h] : [HOME[0], HOME[1], coord.pos.h];
       if (walking) walkId++;   /* en promenade : il s'arrête pour lancer */
-      shout(jobs.map(function (j) { return j.role; }), from);
+      var cri = shout(jobs.map(function (j) { return j.role; }), from);
+      if (cri) log(coord.short.toUpperCase(), "« " + cri + " »");
       jobs.forEach(function (j, i) {
-        log("MESSAGE", say("deliver", j.role));
         setTimeout(function () { launch(from, j.role, j.cb); }, i * STAGGER);
       });
       if (walking) setTimeout(goHome, jobs.length * STAGGER + FLY_MS + 300);
