@@ -3,7 +3,9 @@
    le coordinateur qui se déplace, l'envol, les boucles animées, le journal et la démo.
    L'habillage (décor, personnages, positions, textes) vient d'un fichier themes/<id>/theme.json.
    Rôles fixes : coordination, fabrication, recherche, analyse, securite.
-   2026-11-02 ≈19:00 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5 */
+   2026-11-02 ≈19:00 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5
+   2026-11-03 ≈07:15 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5 : le coordinateur crie + lance un avion
+   en papier (< 1 s) au lieu de marcher ; la marche devient une promenade quand tout est calme. */
 (function () {
   "use strict";
 
@@ -199,18 +201,25 @@
       };
     });
 
-    /* ---- le coordinateur marche jusqu'au compagnon pour lui remettre la tâche ---- */
-    var W = coord.walk, HOME = [coord.pos.x, coord.pos.y];
+    /* ---- le coordinateur envoie la tâche : il crie (bulle) et lance un avion en papier, en moins d'une seconde.
+       La marche ne sert plus qu'aux promenades quand tout est calme (le travail n'attend jamais le trajet). ---- */
+    var W = coord.walk, HOME = [coord.pos.x, coord.pos.y], MS = coord.messenger || {}, ST = coord.stroll || null;
+    var FLY_MS = MS.duration || 750, STAGGER = MS.stagger || 160, RATIO = T.background.w / T.background.h;
     var walker = el("div", "walker", pano), flipBox = el("div", "flip", walker), wSheet = el("div", "sheet", flipBox);
     walker.setAttribute("aria-hidden", "true");
     walker.style.height = W.h + "%"; walker.style.aspectRatio = W.aspect[0] + " / " + W.aspect[1];
     wSheet.style.backgroundImage = "url('" + url(W.src) + "')"; wSheet.style.backgroundSize = (W.cols * 100) + "% " + (W.rows * 100) + "%";
-    var queue = [], walking = false, pos = HOME.slice();
+    var walking = false, walkId = 0, pos = HOME.slice(), lastBusy = Date.now();
     function place(x, y, dir) { walker.style.left = x + "%"; walker.style.top = y + "%"; flipBox.style.transform = dir < 0 ? "scaleX(-1)" : ""; }
+    function showWalker(on) {
+      walking = on; walker.style.display = on ? "block" : "none"; pano.setAttribute("data-walking", on ? "1" : "0");
+      if (on) place(pos[0], pos[1], 1); else pos = HOME.slice();
+    }
     function walkTo(target, done) {
-      var from = pos.slice(), dx = target[0] - from[0], dist = Math.abs(dx) + Math.abs(target[1] - from[1]) * .4;
+      var id = ++walkId, from = pos.slice(), dx = target[0] - from[0], dist = Math.abs(dx) + Math.abs(target[1] - from[1]) * .4;
       var dur = Math.max(700, dist / (W.speed || 6) * 1000), t0 = performance.now(), dir = dx >= 0 ? 1 : -1;
       function step(now) {
+        if (id !== walkId) return;   /* trajet annulé */
         var k = Math.min(1, (now - t0) / dur);
         pos = [from[0] + dx * k, from[1] + (target[1] - from[1]) * k];
         place(pos[0], pos[1], dir);
@@ -219,25 +228,82 @@
       }
       requestAnimationFrame(step);
     }
-    function deliver(role, cb) {
-      if (reduce || !R[role] || !R[role].visit) { cb(); return; }
-      queue.push({ role: role, cb: cb });
-      if (!walking) next();
+    function goHome() { if (!walking) return; walkTo(HOME, function () { showWalker(false); }); }
+
+    /* bulle au-dessus du coordinateur */
+    var shoutEl = el("div", "shout", pano), shoutT = 0;
+    shoutEl.setAttribute("aria-hidden", "true");
+    function pick(list) { return list && list.length ? list[Math.floor(Math.random() * list.length)] : ""; }
+    function names(roles) {
+      var n = roles.map(function (r) { return R[r].short; });
+      return n.length < 2 ? n.join("") : n.slice(0, -1).join(", ") + " et " + n[n.length - 1];
     }
-    function next() {
-      var job = queue.shift();
-      if (!job) {
-        walkTo(HOME, function () {
-          walking = false;
-          if (queue.length) { next(); return; }   /* une tâche est arrivée pendant le retour : on repart */
-          walker.style.display = "none"; pano.setAttribute("data-walking", "0");
-        });
-        return;
+    function shout(roles, from) {
+      var t = (roles.length === 1 && pick(R[roles[0]].shouts)) || fmt(TX.shoutMany || "Hé {names}, au boulot !", { names: names(roles) });
+      if (!t) return;
+      shoutEl.textContent = t;
+      shoutEl.style.left = from[0] + "%"; shoutEl.style.top = (from[1] - from[2] * 1.45) + "%";
+      shoutEl.classList.remove("show"); void shoutEl.offsetWidth; shoutEl.classList.add("show");
+      clearTimeout(shoutT); shoutT = setTimeout(function () { shoutEl.classList.remove("show"); }, 1900);
+    }
+
+    /* avion en papier : arc du coordinateur vers le compagnon, nez dans le sens du vol */
+    var PLANE = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M2 9 L38 20 L12 20 Z" fill="#FFF8EA" stroke="#7A5A3C" stroke-width="1.3" stroke-linejoin="round"/>' +
+                '<path d="M2 31 L38 20 L12 20 Z" fill="#EAD7B5" stroke="#7A5A3C" stroke-width="1.3" stroke-linejoin="round"/></svg>';
+    function launch(from, role, cb) {
+      var c = R[role], p = el("div", "plane", pano); p.innerHTML = PLANE;
+      var a = [from[0], from[1] - from[2] * .55], b = [c.pos.x, c.pos.y - c.pos.h * .6];
+      var dx = b[0] - a[0], dy = b[1] - a[1], lift = Math.max(7, Math.hypot(dx, dy / RATIO * 2.4) * .22), t0 = performance.now();
+      function at(k) { return [a[0] + dx * k, a[1] + dy * k - Math.sin(k * Math.PI) * lift]; }
+      function step(now) {
+        var k = Math.min(1, (now - t0) / FLY_MS), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+        var q = at(e), q2 = at(Math.min(1, e + .02)), ang = Math.atan2(q2[1] - q[1], (q2[0] - q[0]) * RATIO) * 180 / Math.PI;
+        p.style.left = q[0] + "%"; p.style.top = q[1] + "%";
+        p.style.transform = "translate(-50%, -50%) rotate(" + (k < 1 ? ang : 0) + "deg)";
+        if (k < 1) { requestAnimationFrame(step); return; }
+        p.remove();
+        var poof = el("div", "poof", pano); poof.style.left = b[0] + "%"; poof.style.top = b[1] + "%";
+        setTimeout(function () { poof.remove(); }, 500);
+        cb();
       }
-      if (!walking) { walking = true; pos = HOME.slice(); place(pos[0], pos[1], 1); walker.style.display = "block"; pano.setAttribute("data-walking", "1"); }
-      log("MESSAGE", say("deliver", job.role));
-      walkTo(R[job.role].visit, function () { job.cb(); setTimeout(next, 450); });
+      requestAnimationFrame(step);
     }
+
+    /* les envois qui arrivent ensemble partent ensemble : une seule bulle, plusieurs avions en éventail */
+    var batch = [], batchT = 0;
+    function deliver(role, cb) {
+      lastBusy = Date.now();
+      if (reduce || !R[role]) { cb(); return; }
+      batch.push({ role: role, cb: cb });
+      clearTimeout(batchT); batchT = setTimeout(flush, 60);
+    }
+    function flush() {
+      var jobs = batch; batch = [];
+      if (!jobs.length) return;
+      var from = walking ? [pos[0], pos[1], W.h] : [HOME[0], HOME[1], coord.pos.h];
+      if (walking) walkId++;   /* en promenade : il s'arrête pour lancer */
+      shout(jobs.map(function (j) { return j.role; }), from);
+      jobs.forEach(function (j, i) {
+        log("MESSAGE", say("deliver", j.role));
+        setTimeout(function () { launch(from, j.role, j.cb); }, i * STAGGER);
+      });
+      if (walking) setTimeout(goHome, jobs.length * STAGGER + FLY_MS + 300);
+    }
+
+    /* promenade : seulement quand personne ne travaille depuis un moment */
+    if (ST && !reduce) setInterval(function () {
+      var calm = ROLES.every(function (k) { return !A[k] || A[k].state === "rest"; }) && !batch.length;
+      if (!calm) { lastBusy = Date.now(); return; }
+      if (walking || demoOn || document.hidden || Date.now() - lastBusy < (ST.after || 45000)) return;
+      var spots = WORKERS.filter(function (k) { return R[k] && R[k].visit; });
+      if (!spots.length) return;
+      var target = R[pick(spots)].visit, id;
+      pos = HOME.slice(); showWalker(true); lastBusy = Date.now();
+      walkTo(target, function () {
+        id = walkId;
+        setTimeout(function () { if (walking && id === walkId) goHome(); }, ST.pause || 2500);
+      });
+    }, 3000);
 
     /* ---- mode direct : lit l'activité écrite par le hook et le plugin ---- */
     var meta = document.querySelector('meta[name="sanctuaire-source"]');
@@ -369,11 +435,12 @@
       theme: T, setState: setState, deliver: deliver, log: log,
       alert: function (on) { if (A.securite) A.securite.el.setAttribute("data-alert", on ? "1" : "0"); },
       /* le futur chat : Kitsune écoute pendant qu'on écrit */
-      listen: function (on) { var a = A.coordination; if (!a) return; if (on && a.state === "rest") setState("coordination", "listen"); else if (!on && a.state === "listen") setState("coordination", "rest"); },
+      listen: function (on) { var a = A.coordination; if (!a) return; if (on) { lastBusy = Date.now(); goHome(); } if (on && a.state === "rest") setState("coordination", "listen"); else if (!on && a.state === "listen") setState("coordination", "rest"); },
       isLive: function () { return isLive; },
       roleOfTool: roleOfTool, pulse: pulse,
       chatBusy: function (on) {
         chatActive = true; if (demoOn) stopDemo();
+        if (on) { lastBusy = Date.now(); goHome(); }
         chatBusyFlag = !!on; if (!on) coordDoneAt = Date.now(); tick();
       },
       /* la réponse arrive : les compagnons encore « au travail » terminent tout de suite (la Chouette rentre) */
@@ -388,6 +455,6 @@
 
     log("DEBUT", say("start"));
     poll();
-    setTimeout(function () { if (!isLive && !demoOn) startDemo(); }, 1500);
+    setTimeout(function () { if (!isLive && !demoOn && !chatActive) startDemo(); }, 1500);
   }
 })();

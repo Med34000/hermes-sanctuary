@@ -1,5 +1,5 @@
 {
-  "_info": "Habillage « Sanctuaire Solaire » — 2026-11-02 ≈19:00 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5",
+  "_info": "Habillage « Sanctuaire Solaire » — 2026-11-02 ≈19:00, avion en papier 2026-11-03 ≈07:15 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5",
   "id": "sanctuaire",
   "title": "Le Sanctuaire Solaire de Hermes",
   "subtitle": "La grande clairière",
@@ -20,11 +20,14 @@
                 "place": { "left": 5.05, "top": 2.49, "width": 92.63, "height": 95.69 } },
       "listen": { "src": "kitsune-ecoute-video.webp", "frames": 34, "cols": 12, "rows": 3, "fps": 12, "pingpong": true,
                   "place": { "left": 4.38, "top": -4.59, "width": 102.66, "height": 102.77 } },
-      "walk": { "src": "renard-marche-video.webp", "frames": 42, "cols": 14, "rows": 3, "fps": 31, "aspect": [340, 322], "h": 24, "speed": 6 }
+      "walk": { "src": "renard-marche-video.webp", "frames": 42, "cols": 14, "rows": 3, "fps": 31, "aspect": [340, 322], "h": 24, "speed": 6 },
+      "messenger": { "style": "plane", "duration": 750, "stagger": 160 },
+      "stroll": { "after": 45000, "pause": 2500 }
     },
     "fabrication": {
       "name": "Brico-Castor", "short": "Castor", "work": "Forge le code",
       "pos": { "x": 26.5, "y": 84, "h": 27 }, "aspect": [840, 900], "visit": [33.5, 84],
+      "shouts": ["Hé le Castor, à la forge !", "Castor, un coup de marteau !", "Au boulot, Castor !"],
       "sprites": { "rest": "castor-rest.webp", "work": "castor-work.webp", "hit": "castor-hit.webp" },
       "loop": { "src": "castor-forge-video.webp", "frames": 24, "cols": 12, "rows": 2, "fps": 24,
                 "place": { "left": 1.8, "top": 1.15, "width": 94.51, "height": 97.32 } }
@@ -32,6 +35,7 @@
     "recherche": {
       "name": "Chouette Céleste", "short": "Chouette", "work": "En vol",
       "pos": { "x": 40.6, "y": 55, "h": 18 }, "aspect": [760, 864], "visit": [37, 79],
+      "shouts": ["Hé la Chouette, en vol !", "Chouette, va voir ce qu'on dit là-bas !", "Une recherche pour toi, Chouette !"],
       "sprites": { "rest": "chouette-rest.webp", "work": "chouette-read.webp" }, "doneSprite": "work",
       "fly": { "src": "chouette-vol.webp", "frames": 36, "cols": 12, "rows": 3, "fps": 24, "aspect": [469, 400],
                "perch": [40.6, 45], "away": [104, -30], "h": 26, "duration": 2600 }
@@ -39,6 +43,7 @@
     "analyse": {
       "name": "Data-Taupe", "short": "Taupe", "work": "Fouille",
       "pos": { "x": 66.8, "y": 76.5, "h": 20 }, "aspect": [760, 854], "visit": [62, 80],
+      "shouts": ["Hé la Taupe, au boulot !", "Taupe, fouille-moi ça !", "Taupe, creuse un peu !"],
       "sprites": { "rest": "taupe-rest.webp", "work": "taupe-work.webp" },
       "loop": { "src": "taupe-pioche-video.webp", "frames": 53, "cols": 14, "rows": 4, "fps": 24,
                 "place": { "left": 16.16, "top": -13.27, "width": 97.95, "height": 112.52 } }
@@ -46,6 +51,7 @@
     "securite": {
       "name": "Shiba Sentinel", "short": "Shiba", "work": "Garde", "alert": "Alerte !",
       "pos": { "x": 82.5, "y": 82, "h": 24 }, "aspect": [760, 945], "visit": [77, 84],
+      "shouts": ["Shiba, ouvre l'œil !", "Hé Shiba, monte la garde !"],
       "sprites": { "rest": "shiba-rest.webp", "work": "shiba-work.webp" },
       "loop": { "src": "shiba-garde-video.webp", "frames": 43, "cols": 11, "rows": 4, "fps": 12, "pingpong": true,
                 "place": { "left": -8.66, "top": 1.21, "width": 118.65, "height": 98.87 } },
@@ -81,7 +87,8 @@
     "live": "Connecté à Hermes.",
     "lost": "Hermes injoignable, nouvelle tentative.",
     "request": "Nouvelle demande reçue.",
-    "deliver": "{coord} part porter une lettre à {name}.",
+    "deliver": "{coord} envoie une lettre à {name}.",
+    "shoutMany": "Hé {names}, au boulot !",
     "work": "{name} se met au travail.",
     "done": "{name} a fini sa tâche.",
     "flyAway": "{name} s'envole chercher des informations.",
