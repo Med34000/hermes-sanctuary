@@ -78,7 +78,7 @@ cd /opt/sanctuaire
 **Ou demande à ton Hermes de l'installer** :
 > Installe le Sanctuaire Solaire sur ce serveur : https://github.com/Med34000/sanctuaire-solaire-hermes — lis AGENTS.md dans le dépôt et suis-le. Montre-moi le plan (--dry-run) avant de modifier quoi que ce soit.
 
-Tous les détails sont dans **[INSTALL.md](INSTALL.md)**. Pour créer ton propre environnement (coworking, espace, ferme…), voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#créer-un-nouvel-environnement).
+Tous les détails sont dans **[INSTALL.md](INSTALL.md)**. Pour créer ton propre environnement, voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#créer-un-nouvel-environnement).
 
 ### Ton avis et tes idées m'intéressent 🙌
 Que ce soit une critique, une idée, une optimisation ou un conseil de sécurité, **[ouvre une discussion ou une issue](../../issues/new/choose)**. Voir [CONTRIBUTING.md](CONTRIBUTING.md) et la [feuille de route](ROADMAP.md).
@@ -86,9 +86,12 @@ Que ce soit une critique, une idée, une optimisation ou un conseil de sécurit�
 ---
 
 ## License / Licence
-- **Code**: [PolyForm Noncommercial 1.0.0](LICENSE). Free to use, modify and share for **noncommercial** purposes; commercial use requires the author's written permission.
-- **Images & characters**: [CC BY-NC-SA 4.0](LICENSE-ASSETS). Credit required, no commercial use.
-- **Code** : libre pour un usage **non commercial**. Le vendre ou l'intégrer à une offre payante nécessite l'accord écrit de l'auteur ([iatelier.ch](https://iatelier.ch)). **Images et personnages** : citation obligatoire, pas d'usage commercial.
+**Open source.**
+- **Code**: [Apache 2.0](LICENSE). Use it, modify it, share it, build on it, as long as you keep the [NOTICE](NOTICE) that credits the author.
+- **Images & characters**: [CC BY 4.0](LICENSE-ASSETS). Free to reuse, with credit.
+- 🇫🇷 Le code est sous Apache 2.0 et les images sous CC BY 4.0 : tout est libre, à condition de **garder le crédit « Le Sanctuaire Solaire — Médéric Morin »** (fichier [NOTICE](NOTICE)).
+
+**Created by Médéric Morin** · [LinkedIn](https://www.linkedin.com/in/mederic-morin-auto-ia-tech/) · [iatelier.ch](https://iatelier.ch)
 
 Independent project, not affiliated with Nous Research. / Projet indépendant, sans lien avec Nous Research.
 

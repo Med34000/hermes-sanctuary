@@ -19,7 +19,7 @@ Merci de passer par ici ! Ce projet est partagé **justement pour recevoir des a
 
 Règles du projet : aucun contenu de conversation dans l'état, tout en local par défaut, une instance Hermes par personne.
 
-**Licence des contributions** : en proposant une contribution, tu acceptes qu'elle soit publiée sous les licences du dépôt ([LICENSE](LICENSE), [LICENSE-ASSETS](LICENSE-ASSETS)), et que Médéric Morin puisse aussi l'utiliser, la modifier et la proposer sous d'autres conditions, y compris commerciales. C'est ce qui lui permet de continuer à faire vivre le projet. Ton nom sera crédité.
+**Licence des contributions** : tes contributions sont publiées sous les mêmes licences que le dépôt (Apache 2.0 pour le code, CC BY 4.0 pour les images), et tu es crédité.
 
 ## 🇬🇧
 Thanks for stopping by! This project is shared **to get feedback and ideas**.
@@ -36,4 +36,4 @@ Thanks for stopping by! This project is shared **to get feedback and ideas**.
   - support for other agents;
   - translations.
 
-**Contribution license**: by contributing, you agree that your contribution is published under this repository's licenses, and that Médéric Morin may also use, modify and offer it under other terms, including commercial ones. You will be credited.
+**Contribution license**: contributions are published under the repository's licenses (Apache 2.0 for code, CC BY 4.0 for images), and you are credited.
