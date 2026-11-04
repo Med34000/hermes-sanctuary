@@ -8,6 +8,7 @@
 - Le Shiba aboie sur les erreurs d'outils et d'API, et monte la garde pendant les approbations. / Shiba barks on tool and API errors and guards approvals.
 - Moteur et habillage séparés : un environnement = un dossier `themes/<id>/`. / Engine and theme are separate: one environment = one `themes/<id>/` folder.
 - Installation guidée (`install.sh`), installable par Hermes lui-même (`AGENTS.md`). / Guided installer, installable by Hermes itself.
+- Français et anglais, selon la langue du navigateur. / French and English, from the browser language.
 
 ## 🔜 Prochaines étapes · Next
 - **Approbations depuis le chat** : boutons Autoriser / Refuser, avec le Shiba qui monte la garde. / Approvals from the chat (Allow / Deny).
@@ -18,6 +19,7 @@
 
 ## 💡 Idées bienvenues · Ideas welcome
 - **Nouveaux environnements et personnages : à vous d'imaginer !** Un environnement = un dossier `themes/<id>/` ([comment faire](docs/ARCHITECTURE.md#créer-un-nouvel-environnement)). / **New environments and characters: your turn!** One environment = one `themes/<id>/` folder.
+- Traductions dans d'autres langues. / Translations into other languages.
 - Installation Docker. / Docker install.
 - Autres agents que Hermes. / Agents other than Hermes.
 - Sons d'ambiance, mode nuit, statistiques de la journée. / Ambient sounds, night mode, daily stats.

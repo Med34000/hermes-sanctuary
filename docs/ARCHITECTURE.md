@@ -48,6 +48,7 @@ La même table existe dans le hook (`CARTE`) et dans le moteur (`TOOL_ROLE`). Si
 1. Copier `web/themes/sanctuaire/` en `web/themes/<nouveau>/`, et mettre `"base": "themes/<nouveau>/"`.
 2. Y déposer le panorama et les images ou planches des 5 rôles (coordination, fabrication, recherche, analyse, securite).
 3. Ajuster dans `theme.json` les noms, les positions (`pos`, `visit`), les boucles (`loop`, `alertLoop`, `fly`, `walk`) et les textes.
+   Langues : les textes de base sont dans la langue indiquée par `"lang"`. Les traductions vont dans `"i18n": { "en": { … } }`, avec la même structure, seulement les textes. Les textes de la page elle-même (boutons, journal) sont dans `web/moteur.js` → `UI`.
 4. Ouvrir `panorama.html?theme=<nouveau>`.
 
 Recette d'animation qui a fait ses preuves :

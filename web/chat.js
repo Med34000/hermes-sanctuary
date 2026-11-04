@@ -70,7 +70,7 @@
   function addActivity(act, text, cls) {
     var li = document.createElement("li"); li.textContent = text; if (cls) li.className = cls;
     act.ul.appendChild(li); act.n++; act.el.hidden = false;
-    act.sum.textContent = (C.activityTitle || "Activité") + " (" + act.n + ")";
+    act.sum.textContent = (C.activityTitle || S.ui("activity")) + " (" + act.n + ")";
     return li;
   }
 
@@ -80,7 +80,7 @@
     if (current !== "divers") return Promise.resolve(current);
     if (sessionId) return Promise.resolve(sessionId);
     var d = new Date(), p = function (n) { return (n < 10 ? "0" : "") + n; };
-    var title = "Sanctuaire · " + d.toLocaleDateString("fr-CH") + " " + p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds());
+    var title = S.ui("sessionTitle") + " · " + d.toLocaleDateString(S.ui("locale")) + " " + p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds());
     function create(body) {
       return fetch("chat/sessions", { method: "POST", headers: HDR, body: JSON.stringify(body) })
         .then(function (r) { if (!r.ok) throw new Error("création de conversation : " + r.status); return r.json(); });
@@ -175,7 +175,7 @@
   function saveSeen() { store("sanctuaire.seen", JSON.stringify(seen)); }
   function setFolders(d) {
     folders = sessionsOf(d).filter(function (x) { return isOn(x.pinned) && !isOn(x.archived); })
-      .map(function (x) { return { id: x.id || x.session_id, title: (x.title || "").trim() || "Sans nom", last: lastOf(x) }; })
+      .map(function (x) { return { id: x.id || x.session_id, title: (x.title || "").trim() || C.untitled || "Sans nom", last: lastOf(x) }; })
       .sort(function (a, b) { return a.title.localeCompare(b.title, "fr"); });
     folders.forEach(function (f) { if (f.id === current || seen[f.id] == null) seen[f.id] = f.last; });
     saveSeen(); drawFolders();
@@ -193,10 +193,11 @@
       var i = document.createElement("span"); i.className = "ico"; i.textContent = ico; i.setAttribute("aria-hidden", "true"); bt.appendChild(i);
       var n = document.createElement("span"); n.className = "nm"; n.textContent = name; bt.appendChild(n);
       if (runningIn[id] && id !== current) { var r = document.createElement("span"); r.className = "dot run"; r.title = C.working || "Kitsune y travaille"; bt.appendChild(r); }
-      else if (dot) { var d = document.createElement("span"); d.className = "dot"; d.title = C.unread || "Nouvelle réponse"; bt.appendChild(d); }
+      else if (dot) { var d = document.createElement("span"); d.className = "dot"; d.title = C.unread || ""; bt.appendChild(d); }
       bt.addEventListener("click", function () { switchTo(id); });
       li.appendChild(bt); folderList.appendChild(li);
     }
+    if (!folders.length && online) { var h = document.createElement("li"); h.className = "f-hint"; h.textContent = S.ui("foldersHint"); folderList.appendChild(h); }
     folders.forEach(function (f) { item(f.id, "📁", f.title, f.id !== current && f.last > (seen[f.id] || 0) + 0.5); });
     item("divers", "💬", C.diversName || "Divers", false);
     $("chat-title").textContent = current !== "divers" && folderName(current) ? folderName(current) : (C.title || "Chat");
@@ -239,11 +240,11 @@
   folderAdd.addEventListener("click", function () {
     var name = (window.prompt(C.folderAsk || "Nom du nouveau dossier ?") || "").trim().slice(0, 80);
     if (!name) return;
-    if (folders.some(function (f) { return f.title.toLowerCase() === name.toLowerCase(); })) { window.alert(C.folderExists || "Ce dossier existe déjà."); return; }
+    if (folders.some(function (f) { return f.title.toLowerCase() === name.toLowerCase(); })) { window.alert(C.folderExists); return; }
     api("POST", "chat/sessions", { title: name })
       .then(function (j) { var x = j.session || j, id = x.id || x.session_id; return api("PATCH", "chat/sessions/" + encodeURIComponent(id), { pinned: true }).then(function () { return id; }); })
       .then(function (id) { seen[id] = Date.now() / 1000; saveSeen(); return refreshFolders().then(function () { switchTo(id); }); })
-      .catch(function (e) { console.warn("[Sanctuaire] dossier non créé :", e.message); window.alert(C.folderError || "Le dossier n'a pas pu être créé (nom déjà pris ?)."); });
+      .catch(function (e) { console.warn("[Sanctuaire] dossier non créé :", e.message); window.alert(C.folderError); });
   });
   /* petit menu du dossier actif : renommer, archiver (jamais supprimer) */
   var menuEl = null;
@@ -266,7 +267,7 @@
     var name = (window.prompt(C.folderAsk || "Nom du dossier ?", old) || "").trim().slice(0, 80);
     if (!name || name === old) return;
     api("PATCH", "chat/sessions/" + encodeURIComponent(id), { title: name }).then(refreshFolders)
-      .catch(function () { window.alert(C.folderError || "Impossible de renommer (nom déjà pris ?)."); });
+      .catch(function () { window.alert(C.folderError); });
   }
   function archive() {
     var id = current;
@@ -318,7 +319,7 @@
     pics.forEach(function (u, i) {
       var d = document.createElement("div"); d.className = "thumb";
       var im = document.createElement("img"); im.src = u; im.alt = "Image " + (i + 1); d.appendChild(im);
-      var x = document.createElement("button"); x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", "Retirer l'image " + (i + 1));
+      var x = document.createElement("button"); x.type = "button"; x.textContent = "×"; x.setAttribute("aria-label", S.ui("removeImg", { n: i + 1 }));
       x.addEventListener("click", function () { pics.splice(i, 1); drawThumbs(); input.focus(); });
       d.appendChild(x); thumbs.appendChild(d);
     });
@@ -365,7 +366,7 @@
   });
   var toggle = $("chat-toggle");
   if (toggle) toggle.addEventListener("click", function () {
-    var open = box.classList.toggle("open"); toggle.setAttribute("aria-expanded", open); toggle.textContent = open ? "Fermer" : "Ouvrir";
+    var open = box.classList.toggle("open"); toggle.setAttribute("aria-expanded", open); toggle.textContent = S.ui(open ? "close" : "open");
     if (open) setTimeout(function () { input.focus(); }, 350);
   });
 

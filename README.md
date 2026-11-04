@@ -23,6 +23,8 @@ Every tool your agent uses wakes up a companion, and you chat with it right next
 | 🦫 **Brico-Castor** (building) | `write_file`, `patch`, `terminal`, `process`, `execute_code`, `skill_manage` |
 | 🐕 **Shiba Sentinel** (safety) | slash commands, tool errors, API errors, approval requests — he barks |
 
+**English or French, automatically** (from your browser language; force it with `?lang=en` or `?lang=fr`).
+
 Plus a **chat panel**: Kitsune listens while you type, reads your letter, thinks, and every reply has a foldable *"what the companions did"* thread. Folders on the left (pinned Hermes conversations), images, shortcuts.
 
 ### Privacy by design
@@ -60,6 +62,8 @@ Cinq compagnons dans une grande clairière, chacun lié à une famille d'outils 
 - 🐹 **la Taupe** fouille fichiers et mémoire ;
 - 🦫 **le Castor** écrit et exécute ;
 - 🐕 **le Shiba** veille et aboie au moindre souci.
+
+**En français ou en anglais, automatiquement** selon la langue du navigateur (`?lang=fr` ou `?lang=en` pour forcer).
 
 À droite, **le chat**. Kitsune t'écoute pendant que tu écris, lit ta lettre puis réfléchit, et chaque réponse a son fil repliable « Ce qu'ont fait les compagnons ». Tu as aussi des dossiers, des images et des raccourcis.
 

@@ -38,6 +38,41 @@
     return raw % l.frames;
   }
 
+
+  /* ---- langue (2026-11-04) : ?lang=fr|en (mémorisée, ?lang=auto pour revenir au navigateur), sinon la langue du
+     navigateur ; français pour fr-*, anglais pour tout le reste. Textes du thème : theme.json → "i18n": { "en": {…} } ---- */
+  var UI = { fr: {"srcLive": "En direct · Hermes", "srcLost": "Connexion perdue · Hermes", "srcDemo": "Démo · événements simulés", "logLive": "flux en direct", "logLost": "connexion perdue", "logDemo": "flux simulé", "hlLive": "En direct de Hermes", "hlLost": "Connexion perdue · nouvelle tentative", "done": "Terminé", "listening": "Écoute", "and": " et ", "themeMissing": "Habillage introuvable ({e}).", "docTitle": "Sanctuaire · Panorama", "demoBtn": "Démo auto", "scenes": "Les 5 scènes", "loading": "Chargement…", "logTitle": "Sous le capot", "logAria": "Journal", "chatAria": "Discussion avec Kitsune", "folderMenuTitle": "Renommer ou archiver ce dossier", "newBtn": "Nouvelle", "newTitle": "Commencer une nouvelle conversation", "open": "Ouvrir", "close": "Fermer", "foldersTitle": "Dossiers / Projets", "foldersAria": "Dossiers et projets", "folderAdd": "+ Nouveau", "folderAddTitle": "Créer un dossier ou un projet (une conversation à part, gardée par Hermes)", "foldersHint": "Crée un dossier par projet pour ranger tes conversations.", "attach": "Joindre une image", "attachTitle": "Joindre une image (tu peux aussi la coller ou la glisser ici)", "inputAria": "Ton message pour Kitsune", "send": "Envoyer", "removeImg": "Retirer l'image {n}", "activity": "Activité", "sessionTitle": "Sanctuaire", "locale": "fr-CH"},
+    en: {"srcLive": "Live · Hermes", "srcLost": "Connection lost · Hermes", "srcDemo": "Demo · simulated events", "logLive": "live feed", "logLost": "connection lost", "logDemo": "simulated feed", "hlLive": "Live from Hermes", "hlLost": "Connection lost · retrying", "done": "Done", "listening": "Listening", "and": " and ", "themeMissing": "Theme not found ({e}).", "docTitle": "Sanctuary · Panorama", "demoBtn": "Auto demo", "scenes": "The 5 scenes", "loading": "Loading…", "logTitle": "Under the hood", "logAria": "Log", "chatAria": "Chat with Kitsune", "folderMenuTitle": "Rename or archive this folder", "newBtn": "New", "newTitle": "Start a new conversation", "open": "Open", "close": "Close", "foldersTitle": "Folders / Projects", "foldersAria": "Folders and projects", "folderAdd": "+ New", "folderAddTitle": "Create a folder or project (a separate conversation, kept by Hermes)", "foldersHint": "Create one folder per project to keep your conversations tidy.", "attach": "Attach an image", "attachTitle": "Attach an image (you can also paste or drop it here)", "inputAria": "Your message to Kitsune", "send": "Send", "removeImg": "Remove image {n}", "activity": "Activity", "sessionTitle": "Sanctuary", "locale": "en-US"} };
+  var LANG = (function () {
+    var q = new URLSearchParams(location.search).get("lang"), s = null;
+    try {
+      if (q === "auto") localStorage.removeItem("sanctuaire.lang"); else if (q) localStorage.setItem("sanctuaire.lang", q);
+      s = localStorage.getItem("sanctuaire.lang");
+    } catch (e) { /* stockage indisponible */ }
+    var l = String((q !== "auto" && q) || s || (navigator.languages && navigator.languages[0]) || navigator.language || "en").toLowerCase().slice(0, 2);
+    return UI[l] ? l : "en";
+  })();
+  var LOG_TAGS = { en: { "ALERTE": "ALERT", "DEBUT": "START", "EN DIRECT": "LIVE", "ENVOL": "TAKE-OFF", "GARDE": "GUARD",
+    "RESEAU": "NETWORK", "RETOUR": "BACK", "TERMINE": "DONE", "MESSAGE": "MESSAGE" } };
+  var QUOTES = { fr: ["« ", " »"], en: ["“", "”"] };
+  function ui(k, v) { var t = (UI[LANG] && UI[LANG][k]) || UI.fr[k] || ""; return v ? fmt(t, v) : t; }
+  function merge(dst, src) {
+    Object.keys(src).forEach(function (k) {
+      var a = dst[k], b = src[k];
+      if (a && b && typeof a === "object" && typeof b === "object" && !Array.isArray(a) && !Array.isArray(b)) merge(a, b); else dst[k] = b;
+    });
+    return dst;
+  }
+  (function applyUI() {
+    document.documentElement.lang = LANG;
+    document.title = ui("docTitle");
+    [["data-i18n", null], ["data-i18n-title", "title"], ["data-i18n-aria", "aria-label"]].forEach(function (x) {
+      document.querySelectorAll("[" + x[0] + "]").forEach(function (e) {
+        var t = ui(e.getAttribute(x[0])); if (x[1]) e.setAttribute(x[1], t); else e.textContent = t;
+      });
+    });
+  })();
+
   function themeId() {
     var q = new URLSearchParams(location.search).get("theme");
     var m = document.querySelector('meta[name="sanctuaire-theme"]');
@@ -47,9 +82,10 @@
   fetch("themes/" + themeId() + "/theme.json", { cache: "no-cache" })
     .then(function (r) { if (!r.ok) throw new Error("theme " + r.status); return r.json(); })
     .then(start)
-    .catch(function (e) { var h = $("hl-txt"); if (h) h.textContent = "Habillage introuvable (" + e.message + ")."; });
+    .catch(function (e) { var h = $("hl-txt"); if (h) h.textContent = ui("themeMissing", { e: e.message }); });
 
   function start(T) {
+    if (T.i18n && T.i18n[LANG] && (T.lang || "fr") !== LANG) merge(T, T.i18n[LANG]);
     var base = T.base || "", url = function (f) { return base + f; };
     var pano = $("pano"), logEl = $("log"), hlTxt = $("hl-txt");
     var R = T.roles, TX = T.texts || {}, A = {};
@@ -118,7 +154,7 @@
       headline(t);
       var li = el("li"), tm = el("time", "", li), s = el("span", "", li), g = el("span", "k", s);
       tm.textContent = new Date().toTimeString().slice(0, 8);
-      g.textContent = "[" + k + "] "; s.appendChild(document.createTextNode(t));
+      g.textContent = "[" + ((LOG_TAGS[LANG] && LOG_TAGS[LANG][k]) || k) + "] "; s.appendChild(document.createTextNode(t));
       logEl.insertBefore(li, logEl.firstChild);
       while (logEl.children.length > 5) logEl.removeChild(logEl.lastChild);
     }
@@ -130,7 +166,7 @@
       var a = A[role]; if (!a || a.state === s) return;
       a.state = s; a.el.setAttribute("data-state", s); a.el.setAttribute("data-hit", "0");
       var c = a.c, alarm = a.el.getAttribute("data-alert") === "1" && c.alert;
-      a.label.textContent = s === "work" ? c.short + " · " + (alarm ? c.alert : c.work) : s === "done" ? c.short + " · Terminé" : s === "listen" ? c.short + " · " + (c.listening || "Écoute") : c.name;
+      a.label.textContent = s === "work" ? c.short + " · " + (alarm ? c.alert : c.work) : s === "done" ? c.short + " · " + ui("done") : s === "listen" ? c.short + " · " + (c.listening || ui("listening")) : c.name;
       clearInterval(a.hit);
       if (s === "work" || s === "listen") a.vStart = performance.now();
       if (s === "work" && c.sprites.hit && !reduce && !a.el.classList.contains("has-video"))
@@ -236,7 +272,7 @@
     function pick(list) { return list && list.length ? list[Math.floor(Math.random() * list.length)] : ""; }
     function names(roles) {
       var n = roles.map(function (r) { return R[r].short; });
-      return n.length < 2 ? n.join("") : n.slice(0, -1).join(", ") + " et " + n[n.length - 1];
+      return n.length < 2 ? n.join("") : n.slice(0, -1).join(", ") + ui("and") + n[n.length - 1];
     }
     function shout(roles, from) {
       var t = (roles.length === 1 && pick(R[roles[0]].shouts)) || fmt(TX.shoutMany || "Hé {names}, au boulot !", { names: names(roles) });
@@ -284,7 +320,7 @@
       var from = walking ? [pos[0], pos[1], W.h] : [HOME[0], HOME[1], coord.pos.h];
       if (walking) walkId++;   /* en promenade : il s'arrête pour lancer */
       var cri = shout(jobs.map(function (j) { return j.role; }), from);
-      if (cri) log(coord.short.toUpperCase(), "« " + cri + " »");
+      if (cri) log(coord.short.toUpperCase(), (QUOTES[LANG] || QUOTES.fr)[0] + cri + (QUOTES[LANG] || QUOTES.fr)[1]);
       jobs.forEach(function (j, i) {
         setTimeout(function () { launch(from, j.role, j.cb); }, i * STAGGER);
       });
@@ -314,9 +350,9 @@
     var coordBusy = false, chatBusyFlag = false, coordDoneAt = 0, demoOn = false, demoTimer = null, chatActive = false;
     function badge(m) {
       var pill = $("src-pill"); if (pill) pill.setAttribute("data-src", m);
-      if ($("src-txt")) $("src-txt").textContent = m === "live" ? "En direct · Hermes" : m === "lost" ? "Connexion perdue · Hermes" : "Démo · événements simulés";
-      if ($("log-src")) $("log-src").textContent = m === "live" ? "flux en direct" : m === "lost" ? "connexion perdue" : "flux simulé";
-      if ($("hl-sub")) $("hl-sub").textContent = m === "live" ? "En direct de Hermes" : m === "lost" ? "Connexion perdue · nouvelle tentative" : "Démo · événements simulés";
+      if ($("src-txt")) $("src-txt").textContent = ui(m === "live" ? "srcLive" : m === "lost" ? "srcLost" : "srcDemo");
+      if ($("log-src")) $("log-src").textContent = ui(m === "live" ? "logLive" : m === "lost" ? "logLost" : "logDemo");
+      if ($("hl-sub")) $("hl-sub").textContent = ui(m === "live" ? "hlLive" : m === "lost" ? "hlLost" : "srcDemo");
     }
     /* Kitsune arrive chez le compagnon : il travaille au moins un moment, même si la réponse est déjà arrivée */
     function arrived(role) {
@@ -433,7 +469,7 @@
 
     /* API pour le futur chat et les tests */
     window.Sanctuaire = {
-      theme: T, setState: setState, deliver: deliver, log: log,
+      theme: T, lang: LANG, ui: ui, setState: setState, deliver: deliver, log: log,
       alert: function (on) { if (A.securite) A.securite.el.setAttribute("data-alert", on ? "1" : "0"); },
       /* le futur chat : Kitsune écoute pendant qu'on écrit */
       listen: function (on) { var a = A.coordination; if (!a) return; if (on) { lastBusy = Date.now(); goHome(); } if (on && a.state === "rest") setState("coordination", "listen"); else if (!on && a.state === "listen") setState("coordination", "rest"); },

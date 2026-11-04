@@ -191,6 +191,7 @@ body.bands #headline { display: block; }
 .folder.divers[aria-current="true"] { color: var(--cream); }
 #folder-add { flex: none; white-space: nowrap; font: 700 12px/1 var(--body); padding: 8px 11px; border-radius: 12px; border: 1px dashed rgba(63, 42, 24, .35); background: transparent; color: var(--muted); cursor: pointer; }
 #folder-add:hover { color: var(--bark); border-color: var(--bark); }
+.f-hint { display: none; }
 #chat-folder-menu[hidden] { display: none; }
 .fmenu { position: fixed; z-index: 40; display: flex; flex-direction: column; min-width: 150px; padding: 6px; border-radius: 14px; background: #fff; box-shadow: 0 10px 30px rgba(30, 18, 5, .3); }
 .fmenu button { text-align: left; font: 700 13px/1.2 var(--body); padding: 9px 11px; border: 0; border-radius: 9px; background: transparent; color: var(--bark); cursor: pointer; }
@@ -200,6 +201,7 @@ body.bands #headline { display: block; }
   #chat { padding-left: calc(var(--folders-w) + 14px); }
   #chat-folders { position: absolute; left: 0; top: 0; bottom: 0; width: var(--folders-w); flex-direction: column; overflow-y: auto; overflow-x: hidden;
     padding: calc(env(safe-area-inset-top, 0px) + 18px) 10px 14px; border-right: 1px solid rgba(63, 42, 24, .1); background: rgba(63, 42, 24, .05); }
+  .f-hint { display: block; margin: 2px 4px 8px; font: 600 11.5px/1.35 var(--body); color: var(--muted); }
   .f-title { display: block; margin: 4px 4px 6px; font: 700 10px/1 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
   #folder-list { flex-direction: column; }
   .folder { white-space: normal; align-items: flex-start; }
@@ -272,9 +274,9 @@ body.bands #headline { display: block; }
   <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2" fill="#fff"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M18.7 5.3l-1.8 1.8M7.1 16.9l-1.8 1.8"/></svg></div>
   <div class="titles"><h1 id="title">Sanctuaire</h1><p class="sub" id="subtitle">Panorama</p></div>
   <div class="pills">
-    <span class="pill" id="src-pill" data-src="demo"><span class="dot"></span><span id="src-txt">Démo · événements simulés</span></span>
-    <button class="pill" id="demo" type="button" aria-pressed="false">Démo auto</button>
-    <a class="pill" id="scenes-link" href="index.html">Les 5 scènes</a>
+    <span class="pill" id="src-pill" data-src="demo"><span class="dot"></span><span id="src-txt" data-i18n="srcDemo">Démo · événements simulés</span></span>
+    <button class="pill" id="demo" type="button" aria-pressed="false" data-i18n="demoBtn">Démo auto</button>
+    <a class="pill" id="scenes-link" href="index.html" data-i18n="scenes">Les 5 scènes</a>
   </div>
 </header>
 
@@ -282,30 +284,30 @@ body.bands #headline { display: block; }
   <div class="pano" id="pano" data-walking="0"></div>
 </main>
 
-<p id="headline" aria-live="polite"><span id="hl-txt">Chargement…</span><small id="hl-sub">Démo · événements simulés</small></p>
-<aside class="log" aria-label="Journal"><h2>Sous le capot <span id="log-src">flux simulé</span></h2><ol id="log"></ol></aside>
+<p id="headline" aria-live="polite"><span id="hl-txt" data-i18n="loading">Chargement…</span><small id="hl-sub" data-i18n="srcDemo">Démo · événements simulés</small></p>
+<aside class="log" aria-label="Journal" data-i18n-aria="logAria"><h2><span data-i18n="logTitle">Sous le capot</span> <span id="log-src" data-i18n="logDemo">flux simulé</span></h2><ol id="log"></ol></aside>
 
-<aside id="chat" aria-label="Discussion avec Kitsune">
+<aside id="chat" aria-label="Discussion avec Kitsune" data-i18n-aria="chatAria">
   <div class="chat-head">
     <div class="chat-avatar" aria-hidden="true"><img src="renard-rest.webp" alt=""></div>
     <div class="chat-who"><h2 id="chat-title">Parler à Kitsune</h2><p id="chat-status" aria-live="polite">Prêt</p></div>
-    <button class="chat-btn" id="chat-folder-menu" type="button" title="Renommer ou archiver ce dossier" hidden>⋯</button>
-    <button class="chat-btn" id="chat-new" type="button" title="Commencer une nouvelle conversation">Nouvelle</button>
-    <button class="chat-btn" id="chat-toggle" type="button" aria-expanded="false" aria-controls="chat">Ouvrir</button>
+    <button class="chat-btn" id="chat-folder-menu" type="button" title="Renommer ou archiver ce dossier" data-i18n-title="folderMenuTitle" hidden>⋯</button>
+    <button class="chat-btn" id="chat-new" type="button" title="Commencer une nouvelle conversation" data-i18n="newBtn" data-i18n-title="newTitle">Nouvelle</button>
+    <button class="chat-btn" id="chat-toggle" type="button" aria-expanded="false" aria-controls="chat" data-i18n="open">Ouvrir</button>
   </div>
-  <nav id="chat-folders" aria-label="Dossiers">
-    <div class="f-title">Dossiers</div>
+  <nav id="chat-folders" aria-label="Dossiers" data-i18n-aria="foldersAria">
+    <div class="f-title" data-i18n="foldersTitle">Dossiers / Projets</div>
     <ul id="folder-list"></ul>
-    <button id="folder-add" type="button" title="Créer un dossier (une conversation à part, gardée par Hermes)">+ Dossier</button>
+    <button id="folder-add" type="button" title="Créer un dossier ou un projet (une conversation à part, gardée par Hermes)" data-i18n="folderAdd" data-i18n-title="folderAddTitle">+ Nouveau</button>
   </nav>
   <ol id="chat-list" aria-live="polite"></ol>
   <div id="chat-shortcuts"></div>
   <div id="chat-thumbs" hidden></div>
   <div class="chat-input">
-    <button id="chat-attach" type="button" aria-label="Joindre une image" title="Joindre une image (tu peux aussi la coller ou la glisser ici)">📎</button>
+    <button id="chat-attach" type="button" aria-label="Joindre une image" title="Joindre une image (tu peux aussi la coller ou la glisser ici)" data-i18n-aria="attach" data-i18n-title="attachTitle">📎</button>
     <input id="chat-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple hidden>
-    <textarea id="chat-input" rows="1" aria-label="Ton message pour Kitsune"></textarea>
-    <button id="chat-send" type="button" aria-label="Envoyer">➤</button>
+    <textarea id="chat-input" rows="1" aria-label="Ton message pour Kitsune" data-i18n-aria="inputAria"></textarea>
+    <button id="chat-send" type="button" aria-label="Envoyer" data-i18n-aria="send">➤</button>
   </div>
 </aside>
 
