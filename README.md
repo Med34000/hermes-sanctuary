@@ -1,10 +1,10 @@
-# ☀️ Le Sanctuaire Solaire
+# ☀️ Le Sanctuaire Solaire · The Solar Sanctuary
 
 **A living, playful interface for [Hermes Agent](https://github.com/NousResearch/hermes-agent).**
 Every tool your agent uses wakes up a companion, and you chat with it right next to the scene.
 **Une interface vivante et ludique pour Hermes Agent** : chaque outil utilisé par ton agent réveille un compagnon, et tu discutes avec lui juste à côté.
 
-![Le Sanctuaire Solaire — démo](docs/demo.gif)
+![The Solar Sanctuary — demo](docs/demo.gif)
 
 > 🇫🇷 Projet personnel de [Médéric Morin](https://iatelier.ch), construit en *vibe coding* avec l'IA. Partagé pour recevoir **des avis, des idées et des améliorations**. ([Lire en français ↓](#-en-français))
 > 🇬🇧 Personal project, built by vibe coding with AI. Shared to get **feedback, ideas and improvements**.
@@ -18,12 +18,14 @@ Every tool your agent uses wakes up a companion, and you chat with it right next
 | Companion | Wakes up when Hermes uses… |
 |---|---|
 | 🦊 **Kitsune Hermes** (coordinator) | start/end of each turn, `send_message`, `delegate_task`, `clarify`, `cronjob` — he shouts and throws a paper plane to the right companion |
-| 🦉 **Chouette Céleste** (research) | `web_search`, `web_extract`, `vision_analyze`, `browser_*` — she flies away and comes back |
-| 🐹 **Data-Taupe** (analysis) | `read_file`, `search_files`, `memory`, `session_search`, `skill_view`, `todo` |
-| 🦫 **Brico-Castor** (building) | `write_file`, `patch`, `terminal`, `process`, `execute_code`, `skill_manage` |
+| 🦉 **Celestial Owl** (research) | `web_search`, `web_extract`, `vision_analyze`, `browser_*` — she flies away and comes back |
+| 🐹 **Data Mole** (analysis) | `read_file`, `search_files`, `memory`, `session_search`, `skill_view`, `todo` |
+| 🦫 **Tinker Beaver** (building) | `write_file`, `patch`, `terminal`, `process`, `execute_code`, `skill_manage` |
 | 🐕 **Shiba Sentinel** (safety) | slash commands, tool errors, API errors, approval requests — he barks |
 
-**English or French, automatically** (from your browser language; force it with `?lang=en` or `?lang=fr`).
+![The Solar Sanctuary — the real interface, in English](docs/panorama.jpg)
+
+**English or French, automatically** (from your browser language; force it with `?lang=en` or `?lang=fr`). In French, the companions are called Chouette Céleste, Data-Taupe and Brico-Castor.
 
 Plus a **chat panel**: Kitsune listens while you type, reads your letter, thinks, and every reply has a foldable *"what the companions did"* thread. Folders on the left (pinned Hermes conversations), images, shortcuts.
 
@@ -49,7 +51,7 @@ Then from your computer: `ssh -N -L 8787:127.0.0.1:8787 user@your-server` → op
 Details, manual install and troubleshooting: **[INSTALL.md](INSTALL.md)**.
 
 ### Ideas & contributions welcome 🙌
-This is the most interesting part for me. New environments and characters, better tool mappings, mobile, security, performance, support for other agents: **[open a discussion or an issue](../../issues/new/choose)**. See [CONTRIBUTING.md](CONTRIBUTING.md) and the [ROADMAP](ROADMAP.md).
+This is the most interesting part for me. New environments and characters, better tool mappings, mobile, security, performance, support for other agents: **[start a discussion](../../discussions)** or **[open an issue](../../issues/new/choose)**. See [CONTRIBUTING.md](CONTRIBUTING.md) and the [ROADMAP](ROADMAP.md).
 
 ---
 
@@ -62,6 +64,10 @@ Cinq compagnons dans une grande clairière, chacun lié à une famille d'outils 
 - 🐹 **la Taupe** fouille fichiers et mémoire ;
 - 🦫 **le Castor** écrit et exécute ;
 - 🐕 **le Shiba** veille et aboie au moindre souci.
+
+![Le Sanctuaire Solaire — démo](docs/demo-fr.gif)
+
+![Le Sanctuaire Solaire — la vraie interface, en français](docs/panorama-fr.jpg)
 
 **En français ou en anglais, automatiquement** selon la langue du navigateur (`?lang=fr` ou `?lang=en` pour forcer).
 
@@ -85,7 +91,7 @@ cd /opt/sanctuaire
 Tous les détails sont dans **[INSTALL.md](INSTALL.md)**. Pour créer ton propre environnement, voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#créer-un-nouvel-environnement).
 
 ### Ton avis et tes idées m'intéressent 🙌
-Que ce soit une critique, une idée, une optimisation ou un conseil de sécurité, **[ouvre une discussion ou une issue](../../issues/new/choose)**. Voir [CONTRIBUTING.md](CONTRIBUTING.md) et la [feuille de route](ROADMAP.md).
+Que ce soit une critique, une idée, une optimisation ou un conseil de sécurité, **[lance une discussion](../../discussions)** ou **[ouvre une issue](../../issues/new/choose)**. Voir [CONTRIBUTING.md](CONTRIBUTING.md) et la [feuille de route](ROADMAP.md).
 
 ---
 

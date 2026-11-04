@@ -5,7 +5,7 @@
 ## 🇫🇷
 Merci de passer par ici ! Ce projet est partagé **justement pour recevoir des avis et des idées**.
 
-- **Une idée, un avis, une question ?** Ouvre une *issue* « Idée » (ou une discussion si elles sont activées). Une phrase suffit, même une critique.
+- **Une idée, un avis, une question ?** Lance une [discussion](../../discussions) ou ouvre une *issue* « Idée ». Une phrase suffit, même une critique.
 - **Un bug ?** Utilise une *issue* « Bug », en indiquant ta version de Hermes, ce que tu as fait, ce que tu as vu, et une capture si possible. **Ne colle jamais de clé API ni ton `.env`.**
 - **Du code ?** Ouvre d'abord une issue pour en parler, puis une *pull request* courte, centrée sur un seul sujet.
 - **Ce qui m'aiderait le plus** :
@@ -24,7 +24,7 @@ Règles du projet : aucun contenu de conversation dans l'état, tout en local pa
 ## 🇬🇧
 Thanks for stopping by! This project is shared **to get feedback and ideas**.
 
-- **Idea, opinion, question?** Open an "Idea" issue (or a discussion if enabled). One sentence is enough, criticism included.
+- **Idea, opinion, question?** Start a [discussion](../../discussions) or open an "Idea" issue. One sentence is enough, criticism included.
 - **Bug?** Open a "Bug" issue with your Hermes version, what you did and what you saw. **Never paste API keys or your `.env`.**
 - **Code?** Open an issue first, then a small, focused pull request.
 - **Most wanted**:

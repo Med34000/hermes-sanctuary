@@ -24,4 +24,4 @@
 - Autres agents que Hermes. / Agents other than Hermes.
 - Sons d'ambiance, mode nuit, statistiques de la journée. / Ambient sounds, night mode, daily stats.
 
-👉 [Proposer une idée · Suggest an idea](../../issues/new/choose)
+👉 [Discussions](../../discussions) · [Proposer une idée · Suggest an idea](../../issues/new/choose)
