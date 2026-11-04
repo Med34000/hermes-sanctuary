@@ -1,12 +1,25 @@
 # Sanctuaire Solaire — hook d'activite Hermes
 # Lit UNIQUEMENT les noms d'outils et le debut/fin de tour. Jamais de message, reponse, id ou resultat.
 # 2026-11-02 ≈10:25 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5
+# 2026-11-04 ≈18:35 — dossier d'etat reglable (SANCTUAIRE_STATE_DIR ou fichier state_dir a cote du hook),
+#                      nom du dernier outil par compagnon (« outil », nom seulement)
 import json
 import os
 import threading
 import time
 
-ETAT = "/var/lib/sanctuaire/etat.json"
+def _dossier_etat():
+    d = os.environ.get("SANCTUAIRE_STATE_DIR", "").strip()
+    if not d:
+        try:
+            with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "state_dir"), encoding="utf-8") as f:
+                d = f.read().strip()
+        except OSError:
+            d = ""
+    return d or "/var/lib/sanctuaire"
+
+
+ETAT = os.path.join(_dossier_etat(), "etat.json")
 _lock = threading.Lock()
 
 # Noms exacts d'abord, puis prefixes
@@ -38,10 +51,12 @@ def _animal(nom):
     return None
 
 
-def _touche(a, t):
+def _touche(a, t, outil=""):
     x = _etat["animaux"][a]
     x["dernier"] = t
     x["n"] += 1
+    if outil:
+        x["outil"] = outil
 
 
 def _ecrire():
@@ -67,7 +82,7 @@ def handle(event_type, context):
                     nom = str(nom)[:60]
                     a = _animal(nom)
                     if a:
-                        _touche(a, t)
+                        _touche(a, t, nom)
                     elif nom:
                         inc = _etat["inconnus"]
                         if nom in inc or len(inc) < 50:

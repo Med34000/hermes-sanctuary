@@ -1,0 +1,23 @@
+name: "💡 Idée / avis · Idea / feedback"
+description: "Une idée, une amélioration, un avis, une critique · An idea, improvement, opinion or criticism"
+labels: ["idée"]
+body:
+  - type: textarea
+    id: idee
+    attributes:
+      label: "Ton idée ou ton avis · Your idea or feedback"
+      description: "Une phrase suffit · One sentence is enough"
+    validations:
+      required: true
+  - type: dropdown
+    id: sujet
+    attributes:
+      label: "Sujet · Topic"
+      options:
+        - "Personnages / environnements · Characters / environments"
+        - "Chat"
+        - "Installation"
+        - "Sécurité · Security"
+        - "Téléphone · Mobile"
+        - "Performance"
+        - "Autre · Other"

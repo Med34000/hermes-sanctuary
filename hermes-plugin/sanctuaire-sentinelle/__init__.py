@@ -6,6 +6,7 @@ Seuls le NOM de l'outil en erreur et le TYPE d'erreur (classe courte) sont conse
 Ne leve jamais d'exception : Hermes n'est jamais bloque.
 
 2026-11-02 ≈11:40 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5
+2026-11-04 ≈18:35 — dossier d'etat reglable (SANCTUAIRE_STATE_DIR ou fichier state_dir a cote du plugin)
 """
 
 from __future__ import annotations
@@ -16,7 +17,18 @@ import threading
 import time
 from typing import Any
 
-FICHIER = "/var/lib/sanctuaire/sentinelle.json"
+def _dossier_etat() -> str:
+    d = os.environ.get("SANCTUAIRE_STATE_DIR", "").strip()
+    if not d:
+        try:
+            with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "state_dir"), encoding="utf-8") as f:
+                d = f.read().strip()
+        except OSError:
+            d = ""
+    return d or "/var/lib/sanctuaire"
+
+
+FICHIER = os.path.join(_dossier_etat(), "sentinelle.json")
 _OK = {"ok", "success", "succeeded", "completed", "done"}
 _lock = threading.Lock()
 _etat: dict[str, Any] = {

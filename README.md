@@ -1,55 +1,95 @@
-# Le Sanctuaire Solaire de Hermes
+# ☀️ Le Sanctuaire Solaire
 
-*2026-11-02 ≈11:00 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5*
+**A living, playful interface for [Hermes Agent](https://github.com/NousResearch/hermes-agent).**
+Every tool your agent uses wakes up a companion, and you chat with it right next to the scene.
+**Une interface vivante et ludique pour Hermes Agent** : chaque outil utilisé par ton agent réveille un compagnon, et tu discutes avec lui juste à côté.
 
-Interface ludique qui montre l'activité de Hermes avec 5 compagnons animés.
-**Aucun contenu de conversation ne quitte Hermes** : seuls des noms d'outils et des horodatages sont utilisés.
+![Le Sanctuaire Solaire — démo](docs/demo.gif)
 
-## Fonctionnement
+> 🇫🇷 Projet personnel de [Médéric Morin](https://iatelier.ch), construit en *vibe coding* avec l'IA. Partagé pour recevoir **des avis, des idées et des améliorations**. ([Lire en français ↓](#-en-français))
+> 🇬🇧 Personal project, built by vibe coding with AI. Shared to get **feedback, ideas and improvements**.
 
-```
-Hermes (gateway) ──hook──> /var/lib/sanctuaire/etat.json ──> page web (127.0.0.1:8787) ──tunnel SSH──> navigateur
-```
+---
 
-| Compagnon | Déclenché par |
+## 🇬🇧 English
+
+### What you see
+
+| Companion | Wakes up when Hermes uses… |
 |---|---|
-| Brico-Castor (forge) | `write_file`, `patch`, `terminal`, `process`, `execute_code`, `skill_manage` |
-| Data-Taupe (alcôve) | `read_file`, `search_files`, `memory`, `session_search`, `skill_view`, `skills_list`, `todo` |
-| Chouette Céleste (cabane) | `web_search`, `web_extract`, `vision_analyze`, `browser_*`, `web_*` |
-| Kitsune Hermes (chêne) | début/fin de chaque tour, `send_message`, `delegate_task`, `clarify`, `cronjob` |
-| Shiba Sentinel (belvédère) | commandes slash, erreurs d'outils, erreurs API (modèle/fournisseur), demandes d'approbation (plugin) |
+| 🦊 **Kitsune Hermes** (coordinator) | start/end of each turn, `send_message`, `delegate_task`, `clarify`, `cronjob` — he shouts and throws a paper plane to the right companion |
+| 🦉 **Chouette Céleste** (research) | `web_search`, `web_extract`, `vision_analyze`, `browser_*` — she flies away and comes back |
+| 🐹 **Data-Taupe** (analysis) | `read_file`, `search_files`, `memory`, `session_search`, `skill_view`, `todo` |
+| 🦫 **Brico-Castor** (building) | `write_file`, `patch`, `terminal`, `process`, `execute_code`, `skill_manage` |
+| 🐕 **Shiba Sentinel** (safety) | slash commands, tool errors, API errors, approval requests — he barks |
 
-Les outils non reconnus sont listés dans `etat.json` → `inconnus` (noms seulement).
+Plus a **chat panel**: Kitsune listens while you type, reads your letter, thinks, and every reply has a foldable *"what the companions did"* thread. Folders on the left (pinned Hermes conversations), images, shortcuts.
 
-## Contenu
+### Privacy by design
+- The hook and the plugin only write **tool names and timestamps**. Never messages, replies, arguments or results.
+- Everything listens on **127.0.0.1 only**, with no open port. You reach it through an SSH tunnel.
+- The Hermes API key stays on the server and is **never sent to the page**.
 
-- `web/chouette-vol.js` — envol de la Chouette (recherche web) : elle quitte son perchoir, part chercher, revient lire sa trouvaille.
-- `web/moteur.js` — **moteur commun** à tous les environnements (activité Hermes, rôles, états, marche du coordinateur, envol, boucles animées, journal, démo).
-- `web/themes/<id>/theme.json` — **habillage** d'un environnement (décor, personnages, positions, boucles, textes). Premier : `themes/sanctuaire/`. Choix : `panorama.html?theme=<id>` ou balise `sanctuaire-theme`.
-- `web/panorama.html` — vue panorama : tous les compagnons dans la grande clairière ; Kitsune Hermes crie et lance un avion en papier au compagnon (< 1 s), et se promène quand tout est calme (même source live).
-- `web/` — la page (même fichier que l'artefact claude.ai) et ses images. Sans `etat.json` joignable, elle tourne en démo.
-  Source réglable : `<meta name="sanctuaire-source" content="etat.json">`.
-- `hermes-hook/` — le hook gateway, installé dans `/opt/data/hooks/sanctuaire/` (HERMES_HOME=/opt/data).
-- `hermes-plugin/sanctuaire-sentinelle/` — plugin Shiba (erreurs d'outils, erreurs API, approbations) → `/var/lib/sanctuaire/sentinelle.json`, installé dans `/opt/data/plugins/`.
-- `sources/` — fichiers sources : vidéos Grok (renard, castor, chouette, taupe) et panorama Gemini, pour pouvoir refaire les animations.
-- `web/chat.js` — **chat** sur le côté du panorama (Kitsune écoute, lit, réfléchit ; fil d'activité ; raccourcis ; **images** : bouton 📎, coller, glisser — 4 max, réduites à 1600 px dans le navigateur) ; **dossiers** à gauche : chaque dossier = une conversation Hermes épinglée (gardée sur le serveur), « Divers » pour les conversations rapides ; renommer / archiver, jamais supprimer.
-- `deploy/sanctuaire_server.py` — serveur interne : sert la page et **relaie le chat** vers l'API de Hermes (127.0.0.1:9119), clé côté serveur, routes limitées, protection contre les sites tiers, images acceptées (data:image png/jpeg/webp/gif, 4 max), aucun contenu enregistré.
-- `deploy/sanctuaire-web.service` — service systemd du mini serveur (127.0.0.1 seulement, utilisateur dynamique, lecture seule).
+### Quick start
+Requirements: Linux server, Hermes Agent running as a **systemd service**, `python3`, `sudo`.
 
-## Sur le VPS
+```bash
+sudo git clone https://github.com/Med34000/sanctuaire-solaire-hermes /opt/sanctuaire
+cd /opt/sanctuaire
+./install.sh --dry-run   # shows the plan, changes nothing
+./install.sh             # guided install, asks before every step
+```
+Then from your computer: `ssh -N -L 8787:127.0.0.1:8787 user@your-server` → open **http://localhost:8787/panorama.html**
 
-- Dépôt cloné dans `/opt/sanctuaire`, mise à jour : `git -C /opt/sanctuaire pull`
-- `web/etat.json` est un lien vers `/var/lib/sanctuaire/etat.json` (ignoré par Git)
-- Accès depuis le Mac : `ssh -N -L 8787:127.0.0.1:8787 ubuntu@<vps>` puis http://localhost:8787
+**Or let your Hermes install it.** Send him:
+> Install the Sanctuaire Solaire on this server: https://github.com/Med34000/sanctuaire-solaire-hermes — read AGENTS.md in the repo and follow it. Show me the dry-run plan before changing anything.
 
-## Règles
+Details, manual install and troubleshooting: **[INSTALL.md](INSTALL.md)**.
 
-- Jamais d'accès d'un tiers à l'instance Hermes personnelle. Une personne = une instance isolée.
-- `etat.json` ne contient jamais de message, réponse, identifiant ni résultat d'outil.
+### Ideas & contributions welcome 🙌
+This is the most interesting part for me. New environments and characters, better tool mappings, mobile, security, performance, support for other agents: **[open a discussion or an issue](../../issues/new/choose)**. See [CONTRIBUTING.md](CONTRIBUTING.md) and the [ROADMAP](ROADMAP.md).
 
-## Créer un nouvel environnement
+---
 
-1. Copier `web/themes/sanctuaire/` en `web/themes/<nouveau>/` et mettre `"base": "themes/<nouveau>/"`.
-2. Y déposer le panorama et les images/planches des 5 rôles (coordination, fabrication, recherche, analyse, securite).
-3. Ajuster dans `theme.json` : noms, positions (`pos`, `visit`), boucles (`loop`, `alertLoop`, `fly`, `walk`) et textes.
-4. Ouvrir `panorama.html?theme=<nouveau>`.
+## 🇫🇷 En français
+
+### Ce que tu vois
+Cinq compagnons dans une grande clairière, chacun lié à une famille d'outils de Hermes (tableau ci-dessus) :
+- 🦊 **Kitsune** coordonne ;
+- 🦉 **la Chouette** cherche sur le web ;
+- 🐹 **la Taupe** fouille fichiers et mémoire ;
+- 🦫 **le Castor** écrit et exécute ;
+- 🐕 **le Shiba** veille et aboie au moindre souci.
+
+À droite, **le chat**. Kitsune t'écoute pendant que tu écris, lit ta lettre puis réfléchit, et chaque réponse a son fil repliable « Ce qu'ont fait les compagnons ». Tu as aussi des dossiers, des images et des raccourcis.
+
+### Confidentialité
+- Seuls des **noms d'outils et des heures** sont écrits, jamais le contenu des conversations.
+- Tout écoute **en local uniquement** (127.0.0.1), sans aucun port ouvert. L'accès se fait par tunnel SSH.
+- La clé de l'API reste sur le serveur, **jamais dans la page**.
+
+### Installer
+```bash
+sudo git clone https://github.com/Med34000/sanctuaire-solaire-hermes /opt/sanctuaire
+cd /opt/sanctuaire
+./install.sh --dry-run   # montre le plan, ne modifie rien
+./install.sh             # installation guidée, confirmation à chaque étape
+```
+**Ou demande à ton Hermes de l'installer** :
+> Installe le Sanctuaire Solaire sur ce serveur : https://github.com/Med34000/sanctuaire-solaire-hermes — lis AGENTS.md dans le dépôt et suis-le. Montre-moi le plan (--dry-run) avant de modifier quoi que ce soit.
+
+Tous les détails sont dans **[INSTALL.md](INSTALL.md)**. Pour créer ton propre environnement (coworking, espace, ferme…), voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#créer-un-nouvel-environnement).
+
+### Ton avis et tes idées m'intéressent 🙌
+Que ce soit une critique, une idée, une optimisation ou un conseil de sécurité, **[ouvre une discussion ou une issue](../../issues/new/choose)**. Voir [CONTRIBUTING.md](CONTRIBUTING.md) et la [feuille de route](ROADMAP.md).
+
+---
+
+## License / Licence
+- **Code**: [PolyForm Noncommercial 1.0.0](LICENSE). Free to use, modify and share for **noncommercial** purposes; commercial use requires the author's written permission.
+- **Images & characters**: [CC BY-NC-SA 4.0](LICENSE-ASSETS). Credit required, no commercial use.
+- **Code** : libre pour un usage **non commercial**. Le vendre ou l'intégrer à une offre payante nécessite l'accord écrit de l'auteur ([iatelier.ch](https://iatelier.ch)). **Images et personnages** : citation obligatoire, pas d'usage commercial.
+
+Independent project, not affiliated with Nous Research. / Projet indépendant, sans lien avec Nous Research.
+
+*2026-11-04 ≈18:55 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin*

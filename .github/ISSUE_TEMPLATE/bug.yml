@@ -1,0 +1,24 @@
+name: "🐞 Bug"
+description: "Quelque chose ne marche pas · Something is broken"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "⚠️ Ne colle jamais de clé API ni ton fichier .env · Never paste API keys or your .env file."
+  - type: textarea
+    id: quoi
+    attributes:
+      label: "Ce qui se passe · What happens"
+      description: "Ce que tu as fait, ce que tu attendais, ce que tu as vu (capture bienvenue) · What you did, expected, saw (screenshot welcome)"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: "Version de Hermes · Hermes version"
+      placeholder: "hermes --version"
+  - type: dropdown
+    id: install
+    attributes:
+      label: "Installation"
+      options: ["install.sh", "Hermes (AGENTS.md)", "Manuelle · Manual", "Docker"]

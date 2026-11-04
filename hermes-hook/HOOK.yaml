@@ -1,4 +1,4 @@
 # 2026-11-02 ≈10:25 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5
 name: sanctuaire
-description: Sanctuaire Solaire - ecrit l'activite (noms d'outils uniquement, aucun contenu) dans /var/lib/sanctuaire/etat.json
+description: Sanctuaire Solaire - ecrit l'activite (noms d'outils uniquement, aucun contenu) dans <dossier d'etat>/etat.json (defaut /var/lib/sanctuaire)
 events: ["agent:start", "agent:step", "agent:end", "command:*"]

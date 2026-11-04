@@ -1,6 +1,7 @@
 # Sanctuaire — serveur web interne + relais du chat vers l'API de Hermes
 # (127.0.0.1 uniquement, accès par tunnel SSH ; la clé API est lue via LoadCredential, jamais exposée à la page)
 # 2026-11-02 ≈19:50 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5
+# Exemple : install.sh génère son propre fichier avec les bons chemins. / Example: install.sh generates its own unit with the right paths.
 [Unit]
 Description=Sanctuaire - page web interne et relais chat (127.0.0.1:8787)
 After=network.target hermes-gateway.service
@@ -8,7 +9,7 @@ After=network.target hermes-gateway.service
 [Service]
 Type=simple
 DynamicUser=yes
-Environment=SANCTUAIRE_WEB=/opt/sanctuaire/web SANCTUAIRE_PORT=8787 HERMES_API=http://127.0.0.1:9119
+Environment=SANCTUAIRE_WEB=/opt/sanctuaire/web SANCTUAIRE_PORT=8787 HERMES_API=http://127.0.0.1:9119 SANCTUAIRE_STATE_DIR=/var/lib/sanctuaire
 LoadCredential=api.key:/etc/sanctuaire/api.key
 ExecStart=/usr/bin/python3 /opt/sanctuaire/deploy/sanctuaire_server.py
 Restart=on-failure

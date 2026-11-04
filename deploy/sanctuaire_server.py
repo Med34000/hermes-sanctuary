@@ -32,6 +32,9 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
 
 WEB = os.environ.get("SANCTUAIRE_WEB", "/opt/sanctuaire/web")
+# Dossier où le hook et le plugin écrivent l'état (2026-11-04) : servi directement, sans lien symbolique dans web/
+STATE_DIR = os.environ.get("SANCTUAIRE_STATE_DIR", "").strip()
+STATE_FILES = ("etat.json", "sentinelle.json")
 PORT = int(os.environ.get("SANCTUAIRE_PORT", "8787"))
 API = urlsplit(os.environ.get("HERMES_API", "http://127.0.0.1:9119"))
 KEY_FILE = os.environ.get("SANCTUAIRE_KEY_FILE") or os.path.join(os.environ.get("CREDENTIALS_DIRECTORY", "/etc/sanctuaire"), "api.key")
@@ -202,8 +205,26 @@ class Handler(SimpleHTTPRequestHandler):
             conn.close()
         return True
 
+    def _state(self):
+        """Sert etat.json / sentinelle.json depuis STATE_DIR (noms d'outils et horodatages seulement)."""
+        name = urlsplit(self.path).path.lstrip("/")
+        if not STATE_DIR or name not in STATE_FILES:
+            return False
+        try:
+            with open(os.path.join(STATE_DIR, name), "rb") as f:
+                data = f.read()
+        except OSError:
+            self._json(404, {"error": "état absent"})
+            return True
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+        return True
+
     def do_GET(self):
-        if not self._proxy("GET"):
+        if not self._proxy("GET") and not self._state():
             super().do_GET()
 
     def do_POST(self):
