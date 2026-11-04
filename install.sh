@@ -110,7 +110,7 @@ restart_gateway() {
   case "$mode" in
     now)
       say "   $(t "Les messageries de Hermes (Discord, Telegram…) seront coupées ~10 s." "Hermes messaging (Discord, Telegram…) will be down ~10 s.")"
-      if ask "$(t "Redémarrer $GATEWAY maintenant ?" "Restart $GATEWAY now?")"; then run $SUDO systemctl restart "$GATEWAY"; ok "$(t "Hermes redémarré." "Hermes restarted.")"; [ "$DRY" = 1 ] || sleep 8
+      if ask "$(t "Redémarrer $GATEWAY maintenant ?" "Restart $GATEWAY now?")"; then run $SUDO systemctl restart "$GATEWAY"; if [ "$DRY" = 0 ]; then ok "$(t "Hermes redémarré." "Hermes restarted.")"; sleep 8; fi
       else warn "$(t "À faire plus tard : sudo systemctl restart $GATEWAY" "Do it later: sudo systemctl restart $GATEWAY")"; fi ;;
     later)  # utile quand c'est Hermes lui-même qui installe : il termine sa réponse avant d'être redémarré
       run $SUDO systemd-run --quiet --on-active=30 --unit="sanctuaire-restart-$STAMP" systemctl restart "$GATEWAY"
@@ -181,7 +181,8 @@ if ask "$(t "Installer le hook (activité) et le plugin Shiba (erreurs, approbat
   HERMES_BIN="$(command -v hermes 2>/dev/null || true)"
   for c in "$HERMES_HOME/hermes-agent/venv/bin/hermes" "$HERMES_HOME/hermes-agent/.venv/bin/hermes"; do if [ -z "$HERMES_BIN" ] && $SR test -x "$c"; then HERMES_BIN="$c"; fi; done
   if [ -n "$HERMES_BIN" ]; then
-    if run as_gw env HERMES_HOME="$HERMES_HOME" "$HERMES_BIN" plugins enable sanctuaire-sentinelle; then ok "$(t "Plugin activé." "Plugin enabled.")"
+    if [ "$DRY" = 1 ]; then echo "   ${C}\$${N} sudo -u $GW_USER env HERMES_HOME=$HERMES_HOME $HERMES_BIN plugins enable sanctuaire-sentinelle"
+    elif as_gw env HERMES_HOME="$HERMES_HOME" "$HERMES_BIN" plugins enable sanctuaire-sentinelle; then ok "$(t "Plugin activé." "Plugin enabled.")"
     else warn "$(t "Active le plugin toi-même : hermes plugins enable sanctuaire-sentinelle" "Enable the plugin yourself: hermes plugins enable sanctuaire-sentinelle")"; fi
   else
     warn "$(t "Commande hermes introuvable. Active le plugin : hermes plugins enable sanctuaire-sentinelle" "hermes command not found. Enable the plugin: hermes plugins enable sanctuaire-sentinelle")"
