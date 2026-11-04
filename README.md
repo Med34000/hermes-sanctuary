@@ -6,8 +6,9 @@ Every tool your agent uses wakes up a companion, and you chat with it right next
 
 ![The Solar Sanctuary — demo](docs/demo.gif)
 
-> 🇫🇷 Projet personnel de [Médéric Morin](https://iatelier.ch), construit en *vibe coding* avec l'IA. Partagé pour recevoir **des avis, des idées et des améliorations**. ([Lire en français ↓](#-en-français))
-> 🇬🇧 Personal project, built by vibe coding with AI. Shared to get **feedback, ideas and improvements**.
+> 🇬🇧 Personal project by **[Médéric Morin](https://github.com/Med34000)**, built by *vibe coding* with AI. Shared to get **feedback, ideas and improvements**.
+>
+> 🇫🇷 Projet personnel de **[Médéric Morin](https://github.com/Med34000)**, construit en *vibe coding* avec l'IA. Partagé pour recevoir **des avis, des idées et des améliorations**. ([Lire en français ↓](#-en-français))
 
 ---
 
@@ -101,7 +102,7 @@ Que ce soit une critique, une idée, une optimisation ou un conseil de sécurit�
 - **Images & characters**: [CC BY 4.0](LICENSE-ASSETS). Free to reuse, with credit.
 - 🇫🇷 Le code est sous Apache 2.0 et les images sous CC BY 4.0 : tout est libre, à condition de **garder le crédit « Le Sanctuaire Solaire — Médéric Morin »** (fichier [NOTICE](NOTICE)).
 
-**Created by Médéric Morin** · [LinkedIn](https://www.linkedin.com/in/mederic-morin-auto-ia-tech/) · [iatelier.ch](https://iatelier.ch)
+**Created by [Médéric Morin](https://github.com/Med34000)** · [LinkedIn](https://www.linkedin.com/in/mederic-morin-auto-ia-tech/) · [iatelier.ch](https://iatelier.ch)
 
 Independent project, not affiliated with Nous Research. / Projet indépendant, sans lien avec Nous Research.
 
