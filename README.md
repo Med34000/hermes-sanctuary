@@ -102,7 +102,7 @@ Que ce soit une critique, une idée, une optimisation ou un conseil de sécurit�
 - **Images & characters**: [CC BY 4.0](LICENSE-ASSETS). Free to reuse, with credit.
 - 🇫🇷 Le code est sous Apache 2.0 et les images sous CC BY 4.0 : tout est libre, à condition de **garder le crédit « Le Sanctuaire Solaire — Médéric Morin »** (fichier [NOTICE](NOTICE)).
 
-**Created by [Médéric Morin](https://github.com/Med34000)** · [LinkedIn](https://www.linkedin.com/in/mederic-morin-auto-ia-tech/) · [iatelier.ch](https://iatelier.ch)
+**Created by [Médéric Morin](https://github.com/Med34000)** · [X @Med_34000](https://x.com/Med_34000) · [LinkedIn](https://www.linkedin.com/in/mederic-morin-auto-ia-tech/) · [iatelier.ch](https://iatelier.ch)
 
 Independent project, not affiliated with Nous Research. / Projet indépendant, sans lien avec Nous Research.
 
