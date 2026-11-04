@@ -103,7 +103,8 @@
     if ($("backdrop")) $("backdrop").style.backgroundImage = bg;
     if (T.ambience === "rays") el("div", "rays", pano);
     var scenesLink = $("scenes-link");
-    if (scenesLink) { if (T.scenes) scenesLink.href = T.scenes; else scenesLink.remove(); }
+    /* la vue « 5 scènes » n'existe qu'en français pour l'instant : masquée dans les autres langues */
+    if (scenesLink) { if (T.scenes && LANG === (T.lang || "fr")) scenesLink.href = T.scenes; else scenesLink.remove(); }
 
     /* ---- personnages ---- */
     ROLES.forEach(function (role) {
@@ -116,6 +117,8 @@
       e.style.aspectRatio = c.aspect[0] + " / " + c.aspect[1];
       if (c.doneSprite === "work") e.setAttribute("data-done-sprite", "work");
       var tag = el("span", "tag", e); el("i", "", tag); a.label = el("b", "", tag); a.label.textContent = c.name;
+      /* décalage horizontal de l'étiquette (fraction de sa largeur) quand deux voisins se chevauchent */
+      if (c.tagShift) tag.style.transform = "translate(" + (-50 + c.tagShift * 100) + "%, -6px)";
       var sprite = a.sprite = el("div", "sprite", e), breath = el("div", "breath", sprite);
       ["rest", "work", "hit"].forEach(function (k) {
         if (!c.sprites[k]) return;

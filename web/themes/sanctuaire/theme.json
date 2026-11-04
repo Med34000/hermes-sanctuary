@@ -99,7 +99,8 @@
       "stroll": {
         "after": 45000,
         "pause": 2500
-      }
+      },
+      "tagShift": -0.28
     },
     "fabrication": {
       "name": "Brico-Castor",
@@ -229,7 +230,8 @@
           "width": 97.95,
           "height": 112.52
         }
-      }
+      },
+      "tagShift": 0.18
     },
     "securite": {
       "name": "Shiba Sentinel",
@@ -283,7 +285,8 @@
           "width": 89.57,
           "height": 97.33
         }
-      }
+      },
+      "tagShift": 0.3
     }
   },
   "chat": {
