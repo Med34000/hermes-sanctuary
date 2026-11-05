@@ -180,6 +180,12 @@ body.demo #demo { display: inline-flex; }
   padding: 8px 12px; border-radius: 14px; }
 body.bands .log { display: block; }
 #headline { position: fixed; z-index: 9; left: 50%; transform: translate(-50%, -50%); width: min(900px, calc(100vw - 24px)); }
+/* fenêtre très large (bandeau au-dessus du chat, panneau sous la conversation) : le panorama est agrandi et recadré
+   sur la bande où vivent les compagnons (de 34 % à 90 % de la hauteur de l'image) au lieu d'être réduit au milieu */
+@media (min-aspect-ratio: 3/1) {
+  .viewport { align-items: flex-end; }
+  .pano { --pw: min(100vw, calc(100vh * var(--ratio) / .56)); width: var(--pw); margin-bottom: calc(var(--pw) / var(--ratio) * -0.10); }
+}
 /* petite hauteur (bandeau) : seules les étiquettes des compagnons au travail restent visibles */
 @media (max-height: 220px) { .actor[data-state="rest"] .tag { display: none; } .tag { font-size: 8.5px; padding: 3px 6px; } }
 @media (max-height: 260px) { .bar { top: 6px; left: 6px; padding: 3px 8px 3px 4px; } .titles { display: none; } }
