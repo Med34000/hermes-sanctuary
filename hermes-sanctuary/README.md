@@ -32,19 +32,19 @@ You chat with Hermes as usual; the Sanctuary shows what it is doing, including b
 
 ## What it shows
 
-- **Who is working**: each tool wakes its companion; Kitsune shouts and throws a paper plane to hand the work out.
-- **Where the work comes from**: Kitsune's label shows *Discord*, *Telegram* or *⏰ your scheduled task* when Hermes works without you.
-- **The Shiba guards you**: he barks on tool and provider errors, when Hermes **silently switches to a fallback model**, and when a permission is waiting (with Hermes's own short description, e.g. "recursive delete", and where to answer). In Hermes Desktop, a fallback, a loop, a heavy turn, an exceeded budget or a permission waiting on Discord/Telegram also sends a native notification.
+- **Who is working**: each tool wakes its character; Hermes (Kitsune in the Clearing) calls out and hands the work out.
+- **Where the work comes from**: the coordinator's label shows *Discord*, *Telegram* or *⏰ your scheduled task* when Hermes works without you.
+- **The guard (Cerberus, or the Shiba in the Clearing) protects you**: he barks on tool and provider errors, when Hermes **silently switches to a fallback model**, and when a permission is waiting (with Hermes's own short description, e.g. "recursive delete", and where to answer). In Hermes Desktop, a fallback, a loop, a heavy turn, an exceeded budget or a permission waiting on Discord/Telegram also sends a native notification.
 - **Hermes going in circles**: the guard barks when Hermes calls the same tool with the same arguments again and again in one turn (4 times in its last 12 calls) — the kind of loop that burns tokens for nothing.
 - **Daily budget**: the journal shows today's **estimated cost** (Hermes's own pricing, per model). Set a daily budget in dollars and the guard barks once the day goes over it.
 - **Alerts in plain words**: every alert also appears in a bubble above the guard for a few seconds.
-- **Heavy turns**: the Shiba growls when one turn reads more than 200,000 input tokens (a conversation grown too long: time for `/new`), and the journal lists the heaviest turns.
+- **Heavy turns**: the guard growls when one turn reads more than 200,000 input tokens (a conversation grown too long: time for `/new`), and the journal lists the heaviest turns.
 - **Today's journal** (*Today* button): turns, tools per companion, where the work came from, errors, fallbacks, loops, heavy turns, permissions, tokens and cost per model, hour by hour with the peak.
 - **Share my day**: one click makes an image of the panorama with the day's numbers (turns, tools, busiest character, cost), ready to post.
 - **Replay the day**: the whole day plays again in the panorama, sped up, with a clock and a progress bar.
 - **Companion cards**: click a companion to see its role, how often it worked today and its recent tools.
 - **Subagents**: when Hermes delegates, doves circle the temple (Olympus) or little foxes join Kitsune (Clearing) until the subagents are done.
-- **Night and sounds**: in the evening the clearing darkens and fireflies come out (your local time); optional sounds (off by default), synthesised on the spot, no audio files.
+- **Night and sounds**: in the evening the scene darkens and fireflies come out (your local time); optional sounds (off by default), synthesised on the spot, no audio files.
 
 ## Updating
 
