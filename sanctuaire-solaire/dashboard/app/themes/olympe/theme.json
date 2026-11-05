@@ -127,10 +127,6 @@
     "stagger": 160,
     "shoutMs": 3500
    },
-   "stroll": {
-    "after": 45000,
-    "pause": 2500
-   },
    "subagents": [
     [
      -5.6,
