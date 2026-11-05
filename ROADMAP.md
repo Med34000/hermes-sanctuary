@@ -1,6 +1,6 @@
 # Feuille de route · Roadmap
 
-*2026-11-04 ≈18:55, mis à jour 2026-11-05 ≈11:35 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin*
+*2026-11-04 ≈18:55, mis à jour 2026-11-05 ≈11:35 et ≈15:00 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin*
 
 ## ✅ Fait · Done
 - Panorama avec 5 compagnons animés, reliés en direct aux outils de Hermes. / Panorama with 5 animated companions, live from Hermes tools.
@@ -10,6 +10,8 @@
 - Installation guidée (`install.sh`), installable par Hermes lui-même (`AGENTS.md`). / Guided installer, installable by Hermes itself.
 - Français et anglais, selon la langue du navigateur. / French and English, from the browser language.
 - **Plugin Hermes** (bêta) : Hermes Desktop sur Mac, Windows et Linux, et tableau de bord web, installable en une commande. / **Hermes plugin** (beta): Hermes Desktop on macOS, Windows and Linux, plus the web dashboard, one-command install.
+- Journal du jour, fiches des compagnons, sous-agents, nuit et sons, alertes « tour trop lourd ». / Today's journal, companion cards, subagents, night and sounds, heavy-turn alerts.
+- **Univers Olympe** (par défaut) avec décor animé, et choix de l'univers dans la barre. / **Olympus world** (default) with an animated scenery, and a world switch in the bar.
 
 ## 🔜 Prochaines étapes · Next
 - **Approbations depuis le chat** : boutons Autoriser / Refuser, avec le Shiba qui monte la garde. / Approvals from the chat (Allow / Deny).
@@ -23,6 +25,6 @@
 - Traductions dans d'autres langues. / Translations into other languages.
 - Installation Docker. / Docker install.
 - Autres agents que Hermes. / Agents other than Hermes.
-- Sons d'ambiance, mode nuit, statistiques de la journée. / Ambient sounds, night mode, daily stats.
+- D'autres univers (Égypte, Japon, station spatiale…). / More worlds (Egypt, Japan, space station…).
 
 👉 [Discussions](../../discussions) · [Proposer une idée · Suggest an idea](../../issues/new/choose)

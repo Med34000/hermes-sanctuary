@@ -2,7 +2,7 @@
    A "Sanctuaire" tab with the full panorama, and a foldable strip above the Chat tab.
    The panorama runs in an iframe (app/frame.html, same engine as the standalone page); this bundle feeds it the
    theme and the merged activity read from the plugin's own routes. No other network call.
-   2026-11-05 ≈11:35 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin
+   2026-11-05 ≈11:35, mis à jour ≈15:20 (choix de l'univers) (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin
    Copyright 2026 Médéric Morin — Apache License 2.0 */
 (function () {
   "use strict";
@@ -14,14 +14,46 @@
   var API = "/api/plugins/" + NAME;
   var FRAME = "/dashboard-plugins/" + NAME + "/app/frame.html";
   var POLL_MS = 1500;
-  var themeCache = null;
+  var DEFAULT_WORLD = "olympe", WORLD_KEY = "sanctuaire.world";
+  var themeCache = {}, worldsCache = null, worldListeners = [];
+  var world = readWorld();
 
-  function loadTheme() {
-    if (!themeCache) themeCache = SDK.fetchJSON(API + "/theme?id=sanctuaire").catch(function (e) { themeCache = null; throw e; });
-    return themeCache;
+  function readWorld() {
+    try { return (localStorage.getItem(WORLD_KEY) || DEFAULT_WORLD).replace(/[^a-z0-9_-]/g, "") || DEFAULT_WORLD; }
+    catch (e) { return DEFAULT_WORLD; }
+  }
+  function setWorld(id) {
+    if (typeof id !== "string" || !/^[a-z0-9_-]{1,40}$/.test(id) || id === world) return;
+    world = id;
+    try { localStorage.setItem(WORLD_KEY, id); } catch (e) { /* stockage indisponible */ }
+    worldListeners.slice().forEach(function (fn) { try { fn(id); } catch (e) { /* rien */ } });
+  }
+  /* les univers connus du serveur ; un serveur plus ancien n'a que la clairière */
+  function loadWorlds() {
+    if (!worldsCache) worldsCache = SDK.fetchJSON(API + "/themes")
+      .then(function (l) { return Array.isArray(l) && l.length ? l : [{ id: "sanctuaire", names: {} }]; },
+            function () { return [{ id: "sanctuaire", names: {} }]; });
+    return worldsCache;
+  }
+  function loadTheme(want) {
+    return loadWorlds().then(function (worlds) {
+      var id = worlds.some(function (w) { return w.id === want; }) ? want : worlds[0].id;
+      if (!themeCache[id]) themeCache[id] = SDK.fetchJSON(API + "/theme?id=" + encodeURIComponent(id))
+        .catch(function (e) { delete themeCache[id]; throw e; });
+      return themeCache[id].then(function (theme) { return { theme: theme, worlds: worlds, world: id }; });
+    });
   }
 
   function Panorama(props) {
+    var ws = useState(world), want = ws[0], setWant = ws[1];
+    useEffect(function () {
+      worldListeners.push(setWant);
+      return function () { worldListeners = worldListeners.filter(function (f) { return f !== setWant; }); };
+    }, []);
+    return h(Frame, { key: want, want: want, height: props.height });
+  }
+
+  function Frame(props) {
     var ref = useRef(null);
     useEffect(function () {
       var alive = true, timer = 0, started = false;
@@ -39,11 +71,13 @@
       }
       function onMessage(ev) {
         var f = ref.current;
-        if (!f || ev.source !== f.contentWindow || !ev.data || ev.data.type !== "sanctuaire:ready" || started) return;
+        if (!f || ev.source !== f.contentWindow || !ev.data) return;
+        if (ev.data.type === "sanctuaire:world") { setWorld(ev.data.id); return; }
+        if (ev.data.type !== "sanctuaire:ready" || started) return;
         started = true;
-        loadTheme().then(function (theme) {
+        loadTheme(props.want).then(function (b) {
           if (!alive) return;
-          post({ type: "sanctuaire:theme", theme: theme });
+          post({ type: "sanctuaire:theme", theme: b.theme, worlds: b.worlds, world: b.world });
           poll();
         }, function () { started = false; });
       }

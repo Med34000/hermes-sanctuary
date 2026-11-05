@@ -2,13 +2,15 @@
 
 Read-only. Serves:
 - GET /state         the merged activity of every Hermes process (tool names and times only);
+- GET /themes        the list of worlds (id and short name) found in dashboard/app/themes/;
 - GET /theme?id=…    a theme (characters, positions, texts) from dashboard/app/themes/<id>/theme.json;
 - GET /frame         the panorama page with its engine inlined (for Hermes Desktop's sandboxed frame);
-- GET /asset?name=…  one image of dashboard/app/, base64-encoded (Desktop cannot load files directly).
+- GET /asset?name=…&theme=…  one image of dashboard/app/ (or of themes/<theme>/), base64-encoded
+                     (Desktop cannot load files directly).
 
 Reads nothing outside this plugin's folder and its own data folder. No network, no secrets.
 
-2026-11-05 ≈11:25, mis à jour ≈12:35 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin
+2026-11-05 ≈11:25, mis à jour ≈12:35 et ≈15:10 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin
 Copyright 2026 Médéric Morin — Apache License 2.0
 """
 
@@ -183,14 +185,34 @@ def _read_theme(theme_id: str) -> dict:
     return json.loads(f.read_text(encoding="utf-8"))
 
 
+def _list_themes() -> list[dict]:
+    out = []
+    root = APP / "themes"
+    for d in sorted(root.iterdir()) if root.is_dir() else []:
+        f = d / "theme.json"
+        if d.is_symlink() or not THEME_ID.match(d.name) or not f.is_file() or f.stat().st_size > MAX_ASSET:
+            continue
+        try:
+            t = json.loads(f.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        w = t.get("world") if isinstance(t.get("world"), dict) else {}
+        en = ((t.get("i18n") or {}).get("en") or {}).get("world") or {}
+        names = {(t.get("lang") or "fr")[:5]: _txt(w.get("name") or t.get("title") or d.name, 40)}
+        if isinstance(en, dict) and en.get("name"):
+            names["en"] = _txt(en.get("name"), 40)
+        out.append({"id": d.name, "names": names, "icon": _txt(w.get("icon"), 4)})
+    return out[:8]
+
+
 def _read_frame() -> str:
     html = (APP / "frame.html").read_text(encoding="utf-8")
     js = (APP / "moteur.js").read_text(encoding="utf-8").replace("</script", "<\\/script")
     return html.replace('<script src="moteur.js"></script>', "<script>\n" + js + "\n</script>")
 
 
-def _read_asset(name: str) -> dict:
-    f = APP / name
+def _read_asset(name: str, theme_id: str = "") -> dict:
+    f = (APP / "themes" / theme_id / name) if theme_id else (APP / name)
     if f.is_symlink() or not f.is_file():
         raise FileNotFoundError(name)
     if f.stat().st_size > MAX_ASSET:
@@ -202,6 +224,11 @@ def _read_asset(name: str) -> dict:
 @router.get("/state")
 async def state() -> dict:
     return await asyncio.to_thread(_read_state)
+
+
+@router.get("/themes")
+async def themes() -> list:
+    return await asyncio.to_thread(_list_themes)
 
 
 @router.get("/theme")
@@ -223,10 +250,10 @@ async def frame() -> dict:
 
 
 @router.get("/asset")
-async def asset(name: str = "") -> dict:
-    if not ASSET_NAME.match(name):
+async def asset(name: str = "", theme: str = "") -> dict:
+    if not ASSET_NAME.match(name) or (theme and not THEME_ID.match(theme)):
         raise HTTPException(status_code=400, detail="bad asset name")
     try:
-        return await asyncio.to_thread(_read_asset, name)
+        return await asyncio.to_thread(_read_asset, name, theme)
     except (OSError, ValueError):
         raise HTTPException(status_code=404, detail="asset not found")

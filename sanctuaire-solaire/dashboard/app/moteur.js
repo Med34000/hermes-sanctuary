@@ -66,7 +66,7 @@
       "cardRole_recherche": "Cherche dehors : web, pages, images, navigateur.",
       "cardRole_analyse": "Fouille ce qui existe déjà : fichiers, mémoire, anciennes conversations, skills.",
       "cardRole_securite": "Veille : erreurs d'outils et de fournisseur, bascules de modèle, tours trop lourds, autorisations.",
-      "subagents": "{coord} délègue à {n} sous-agent(s).", "soundOn": "Sons activés", "soundOff": "Sons coupés", "soundTitle": "Sons"},
+      "subagents": "{coord} délègue à {n} sous-agent(s).", "soundOn": "Sons activés", "soundOff": "Sons coupés", "soundTitle": "Sons", "worldTitle": "Changer d'univers : {name}"},
     en: {"srcLive": "Live · Hermes", "srcLost": "Connection lost · Hermes", "srcDemo": "Demo · simulated events", "logLive": "live feed", "logLost": "connection lost", "logDemo": "simulated feed", "hlLive": "Live from Hermes", "hlLost": "Connection lost · retrying", "done": "Done", "listening": "Listening", "and": " and ", "themeMissing": "Theme not found ({e}).", "docTitle": "Sanctuary · Panorama", "demoBtn": "Auto demo", "scenes": "The 5 scenes", "loading": "Loading…", "logTitle": "Under the hood", "logAria": "Log", "chatAria": "Chat with Kitsune", "folderMenuTitle": "Rename or archive this folder", "newBtn": "New", "newTitle": "Start a new conversation", "open": "Open", "close": "Close", "foldersTitle": "Folders / Projects", "foldersAria": "Folders and projects", "folderAdd": "+ New", "folderAddTitle": "Create a folder or project (a separate conversation, kept by Hermes)", "foldersHint": "Create one folder per project to keep your conversations tidy.", "attach": "Attach an image", "attachTitle": "Attach an image (you can also paste or drop it here)", "inputAria": "Your message to Kitsune", "send": "Send", "removeImg": "Remove image {n}", "activity": "Activity", "sessionTitle": "Sanctuary", "locale": "en-US",
       "src_discord": "Discord", "src_telegram": "Telegram", "src_slack": "Slack", "src_whatsapp": "WhatsApp", "src_signal": "Signal",
       "src_email": "e-mail", "src_api_server": "API", "src_cron": "Scheduled task", "srcStart": "{coord} heads off to {src}.",
@@ -89,7 +89,7 @@
       "cardRole_recherche": "Searches outside: web, pages, images, browser.",
       "cardRole_analyse": "Digs through what already exists: files, memory, past conversations, skills.",
       "cardRole_securite": "Keeps watch: tool and provider errors, model fallbacks, heavy turns, permissions.",
-      "subagents": "{coord} delegates to {n} subagent(s).", "soundOn": "Sound on", "soundOff": "Sound off", "soundTitle": "Sound"} };
+      "subagents": "{coord} delegates to {n} subagent(s).", "soundOn": "Sound on", "soundOff": "Sound off", "soundTitle": "Sound", "worldTitle": "Switch world: {name}"} };
   var LANG = (function () {
     var q = new URLSearchParams(location.search).get("lang") || (window.SANCTUAIRE_LANG || null), s = null;
     try {
@@ -122,6 +122,43 @@
     });
   })();
 
+  /* animations du décor : injectées par le moteur pour que tout habillage en profite (page autonome et cadre du plugin) */
+  function injectAmbientCSS() {
+    if (document.getElementById("sanctuaire-ambient-css")) return;
+    var st = document.createElement("style"); st.id = "sanctuaire-ambient-css";
+    st.textContent = [
+      ".layer{position:absolute;pointer-events:none;background-repeat:no-repeat}",
+      ".a-sway{animation:s-sway 7s ease-in-out infinite alternate;will-change:transform}",
+      "@keyframes s-sway{0%{transform:rotate(-.32deg) skewX(-.35deg)}100%{transform:rotate(.32deg) skewX(.35deg)}}",
+      ".a-flow{background-repeat:repeat-y!important;animation:s-flow 1.3s linear infinite}",
+      "@keyframes s-flow{from{background-position:0 0}to{background-position:0 100%}}",
+      ".a-flicker,.t-glow{animation:s-flicker 2.6s ease-in-out infinite}",
+      ".t-glow{background:radial-gradient(closest-side,var(--c,rgba(255,150,40,.55)),rgba(255,120,30,0));mix-blend-mode:screen}",
+      "@keyframes s-flicker{0%,100%{opacity:.55}18%{opacity:.85}31%{opacity:.6}47%{opacity:.95}63%{opacity:.7}82%{opacity:.9}}",
+      ".t-smoke i{position:absolute;bottom:0;width:55%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(238,232,222,.8),rgba(225,218,205,.35) 45%,rgba(225,218,205,0) 70%);filter:blur(1.5px);animation:s-smoke 6s linear infinite;opacity:0}",
+      "@keyframes s-smoke{0%{transform:translate(-50%,0) scale(.35);opacity:0}12%{opacity:.85}60%{opacity:.55}100%{transform:translate(-5%,-210%) scale(1.9);opacity:0}}",
+      ".t-sparkle i{position:absolute;width:5px;height:2px;border-radius:2px;background:rgba(255,248,220,.95);box-shadow:0 0 6px 2px rgba(255,236,170,.7);animation:s-twinkle 2.5s ease-in-out infinite;opacity:0}",
+      "@keyframes s-twinkle{0%,100%{opacity:0;transform:scaleX(.4)}50%{opacity:1;transform:scaleX(1.4)}}",
+      ".pano.still .layer,.pano.still .layer i{animation:none!important}",
+      /* habillage réaliste (« calm ») : pas de respiration ni de sautillement, pas de halo au sol */
+      ".pano.calm .actor .breath{animation:none!important}",
+      ".pano.calm .actor::before{display:none}",
+      /* colombes (sous-agents) : un vol en boucle autour d'un point, ailes qui battent */
+      ".dove{position:absolute;width:var(--w,2.4%);aspect-ratio:3/2;margin:0 0 0 calc(var(--w,2.4%) / -2);opacity:0;transition:opacity .8s ease;pointer-events:none;z-index:6;animation:dv-orbit var(--d,9s) linear infinite}",
+      ".dove.on{opacity:1}",
+      ".dove .dv{position:absolute;inset:0;animation:dv-face var(--d,9s) linear infinite;animation-direction:inherit;animation-delay:inherit}",
+      ".dove svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 1px 1.5px rgba(60,50,35,.35));animation:dv-bob .5s ease-in-out infinite alternate}",
+      ".dove .w{transform-box:fill-box;transform-origin:85% 100%;animation:dv-flap .32s ease-in-out infinite alternate}",
+      ".dove .w2{animation-delay:-.04s}",
+      "@keyframes dv-flap{from{transform:scaleY(1)}to{transform:scaleY(-.55)}}",
+      "@keyframes dv-bob{from{transform:translateY(-6%)}to{transform:translateY(6%)}}",
+      "@keyframes dv-face{0%,49.9%{transform:scaleX(1)}50%,100%{transform:scaleX(-1)}}",
+      "@keyframes dv-orbit{0%{left:calc(var(--cx) - var(--rx));top:var(--cy)}12.5%{left:calc(var(--cx) - var(--rx) * .707);top:calc(var(--cy) - var(--ry) * .707)}25%{left:var(--cx);top:calc(var(--cy) - var(--ry))}37.5%{left:calc(var(--cx) + var(--rx) * .707);top:calc(var(--cy) - var(--ry) * .707)}50%{left:calc(var(--cx) + var(--rx));top:var(--cy)}62.5%{left:calc(var(--cx) + var(--rx) * .707);top:calc(var(--cy) + var(--ry) * .707)}75%{left:var(--cx);top:calc(var(--cy) + var(--ry))}87.5%{left:calc(var(--cx) - var(--rx) * .707);top:calc(var(--cy) + var(--ry) * .707)}100%{left:calc(var(--cx) - var(--rx));top:var(--cy)}}",
+      "@media (prefers-reduced-motion: reduce){.dove,.dove .dv,.dove svg,.dove .w{animation:none!important}}"
+    ].join("\n");
+    document.head.appendChild(st);
+  }
+
   function themeId() {
     var q = new URLSearchParams(location.search).get("theme");
     var m = document.querySelector('meta[name="sanctuaire-theme"]');
@@ -131,7 +168,7 @@
   /* mode hôte (plugin) : la page qui contient le cadre envoie l'habillage, les images (data:/blob:) et l'activité */
   var srcMeta = document.querySelector('meta[name="sanctuaire-source"]');
   var HOSTED = !!(srcMeta && srcMeta.content === "host");
-  var ASSETS = {};
+  var ASSETS = {}, WORLDS = [], WORLD = "";
   var hostQueue = [], hostHandler = null;
   function toHost(msg) { try { if (window.parent && window.parent !== window) window.parent.postMessage(msg, "*"); } catch (e) { /* rien */ } }
   if (HOSTED) {
@@ -142,6 +179,10 @@
       if (ev.source && window.parent && ev.source !== window.parent) return;
       if (d.type === "sanctuaire:theme" && !started && d.theme && typeof d.theme === "object") {
         started = true;
+        if (Array.isArray(d.worlds)) WORLDS = d.worlds.filter(function (w) {
+          return w && typeof w.id === "string" && /^[a-z0-9_-]{1,40}$/.test(w.id);
+        }).slice(0, 8);
+        WORLD = typeof d.world === "string" ? d.world : "";
         if (d.assets && typeof d.assets === "object") Object.keys(d.assets).forEach(function (k) {
           var v = d.assets[k]; if (typeof v === "string" && /^(data:image\/|blob:)/.test(v)) ASSETS[k] = v;
         });
@@ -176,6 +217,7 @@
     pano.style.backgroundImage = bg;
     if ($("backdrop")) $("backdrop").style.backgroundImage = bg;
     if (T.ambience === "rays") el("div", "rays", pano);
+    injectAmbientCSS();
     if (HOSTED) T.scenes = null;
     var scenesLink = $("scenes-link");
     /* la vue « 5 scènes » n'existe qu'en français pour l'instant : masquée dans les autres langues */
@@ -195,6 +237,8 @@
       /* décalage horizontal de l'étiquette (fraction de sa largeur) quand deux voisins se chevauchent */
       if (c.tagShift) tag.style.transform = "translate(" + (-50 + c.tagShift * 100) + "%, -6px)";
       var sprite = a.sprite = el("div", "sprite", e), breath = el("div", "breath", sprite);
+      /* bas de l'image effacé en fondu (personnage derrière un objet du décor) — 2026-11-05 */
+      if (c.fade) { var mk = "linear-gradient(to top, transparent 0%, #000 " + c.fade + "%)"; sprite.style.webkitMaskImage = mk; sprite.style.maskImage = mk; }
       ["rest", "work", "hit"].forEach(function (k) {
         if (!c.sprites[k]) return;
         var im = el("img", "p-" + k, breath); im.src = url(c.sprites[k]); im.alt = "";
@@ -221,6 +265,42 @@
         e.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); go(); } });
       }
     });
+
+    /* ---- décor vivant et plans de profondeur (2026-11-05) : theme.layers ----
+       type "img" : une découpe du décor (src) placée en % du panorama, devant ("front") ou derrière ("back") les personnages,
+                    animée ou non (anim : sway = feuillage, flow = eau qui coule, flicker = lueur) ;
+       type "smoke" : des volutes qui montent ; "sparkle" : des reflets (eau, mer) dans une zone (clip en polygon CSS) ;
+       type "glow" : une lueur chaude qui vacille (feu). */
+    var firstActor = pano.querySelector(".actor");
+    (T.layers || []).forEach(function (L) {
+      var d = el("div", "layer" + (L.anim ? " a-" + L.anim : "") + (L.type ? " t-" + L.type : ""), pano);
+      d.style.left = L.x + "%"; d.style.top = L.y + "%"; d.style.width = L.w + "%"; d.style.height = L.h + "%";
+      if (L.z === "back" && firstActor) pano.insertBefore(d, firstActor); else d.style.zIndex = L.zIndex || 4;
+      if (L.origin) d.style.transformOrigin = L.origin;
+      if (L.blend) d.style.mixBlendMode = L.blend;
+      if (L.opacity != null) d.style.opacity = L.opacity;
+      if (L.dur) d.style.animationDuration = L.dur + "s";
+      if (L.clip) d.style.clipPath = L.clip;
+      if (L.mask) { d.style.webkitMaskImage = L.mask; d.style.maskImage = L.mask; }
+      if (L.src) {
+        d.style.backgroundImage = "url('" + url(L.src) + "')";
+        d.style.backgroundSize = L.anim === "flow" ? "100% 50%" : "100% 100%";
+      }
+      if (L.color) d.style.setProperty("--c", L.color);
+      var n = L.count || 0, i;
+      for (i = 0; i < n; i++) {
+        var p = el("i", "", d);
+        if (L.type === "smoke") {
+          p.style.left = (40 + Math.random() * 20) + "%"; p.style.animationDelay = (-i * (L.dur || 6) / n).toFixed(2) + "s";
+          p.style.animationDuration = (L.dur || 6) + "s";
+        } else if (L.type === "sparkle") {
+          p.style.left = (Math.random() * 100) + "%"; p.style.top = (Math.random() * 100) + "%";
+          p.style.animationDelay = (Math.random() * 3).toFixed(2) + "s"; p.style.animationDuration = (1.6 + Math.random() * 2.4).toFixed(2) + "s";
+        }
+      }
+    });
+    if (reduce) pano.classList.add("still");
+    if (T.calm) pano.classList.add("calm");
 
     /* ---- journal et titre ---- */
     function headline(t) {
@@ -279,6 +359,8 @@
       var c = R[role]; if (!c || !c.fly) return;
       var F = c.fly, box = el("div", "flyer", pano), sh = el("div", "sheet", box);
       box.style.height = F.h + "%"; box.style.aspectRatio = F.aspect[0] + " / " + F.aspect[1];
+      /* point d'ancrage = le corps de l'oiseau dans l'image (et non le centre), pour partir exactement de la branche */
+      if (F.anchor) box.style.transform = "translate(" + (-F.anchor[0] * 100) + "%, " + (-F.anchor[1] * 100) + "%)";
       sh.style.backgroundImage = "url('" + url(F.src) + "')"; sh.style.backgroundSize = (F.cols * 100) + "% " + (F.rows * 100) + "%";
       var mode = "perched", wantBack = false, raf = 0, ready = false, img = new Image();
       img.onload = function () { ready = true; }; img.src = url(F.src);
@@ -701,12 +783,30 @@
 
     /* ---- sous-agents (2026-11-05) : de petits clones du coordinateur travaillent à côté de lui ---- */
     var subs = [], subsShown = 0, SUB_SLOTS = coord.subagents || [[-4.8, -6], [5.2, -5.5], [-8.8, -4.5], [9.2, -4]];
+    /* colombes (2026-11-05, habillage Olympe) : à la place des clones, des colombes tournent au-dessus du temple */
+    var DOVES = Array.isArray(T.doves) ? T.doves.slice(0, 4) : null;
+    if (DOVES && DOVES.length) SUB_SLOTS = DOVES;
+    var DOVE_SVG = '<svg viewBox="0 0 60 40" aria-hidden="true">' +
+      '<path class="w w2" d="M31 21 C27 11 20 5 11 5 C17 9 20 14 24 21 Z" fill="#d9d4c8"/>' +
+      '<path d="M15 23 C21 17 35 17 43 20 C46 17 51 17 54 20 L59 21.5 L54 23 C51 26 46 26 42 25 C34 29 22 29 15 25 L4 29 L6 24 L2 18 Z" fill="#fbf8f1" stroke="rgba(110,100,85,.45)" stroke-width=".7"/>' +
+      '<circle cx="51.3" cy="20.2" r=".9" fill="#2b2620"/>' +
+      '<path class="w" d="M33 21 C30 9 23 1 12 1 C19 6 22 13 26 22 Z" fill="#fffdf8" stroke="rgba(110,100,85,.4)" stroke-width=".6"/></svg>';
     function showSubagents(n) {
       n = Math.max(0, Math.min(Number(n) || 0, SUB_SLOTS.length));
       if (n === subsShown) return;
       if (n > subsShown && lastState) log("HERMES", ui("subagents", { coord: coord.short, n: (lastState.sous_agents || {}).actifs || n }));
       subsShown = n;
       var src = coord.sprites && (coord.sprites.work || coord.sprites.rest);
+      while (DOVES && subs.length < n) {
+        var dv = DOVES[subs.length], d = el("div", "dove", pano), inner = el("div", "dv", d);
+        inner.innerHTML = DOVE_SVG;
+        d.style.setProperty("--cx", dv.cx + "%"); d.style.setProperty("--cy", dv.cy + "%");
+        d.style.setProperty("--rx", dv.rx + "%"); d.style.setProperty("--ry", dv.ry + "%");
+        d.style.setProperty("--d", (dv.dur || 9) + "s"); if (dv.w) d.style.setProperty("--w", dv.w + "%");
+        d.style.animationDelay = (-(dv.phase || 0) * (dv.dur || 9)).toFixed(2) + "s";
+        if (dv.reverse) d.style.animationDirection = "reverse";
+        subs.push(d);
+      }
       while (subs.length < n) {
         var i = subs.length, slot = SUB_SLOTS[i], m = el("div", "subag", pano), im = el("img", "", m);
         im.src = url(src); im.alt = "";
@@ -779,6 +879,21 @@
         try { localStorage.setItem("sanctuaire.sound", soundOn ? "1" : "0"); } catch (e) { /* stockage indisponible */ }
         if (soundOn) { audio(); sound("hoot"); }
       });
+
+    /* ---- changer d'univers (plugin : la page hôte recharge le cadre avec l'autre habillage) ---- */
+    var worldBtn = $("world-btn");
+    if (worldBtn && HOSTED && WORLDS.length > 1) {
+      var wi = 0;
+      WORLDS.forEach(function (w, k) { if (w.id === (WORLD || T.id)) wi = k; });
+      var next = WORLDS[(wi + 1) % WORLDS.length];
+      var wname = function (w) { var n = (w.names && (w.names[LANG] || w.names.fr)) || w.id; return String(n).slice(0, 24); };
+      var here = T.world || {};
+      worldBtn.textContent = (here.icon || "\u21C4") + " " + (here.name || wname(WORLDS[wi]));
+      worldBtn.title = ui("worldTitle", { name: wname(next) });
+      worldBtn.setAttribute("aria-label", worldBtn.title);
+      worldBtn.hidden = false;
+      worldBtn.addEventListener("click", function () { toHost({ type: "sanctuaire:world", id: next.id }); });
+    }
     }
 
     /* ---- démo : le coordinateur distribue des tâches au hasard ---- */

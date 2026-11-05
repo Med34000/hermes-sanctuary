@@ -5,6 +5,7 @@
 // Only tool NAMES are forwarded, never arguments, results or messages.
 // 2026-11-05 ≈11:45, mis à jour ≈12:50 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin
 // 2026-11-05 ≈12:50 : notifications natives du Shiba (modèle de secours, autorisation en attente sur la messagerie)
+// 2026-11-05 ≈15:15 : choix de l'univers (Olympe, Clairière), notification « tour trop lourd »
 // Copyright 2026 Médéric Morin — Apache License 2.0
 import { SandboxedFrame, ROUTES_AREA, SIDEBAR_NAV_AREA } from '@hermes/plugin-sdk'
 import { useEffect, useRef, useState } from 'react'
@@ -15,13 +16,40 @@ const POLL_MS = 1500
 const listeners = new Set()
 const NOTIFY_GAP_MS = 120000
 const lastNotify = {}
+const KINDS = ['fallback', 'approval', 'heavy']
+const DEFAULT_WORLD = 'olympe'
+const WORLD_KEY = 'sanctuaire.world'
+const worldListeners = new Set()
 let api = null
-let bundle = null
+let bundles = {}
+let worldsP = null
+let world = readWorld()
 
-// The Shiba's alerts (fallback model, permission waiting on Discord/Telegram) as a native notification,
+function readWorld() {
+  try { return (localStorage.getItem(WORLD_KEY) || DEFAULT_WORLD).replace(/[^a-z0-9_-]/g, '') || DEFAULT_WORLD } catch (e) { return DEFAULT_WORLD }
+}
+
+function setWorld(id) {
+  if (typeof id !== 'string' || !/^[a-z0-9_-]{1,40}$/.test(id) || id === world) return
+  world = id
+  try { localStorage.setItem(WORLD_KEY, id) } catch (e) { /* stockage indisponible */ }
+  worldListeners.forEach(fn => { try { fn(id) } catch (e) { /* rien */ } })
+}
+
+// The worlds the backend knows. An older backend has no /themes route: then only the clearing exists.
+function loadWorlds() {
+  if (!worldsP) {
+    worldsP = api.rest('/themes')
+      .then(list => (Array.isArray(list) && list.length ? list : [{ id: 'sanctuaire', names: {} }]))
+      .catch(() => [{ id: 'sanctuaire', names: {} }])
+  }
+  return worldsP
+}
+
+// The Shiba's alerts (fallback model, permission waiting on Discord/Telegram, heavy turn) as a native notification,
 // at most one per kind every 2 minutes. Title and text are written by the panorama, never by the frame's caller.
 function notify(msg) {
-  const kind = msg.kind === 'fallback' || msg.kind === 'approval' ? msg.kind : null
+  const kind = KINDS.includes(msg.kind) ? msg.kind : null
   if (!kind || !api || !api.os || typeof api.os.notify !== 'function') return
   const now = Date.now()
   if (now - (lastNotify[kind] || 0) < NOTIFY_GAP_MS) return
@@ -43,14 +71,14 @@ function assetNames(theme) {
   return [...names]
 }
 
-async function loadAssets(names) {
+async function loadAssets(names, themeId) {
   const out = {}
   let i = 0
   async function worker() {
     while (i < names.length) {
       const name = names[i++]
       try {
-        const r = await api.rest('/asset?name=' + encodeURIComponent(name), { timeoutMs: 60000 })
+        const r = await api.rest('/asset?name=' + encodeURIComponent(name) + (themeId ? '&theme=' + encodeURIComponent(themeId) : ''), { timeoutMs: 60000 })
         if (r && typeof r.url === 'string' && r.url.startsWith('data:image/')) out[name] = r.url
       } catch (e) { /* image manquante : le personnage garde son image fixe */ }
     }
@@ -59,28 +87,40 @@ async function loadAssets(names) {
   return out
 }
 
-function loadBundle() {
-  if (!bundle) {
-    bundle = (async () => {
-      const [frame, theme] = await Promise.all([api.rest('/frame'), api.rest('/theme?id=sanctuaire')])
-      const assets = await loadAssets(assetNames(theme))
-      return { src: 'data:text/html;charset=utf-8,' + encodeURIComponent(frame.html), theme, assets }
+function loadBundle(want) {
+  if (!bundles[want]) {
+    const p = (async () => {
+      const worlds = await loadWorlds()
+      const id = worlds.some(w => w.id === want) ? want : worlds[0].id
+      const [frame, theme] = await Promise.all([api.rest('/frame'), api.rest('/theme?id=' + encodeURIComponent(id))])
+      // The clearing keeps its images at the root of app/ (base ""); other worlds in their own folder.
+      const folder = typeof theme.base === 'string' && theme.base.startsWith('themes/') ? id : ''
+      const assets = await loadAssets(assetNames(theme), folder)
+      return { src: 'data:text/html;charset=utf-8,' + encodeURIComponent(frame.html), theme, assets, worlds, world: id }
     })()
-    bundle.catch(() => { bundle = null })
+    bundles[want] = p
+    p.catch(() => { delete bundles[want] })
   }
-  return bundle
+  return bundles[want]
 }
 
 function Panorama({ height }) {
   const ref = useRef(null)
   const [data, setData] = useState(null)
   const [failed, setFailed] = useState(false)
+  const [want, setWant] = useState(world)
+
+  useEffect(() => {
+    worldListeners.add(setWant)
+    return () => { worldListeners.delete(setWant) }
+  }, [])
 
   useEffect(() => {
     let alive = true
-    loadBundle().then(b => { if (alive) setData(b) }, () => { if (alive) setFailed(true) })
+    setData(null)
+    loadBundle(want).then(b => { if (alive) setData(b) }, () => { if (alive) setFailed(true) })
     return () => { alive = false }
-  }, [])
+  }, [want])
 
   useEffect(() => {
     if (!data) return undefined
@@ -102,9 +142,10 @@ function Panorama({ height }) {
       const w = ref.current && ref.current.contentWindow
       if (!w || ev.source !== w || !ev.data || typeof ev.data.type !== 'string') return
       if (ev.data.type === 'sanctuaire:notify') { notify(ev.data); return }
+      if (ev.data.type === 'sanctuaire:world') { setWorld(ev.data.id); return }
       if (ev.data.type !== 'sanctuaire:ready' || started) return
       started = true
-      post({ type: 'sanctuaire:theme', theme: data.theme, assets: data.assets })
+      post({ type: 'sanctuaire:theme', theme: data.theme, assets: data.assets, worlds: data.worlds, world: data.world })
       poll()
     }
     const live = msg => { if (started) post(msg) }
@@ -132,7 +173,7 @@ function Panorama({ height }) {
     src: data.src,
     title: 'Le Sanctuaire Solaire',
     style: { width: '100%', height, border: 0, display: 'block', background: '#142016' }
-  })
+  }, data.world)
 }
 
 export default {
@@ -140,14 +181,15 @@ export default {
   name: 'Le Sanctuaire Solaire',
   register(ctx) {
     api = ctx
-    bundle = null
+    bundles = {}
+    worldsP = null
     ctx.onEvent('tool.start', ev => {
       const name = ev && ev.payload && ev.payload.name
       if (typeof name === 'string') emit({ type: 'sanctuaire:event', kind: 'tool', name: name.slice(0, 80) })
     })
     ctx.onEvent('message.start', () => emit({ type: 'sanctuaire:event', kind: 'turn', busy: true }))
     ctx.onEvent('message.complete', () => emit({ type: 'sanctuaire:event', kind: 'turn', busy: false }))
-    ctx.onDispose(() => { listeners.clear(); bundle = null })
+    ctx.onDispose(() => { listeners.clear(); worldListeners.clear(); bundles = {}; worldsP = null })
 
     ctx.registerMany([
       {

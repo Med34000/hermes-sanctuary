@@ -1,6 +1,10 @@
 {
   "_info": "Habillage « Sanctuaire Solaire » — 2026-11-02 ≈19:00, avion en papier 2026-11-03 ≈07:15 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5 ; anglais 2026-11-04 ≈19:30",
   "id": "sanctuaire",
+  "world": {
+    "name": "Clairière",
+    "icon": "☀"
+  },
   "lang": "fr",
   "title": "Le Sanctuaire Solaire de Hermes",
   "subtitle": "La grande clairière",
@@ -446,6 +450,10 @@
         "errorApi": "The model or provider isn't responding.",
         "errorTool": "{name} spotted a tool error.",
         "approval": "Hermes is waiting for your approval."
+      },
+      "world": {
+        "name": "Clearing",
+        "icon": "☀"
       }
     }
   }

@@ -1,6 +1,6 @@
 # Architecture
 
-*2026-11-04 ≈18:55, mis à jour 2026-11-05 ≈11:55 et ≈13:00 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin*
+*2026-11-04 ≈18:55, mis à jour 2026-11-05 ≈11:55, ≈13:00 et ≈15:00 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin*
 
 Le Sanctuaire existe en deux formes, qui partagent le même moteur, le même habillage et les mêmes images :
 
@@ -13,7 +13,7 @@ Le Sanctuaire existe en deux formes, qui partagent le même moteur, le même hab
 Hermes (chaque processus : gateway, chat, Desktop, crons)
   └─ __init__.py (hooks) ──> <hermes home>/plugin-data/sanctuaire-solaire/proc/<pid>.json
                                         │
-dashboard/plugin_api.py  ── GET /state (fusion) · /theme · /frame · /asset ──┐
+dashboard/plugin_api.py  ── GET /state (fusion) · /themes · /theme · /frame · /asset ──┐
                                                                               ├─> Hermes Desktop : panneau sous la conversation + page « Sanctuaire »
                                                                               └─> Tableau de bord : onglet « Sanctuaire » + bandeau au-dessus du Chat
 ```
@@ -25,7 +25,7 @@ dashboard/plugin_api.py  ── GET /state (fusion) · /theme · /frame · /asse
   - les **tours trop lourds** (plus de 200 000 tokens d'entrée cumulés sur un tour), les 5 derniers outils de chaque compagnon et le nombre de sous-agents en cours.
 
   Ils ne renvoient jamais rien : Hermes n'est ni bloqué ni ralenti, et les approbations ne sont qu'affichées.
-- **`dashboard/plugin_api.py`** : en lecture seule. `/state` fusionne les fichiers des processus. `/theme`, `/frame` et `/asset` servent l'habillage, la page et les images (Hermes Desktop ne peut pas lire les fichiers directement).
+- **`dashboard/plugin_api.py`** : en lecture seule. `/state` fusionne les fichiers des processus. `/themes` liste les univers, `/theme`, `/frame` et `/asset` (avec `theme=<id>` pour les images rangées dans `themes/<id>/`) servent l'habillage, la page et les images (Hermes Desktop ne peut pas lire les fichiers directement).
 - **`dashboard/app/`** : le moteur (`moteur.js`), la page du cadre (`frame.html`), les habillages (`themes/<id>/`) et les images. Le mode serveur utilise les mêmes fichiers, par des liens dans `web/`.
 - **`dashboard/dist/index.js`** : la partie tableau de bord. Elle affiche `app/frame.html` dans un cadre et lui envoie l'habillage et l'activité par `postMessage`.
 - **`desktop/plugin.js`** : la partie Hermes Desktop. Elle affiche la page dans le cadre isolé de l'app (`SandboxedFrame`), lui envoie les images, l'activité fusionnée et les événements instantanés de l'app (`tool.start`, `message.start`, `message.complete` : **noms d'outils seulement**).
@@ -53,13 +53,13 @@ Hermes API (127.0.0.1:9119) <──────── relais du chat (clé côt�
 
 ## Correspondance outils → compagnons
 
-| Rôle (clé moteur) | Outils Hermes | Sanctuaire Solaire |
-|---|---|---|
-| coordination | début/fin de tour, `send_message`, `delegate_task`, `clarify`, `cronjob` | Kitsune Hermes |
-| recherche | `web_search`, `web_extract`, `vision_analyze`, `browser_*`, `web_*` | Chouette Céleste |
-| analyse | `read_file`, `search_files`, `memory`, `session_search`, `skill_view`, `skills_list`, `todo` | Data-Taupe |
-| fabrication | `write_file`, `patch`, `terminal`, `process`, `execute_code`, `skill_manage` (et tout outil inconnu) | Brico-Castor |
-| securite | erreurs d'outils, erreurs API, approbations (et commandes slash en mode serveur) | Shiba Sentinel |
+| Rôle (clé moteur) | Outils Hermes | Clairière | Olympe |
+|---|---|---|---|
+| coordination | début/fin de tour, `send_message`, `delegate_task`, `clarify`, `cronjob` | Kitsune Hermes | Hermès |
+| recherche | `web_search`, `web_extract`, `vision_analyze`, `browser_*`, `web_*` | Chouette Céleste | Chouette d'Athéna |
+| analyse | `read_file`, `search_files`, `memory`, `session_search`, `skill_view`, `skills_list`, `todo` | Data-Taupe | Mnémosyne |
+| fabrication | `write_file`, `patch`, `terminal`, `process`, `execute_code`, `skill_manage` (et tout outil inconnu) | Brico-Castor | Héphaïstos |
+| securite | erreurs d'outils, erreurs API, approbations (et commandes slash en mode serveur) | Shiba Sentinel | Cerbère |
 
 La même table existe dans le plugin (`sanctuaire-solaire/__init__.py` → `CARTE`), dans le hook du mode serveur (`hermes-hook/handler.py` → `CARTE`) et dans le moteur (`TOOL_ROLE`). Si tu en changes une, change les autres.
 
@@ -79,7 +79,13 @@ La même table existe dans le plugin (`sanctuaire-solaire/__init__.py` → `CART
 2. Y déposer le panorama et les images ou planches des 5 rôles (coordination, fabrication, recherche, analyse, securite).
 3. Ajuster dans `theme.json` les noms, les positions (`pos`, `visit`), les boucles (`loop`, `alertLoop`, `fly`, `walk`) et les textes.
    Langues : les textes de base sont dans la langue indiquée par `"lang"`. Les traductions vont dans `"i18n": { "en": { … } }`, avec la même structure, seulement les textes. Les textes de la page elle-même (boutons, journal) sont dans `moteur.js` → `UI`.
-4. Mode serveur : ouvrir `panorama.html?theme=<nouveau>`. Plugin : le choix de l'environnement n'existe pas encore (prévu dans la feuille de route).
+4. Mode serveur : ouvrir `panorama.html?theme=<nouveau>`. Plugin : le nouvel univers apparaît tout seul dans le bouton de la barre (ajouter `"world": {"name": …, "icon": …}` pour son nom court). Le choix est gardé par Hermes Desktop et par le navigateur ; l'univers par défaut est `olympe`.
+
+Options d'habillage utiles (voir `themes/olympe/theme.json`) :
+- `layers` : décor animé posé sur le panorama (`img` avec `anim` `sway` ou `flow`, `smoke`, `sparkle`, `glow`), devant (`front`) ou derrière (`back`) les personnages. Une image découpée du panorama posée devant sert à cacher un personnage (Héphaïstos derrière son enclume).
+- `calm: true` : pas de respiration, de sautillement ni de halo au sol (personnages réalistes).
+- `doves` : des colombes en vol à la place des clones pour les sous-agents.
+- `fade` (rôle) : fondu du bas de l'image ; `fly.anchor` : point d'attache de l'oiseau en vol.
 
 Recette d'animation qui a fait ses preuves :
 1. Une image du personnage sur fond vert pur (#00FF00).

@@ -1,0 +1,545 @@
+{
+ "_info": "Habillage « Olympe » — 2026-11-05 ≈14:40, mis à jour ≈15:05 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin. Images : Médéric Morin (générées avec Grok), CC BY 4.0.",
+ "id": "olympe",
+ "world": {
+  "name": "Olympe",
+  "icon": "🏛"
+ },
+ "lang": "fr",
+ "title": "Le Sanctuaire de l'Olympe",
+ "subtitle": "Le sanctuaire d'Hermès",
+ "base": "themes/olympe/",
+ "scenes": null,
+ "background": {
+  "src": "olympe-fond.webp",
+  "w": 2128,
+  "h": 912
+ },
+ "ambience": "rays",
+ "calm": true,
+ "doves": [
+  {
+   "cx": 46,
+   "cy": 17,
+   "rx": 7,
+   "ry": 3,
+   "dur": 9,
+   "phase": 0,
+   "w": 3
+  },
+  {
+   "cx": 48,
+   "cy": 22,
+   "rx": 9,
+   "ry": 4,
+   "dur": 12,
+   "reverse": true,
+   "phase": 0.3,
+   "w": 3
+  },
+  {
+   "cx": 44,
+   "cy": 13,
+   "rx": 5,
+   "ry": 2.2,
+   "dur": 7.5,
+   "phase": 0.6,
+   "w": 2.7
+  },
+  {
+   "cx": 51,
+   "cy": 19,
+   "rx": 6.5,
+   "ry": 3,
+   "dur": 10,
+   "reverse": true,
+   "phase": 0.15,
+   "w": 2.8
+  }
+ ],
+ "colors": {
+  "accent": "#D9822B",
+  "accent2": "#2E7FB8",
+  "night": "#10141f"
+ },
+ "roles": {
+  "coordination": {
+   "name": "Hermès",
+   "short": "Hermès",
+   "work": "Lit le message",
+   "listening": "Écoute",
+   "pos": {
+    "x": 42.74,
+    "y": 74.0,
+    "h": 27.72
+   },
+   "aspect": [
+    263,
+    360
+   ],
+   "sprites": {
+    "rest": "hermes-repos.webp",
+    "work": "hermes-repos.webp"
+   },
+   "intro": {
+    "src": "hermes-rouleau.webp",
+    "frames": 19,
+    "cols": 7,
+    "rows": 3,
+    "fps": 12,
+    "place": {
+     "left": 0,
+     "top": 0,
+     "width": 100,
+     "height": 100
+    }
+   },
+   "loop": {
+    "src": "hermes-lecture.webp",
+    "frames": 43,
+    "cols": 10,
+    "rows": 5,
+    "fps": 12,
+    "pingpong": true,
+    "place": {
+     "left": 0,
+     "top": 0,
+     "width": 100,
+     "height": 100
+    }
+   },
+   "walk": {
+    "src": "hermes-marche.webp",
+    "frames": 26,
+    "cols": 8,
+    "rows": 4,
+    "fps": 24,
+    "aspect": [
+     300,
+     360
+    ],
+    "h": 27.5,
+    "speed": 8.3
+   },
+   "messenger": {
+    "style": "plane",
+    "duration": 750,
+    "stagger": 160,
+    "shoutMs": 3500
+   },
+   "stroll": {
+    "after": 45000,
+    "pause": 2500
+   },
+   "subagents": [
+    [
+     -5.6,
+     -1.2
+    ],
+    [
+     5.4,
+     -1.2
+    ],
+    [
+     -9.8,
+     -0.4
+    ],
+    [
+     9.6,
+     -0.4
+    ]
+   ],
+   "tagShift": 0
+  },
+  "fabrication": {
+   "name": "Héphaïstos",
+   "short": "Héphaïstos",
+   "work": "Forge",
+   "pos": {
+    "x": 15.2,
+    "y": 66.46,
+    "h": 24.5
+   },
+   "aspect": [
+    462,
+    360
+   ],
+   "fade": 12,
+   "visit": [
+    23.5,
+    74.5
+   ],
+   "shouts": [
+    "Héphaïstos, à ta forge !",
+    "Un ouvrage pour toi, Héphaïstos !",
+    "Héphaïstos, fais chauffer le métal !"
+   ],
+   "sprites": {
+    "rest": "hephaistos-repos.webp",
+    "work": "hephaistos-repos.webp"
+   },
+   "loop": {
+    "src": "hephaistos-forge.webp",
+    "frames": 32,
+    "cols": 7,
+    "rows": 5,
+    "fps": 24,
+    "place": {
+     "left": 0,
+     "top": 0,
+     "width": 100,
+     "height": 100
+    }
+   }
+  },
+  "recherche": {
+   "name": "Chouette d'Athéna",
+   "short": "Chouette",
+   "work": "En vol",
+   "pos": {
+    "x": 31.02,
+    "y": 38.6,
+    "h": 10.42
+   },
+   "aspect": [
+    210,
+    220
+   ],
+   "visit": [
+    31,
+    74.5
+   ],
+   "shouts": [
+    "Chouette, va voir ce qu'on dit dehors !",
+    "Une recherche pour toi, Chouette !",
+    "Chouette d'Athéna, en vol !"
+   ],
+   "sprites": {
+    "rest": "chouette-repos.webp",
+    "work": "chouette-repos.webp"
+   },
+   "doneSprite": "work",
+   "fly": {
+    "src": "chouette-vol.webp",
+    "frames": 27,
+    "cols": 7,
+    "rows": 4,
+    "fps": 48,
+    "aspect": [
+     309,
+     300
+    ],
+    "anchor": [
+     0.46,
+     0.69
+    ],
+    "perch": [
+     30.73,
+     32.68
+    ],
+    "away": [
+     110,
+     -14
+    ],
+    "h": 17.54,
+    "duration": 3200
+   }
+  },
+  "analyse": {
+   "name": "Mnémosyne",
+   "short": "Mnémosyne",
+   "work": "Consulte la mémoire",
+   "pos": {
+    "x": 66.26,
+    "y": 74.12,
+    "h": 34.43
+   },
+   "aspect": [
+    197,
+    360
+   ],
+   "visit": [
+    60.2,
+    75
+   ],
+   "shouts": [
+    "Mnémosyne, souviens-toi pour moi !",
+    "Mnémosyne, cherche dans tes rouleaux !",
+    "Une question pour ta mémoire, Mnémosyne !"
+   ],
+   "sprites": {
+    "rest": "mnemosyne-repos.webp",
+    "work": "mnemosyne-repos.webp"
+   },
+   "loop": {
+    "src": "mnemosyne-lecture.webp",
+    "frames": 42,
+    "cols": 12,
+    "rows": 4,
+    "fps": 12,
+    "pingpong": true,
+    "place": {
+     "left": 0,
+     "top": 0,
+     "width": 100,
+     "height": 100
+    }
+   }
+  },
+  "securite": {
+   "name": "Cerbère",
+   "short": "Cerbère",
+   "work": "Monte la garde",
+   "alert": "Aboie",
+   "pos": {
+    "x": 86.3,
+    "y": 74.3,
+    "h": 15.8
+   },
+   "aspect": [
+    548,
+    300
+   ],
+   "visit": [
+    77.5,
+    75
+   ],
+   "shouts": [
+    "Cerbère, garde la porte !",
+    "Cerbère, ouvre l'œil !",
+    "À ton poste, Cerbère !"
+   ],
+   "sprites": {
+    "rest": "cerbere-repos.webp",
+    "work": "cerbere-repos.webp"
+   },
+   "loop": {
+    "src": "cerbere-garde.webp",
+    "frames": 26,
+    "cols": 5,
+    "rows": 6,
+    "fps": 12,
+    "pingpong": true,
+    "place": {
+     "left": 0,
+     "top": 0,
+     "width": 100,
+     "height": 100
+    }
+   },
+   "alertLoop": {
+    "src": "cerbere-alerte.webp",
+    "frames": 39,
+    "cols": 7,
+    "rows": 6,
+    "fps": 24,
+    "place": {
+     "left": 0,
+     "top": 0,
+     "width": 100,
+     "height": 100
+    }
+   }
+  }
+ },
+ "layers": [
+  {
+   "type": "img",
+   "src": "olivier-feuillage.webp",
+   "x": 14.1,
+   "y": 3.29,
+   "w": 28.2,
+   "h": 34.54,
+   "z": "back",
+   "anim": "sway",
+   "origin": "43% 100%"
+  },
+  {
+   "type": "img",
+   "src": "enclume.webp",
+   "x": 10.34,
+   "y": 59.21,
+   "w": 9.54,
+   "h": 16.78,
+   "z": "front"
+  },
+  {
+   "type": "img",
+   "src": "socle.webp",
+   "x": 62.73,
+   "y": 57.68,
+   "w": 6.77,
+   "h": 18.31,
+   "z": "front"
+  },
+  {
+   "type": "img",
+   "src": "cascade.webp",
+   "x": 6.02,
+   "y": 82.46,
+   "w": 5.26,
+   "h": 11.62,
+   "z": "front",
+   "anim": "flow",
+   "opacity": 0.75,
+   "mask": "radial-gradient(ellipse 45% 50% at 50% 50%, #000 55%, transparent 100%)"
+  },
+  {
+   "type": "sparkle",
+   "x": 4.7,
+   "y": 91.56,
+   "w": 11.75,
+   "h": 8.44,
+   "count": 10,
+   "z": "front"
+  },
+  {
+   "type": "sparkle",
+   "x": 18.8,
+   "y": 43.31,
+   "w": 6.11,
+   "h": 16.45,
+   "count": 8,
+   "z": "back",
+   "opacity": 0.8
+  },
+  {
+   "type": "sparkle",
+   "x": 29.14,
+   "y": 43.31,
+   "w": 7.05,
+   "h": 16.45,
+   "count": 8,
+   "z": "back",
+   "opacity": 0.8
+  },
+  {
+   "type": "glow",
+   "x": 4.93,
+   "y": 47.15,
+   "w": 6.11,
+   "h": 14.25,
+   "z": "front",
+   "color": "rgba(255,150,40,.55)"
+  },
+  {
+   "type": "glow",
+   "x": 6.58,
+   "y": 61.4,
+   "w": 4.23,
+   "h": 7.68,
+   "z": "front",
+   "color": "rgba(255,140,40,.5)",
+   "dur": 1.9
+  },
+  {
+   "type": "smoke",
+   "x": 4.61,
+   "y": 4.39,
+   "w": 3.76,
+   "h": 16.45,
+   "count": 5,
+   "dur": 7,
+   "z": "back"
+  },
+  {
+   "type": "smoke",
+   "x": 47.89,
+   "y": 38.93,
+   "w": 2.26,
+   "h": 10.96,
+   "count": 4,
+   "dur": 5,
+   "z": "back"
+  }
+ ],
+ "texts": {
+  "start": "Le sanctuaire d'Hermès s'éveille.",
+  "live": "Connecté à Hermes.",
+  "lost": "Hermes injoignable, nouvelle tentative.",
+  "request": "Nouvelle demande reçue.",
+  "deliver": "{coord} envoie un message à {name}.",
+  "shoutMany": "{names}, au travail !",
+  "work": "{name} se met au travail.",
+  "done": "{name} a fini sa tâche.",
+  "flyAway": "{name} s'envole chercher des nouvelles.",
+  "flyBack": "{name} revient avec sa trouvaille.",
+  "errorApi": "Le modèle ou le fournisseur ne répond pas.",
+  "errorTool": "{name} a repéré une erreur d'outil.",
+  "approval": "Hermes attend ton approbation."
+ },
+ "i18n": {
+  "en": {
+   "title": "The Sanctuary of Olympus",
+   "subtitle": "The sanctuary of Hermes",
+   "roles": {
+    "coordination": {
+     "name": "Hermes",
+     "short": "Hermes",
+     "work": "Reading the message",
+     "listening": "Listening"
+    },
+    "fabrication": {
+     "name": "Hephaestus",
+     "short": "Hephaestus",
+     "work": "Forging",
+     "shouts": [
+      "Hephaestus, to your forge!",
+      "A job for you, Hephaestus!",
+      "Hephaestus, heat up the metal!"
+     ]
+    },
+    "recherche": {
+     "name": "Athena's Owl",
+     "short": "Owl",
+     "work": "Flying",
+     "shouts": [
+      "Owl, go and see what they say out there!",
+      "A search for you, Owl!",
+      "Athena's Owl, take flight!"
+     ]
+    },
+    "analyse": {
+     "name": "Mnemosyne",
+     "short": "Mnemosyne",
+     "work": "Remembering",
+     "shouts": [
+      "Mnemosyne, remember this for me!",
+      "Mnemosyne, look through your scrolls!",
+      "A question for your memory, Mnemosyne!"
+     ]
+    },
+    "securite": {
+     "name": "Cerberus",
+     "short": "Cerberus",
+     "work": "On guard",
+     "alert": "Barking",
+     "shouts": [
+      "Cerberus, guard the gate!",
+      "Cerberus, keep an eye out!",
+      "To your post, Cerberus!"
+     ]
+    }
+   },
+   "texts": {
+    "start": "The sanctuary of Hermes awakens.",
+    "live": "Connected to Hermes.",
+    "lost": "Hermes unreachable, retrying.",
+    "request": "New request received.",
+    "deliver": "{coord} sends a message to {name}.",
+    "shoutMany": "{names}, to work!",
+    "work": "{name} gets to work.",
+    "done": "{name} is done.",
+    "flyAway": "{name} flies off to gather news.",
+    "flyBack": "{name} comes back with a find.",
+    "errorApi": "The model or provider isn't responding.",
+    "errorTool": "{name} spotted a tool error.",
+    "approval": "Hermes is waiting for your approval."
+   },
+   "world": {
+    "name": "Olympus",
+    "icon": "🏛"
+   }
+  }
+ }
+}

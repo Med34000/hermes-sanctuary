@@ -233,6 +233,7 @@ body.bands .log { display: block; }
 @keyframes firefly { 0%, 100% { transform: translate(0, 0); opacity: 0; } 20% { opacity: 1; } 50% { transform: translate(18px, -14px); opacity: .7; } 80% { opacity: 1; } }
 .pano[data-night="1"] .actor img, .pano[data-night="1"] .vsheet { filter: brightness(.82) saturate(.9); }
 #sound-btn { padding: 4px 8px; font-size: 12px; }
+#world-btn { padding: 4px 9px; font-size: 12px; }
 @media (prefers-reduced-motion: reduce) { .flies i, .subag.on { animation: none; } }
 
 /* fenêtre très large (bandeau au-dessus du chat, panneau sous la conversation) : le panorama est agrandi et recadré
@@ -256,6 +257,7 @@ body.bands .log { display: block; }
     <span class="pill" id="src-pill" data-src="demo"><span class="dot"></span><span id="src-txt" data-i18n="srcDemo">Démo · événements simulés</span></span>
     <button class="pill" id="today-btn" type="button" aria-pressed="false" aria-controls="today" data-i18n="todayBtn">Aujourd'hui</button>
     <button class="pill" id="sound-btn" type="button" aria-pressed="false">🔇</button>
+    <button class="pill" id="world-btn" type="button" hidden></button>
     <button class="pill" id="demo" type="button" aria-pressed="false" data-i18n="demoBtn">Démo auto</button>
   </div>
 </header>
