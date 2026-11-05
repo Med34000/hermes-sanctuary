@@ -46,7 +46,7 @@
      navigateur ; français pour fr-*, anglais pour tout le reste. Textes du thème : theme.json → "i18n": { "en": {…} } ---- */
   var UI = { fr: {"srcLive": "En direct · Hermes", "srcLost": "Connexion perdue · Hermes", "srcDemo": "Démo · événements simulés", "logLive": "flux en direct", "logLost": "connexion perdue", "logDemo": "flux simulé", "hlLive": "En direct de Hermes", "hlLost": "Connexion perdue · nouvelle tentative", "done": "Terminé", "listening": "Écoute", "and": " et ", "themeMissing": "Habillage introuvable ({e}).", "docTitle": "Sanctuaire · Panorama", "demoBtn": "Démo auto", "scenes": "Les 5 scènes", "loading": "Chargement…", "logTitle": "Sous le capot", "logAria": "Journal", "chatAria": "Discussion avec Kitsune", "folderMenuTitle": "Renommer ou archiver ce dossier", "newBtn": "Nouvelle", "newTitle": "Commencer une nouvelle conversation", "open": "Ouvrir", "close": "Fermer", "foldersTitle": "Dossiers / Projets", "foldersAria": "Dossiers et projets", "folderAdd": "+ Nouveau", "folderAddTitle": "Créer un dossier ou un projet (une conversation à part, gardée par Hermes)", "foldersHint": "Crée un dossier par projet pour ranger tes conversations.", "attach": "Joindre une image", "attachTitle": "Joindre une image (tu peux aussi la coller ou la glisser ici)", "inputAria": "Ton message pour Kitsune", "send": "Envoyer", "removeImg": "Retirer l'image {n}", "activity": "Activité", "sessionTitle": "Sanctuaire", "locale": "fr-CH",
       "src_discord": "Discord", "src_telegram": "Telegram", "src_slack": "Slack", "src_whatsapp": "WhatsApp", "src_signal": "Signal",
-      "src_email": "e-mail", "src_api_server": "API", "src_cron": "tâche planifiée", "srcStart": "{coord} part sur {src}.",
+      "src_email": "e-mail", "src_api_server": "API", "src_cron": "Tâche planifiée", "srcStart": "{coord} part sur {src}.",
       "srcStartCron": "{coord} lance la tâche planifiée « {name} ».", "fallback": "{name} aboie : Hermes a basculé de {de} vers {vers} (modèle de secours).",
       "fallbackTitle": "Modèle de secours", "approvalWhat": "{name} monte la garde : Hermes demande l'autorisation ({quoi}){ou}.",
       "approvalWhere": ", à valider sur {ou}", "approvalTitle": "Autorisation demandée", "todayBtn": "Aujourd'hui",
@@ -54,10 +54,14 @@
       "todaySources": "D'où ça vient", "todayTokens": "Tokens (entrée / sortie)", "todayErrTools": "erreurs d'outils",
       "todayErrApi": "erreurs de fournisseur", "todayFallbacks": "bascules", "todayApprovals": "autorisations",
       "todayEmpty": "Rien encore aujourd'hui.", "todayHours": "Heure par heure", "todayBusiest": "Le plus actif : {name}",
-      "srcInteractive": "toi", "src_gateway": "ta messagerie (Discord, Telegram…)"},
+      "srcInteractive": "toi", "src_gateway": "ta messagerie (Discord, Telegram…)",
+      "src_desktop": "Desktop", "src_gui": "Desktop", "src_tui": "Terminal (TUI)", "src_cli": "Terminal", "src_local": "Local",
+      "src_dashboard": "Tableau de bord", "src_webapp": "Tableau de bord", "src_web": "Web", "src_acp": "Éditeur (ACP)",
+      "src_mattermost": "Mattermost", "src_matrix": "Matrix", "src_sms": "SMS", "todayPeak": "Pic : {h} h – {h2} h · {t} tours, {o} outils",
+      "todayNow": "maintenant"},
     en: {"srcLive": "Live · Hermes", "srcLost": "Connection lost · Hermes", "srcDemo": "Demo · simulated events", "logLive": "live feed", "logLost": "connection lost", "logDemo": "simulated feed", "hlLive": "Live from Hermes", "hlLost": "Connection lost · retrying", "done": "Done", "listening": "Listening", "and": " and ", "themeMissing": "Theme not found ({e}).", "docTitle": "Sanctuary · Panorama", "demoBtn": "Auto demo", "scenes": "The 5 scenes", "loading": "Loading…", "logTitle": "Under the hood", "logAria": "Log", "chatAria": "Chat with Kitsune", "folderMenuTitle": "Rename or archive this folder", "newBtn": "New", "newTitle": "Start a new conversation", "open": "Open", "close": "Close", "foldersTitle": "Folders / Projects", "foldersAria": "Folders and projects", "folderAdd": "+ New", "folderAddTitle": "Create a folder or project (a separate conversation, kept by Hermes)", "foldersHint": "Create one folder per project to keep your conversations tidy.", "attach": "Attach an image", "attachTitle": "Attach an image (you can also paste or drop it here)", "inputAria": "Your message to Kitsune", "send": "Send", "removeImg": "Remove image {n}", "activity": "Activity", "sessionTitle": "Sanctuary", "locale": "en-US",
       "src_discord": "Discord", "src_telegram": "Telegram", "src_slack": "Slack", "src_whatsapp": "WhatsApp", "src_signal": "Signal",
-      "src_email": "e-mail", "src_api_server": "API", "src_cron": "scheduled task", "srcStart": "{coord} heads off to {src}.",
+      "src_email": "e-mail", "src_api_server": "API", "src_cron": "Scheduled task", "srcStart": "{coord} heads off to {src}.",
       "srcStartCron": "{coord} starts the scheduled task “{name}”.", "fallback": "{name} barks: Hermes switched from {de} to {vers} (fallback model).",
       "fallbackTitle": "Fallback model", "approvalWhat": "{name} stands guard: Hermes asks for permission ({quoi}){ou}.",
       "approvalWhere": ", to approve on {ou}", "approvalTitle": "Permission requested", "todayBtn": "Today",
@@ -65,7 +69,11 @@
       "todaySources": "Where it came from", "todayTokens": "Tokens (in / out)", "todayErrTools": "tool errors",
       "todayErrApi": "provider errors", "todayFallbacks": "fallbacks", "todayApprovals": "permissions",
       "todayEmpty": "Nothing yet today.", "todayHours": "Hour by hour", "todayBusiest": "Busiest: {name}",
-      "srcInteractive": "you", "src_gateway": "your messaging app (Discord, Telegram…)"} };
+      "srcInteractive": "you", "src_gateway": "your messaging app (Discord, Telegram…)",
+      "src_desktop": "Desktop", "src_gui": "Desktop", "src_tui": "Terminal (TUI)", "src_cli": "Terminal", "src_local": "Local",
+      "src_dashboard": "Dashboard", "src_webapp": "Dashboard", "src_web": "Web", "src_acp": "Editor (ACP)",
+      "src_mattermost": "Mattermost", "src_matrix": "Matrix", "src_sms": "SMS", "todayPeak": "Peak: {h}:00 – {h2}:00 · {t} turns, {o} tools",
+      "todayNow": "now"} };
   var LANG = (function () {
     var q = new URLSearchParams(location.search).get("lang") || (window.SANCTUAIRE_LANG || null), s = null;
     try {
@@ -416,14 +424,20 @@
     }
     function set(role, s) { phase[role] = s; if (!inFlight[role] && !demoOn) setState(role, s); }
     /* d'où vient le travail (2026-11-05) : plateforme du tour ou nom de la tâche planifiée — noms seulement */
-    var INTERACTIVE = ["", "?", "cli", "tui", "desktop", "dashboard", "webapp", "web", "local", "acp"];
+    var INTERACTIVE = ["", "?", "cli", "tui", "desktop", "gui", "dashboard", "webapp", "web", "local", "acp"];
+    /* nom lisible d'une plateforme de Hermes (2026-11-05) : Desktop, Terminal, Discord… ; inconnue → son nom, avec une majuscule */
+    function platformName(p) {
+      p = String(p || "").toLowerCase();
+      if (!p || p === "?") return ui("srcInteractive");
+      return ui("src_" + p.replace(/[^a-z0-9_]/g, "")) || (p.charAt(0).toUpperCase() + p.slice(1, 24));
+    }
     var lastTourT = 0, bgSrc = "", lastState = null;
     function srcName(tr) {
       if (!tr) return "";
       var p = String(tr.plateforme || "").toLowerCase();
       if (tr.tache || p === "cron") return tr.tache ? "\u23F0 " + String(tr.tache).slice(0, 24) : ui("src_cron");
       if (INTERACTIVE.indexOf(p) >= 0) return "";
-      return ui("src_" + p) || p.slice(0, 16);
+      return platformName(p);
     }
     function sources(e) {
       var tours = Array.isArray(e.tours) ? e.tours : [], maxT = lastTourT;
@@ -551,8 +565,8 @@
     function fmtN(n) { n = Number(n) || 0; return n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e4 ? Math.round(n / 1e3) + "k" : n >= 1e3 ? (n / 1e3).toFixed(1) + "k" : String(n); }
     function renderToday() {
       if (!todayBox || !todayBody || todayBox.hidden || !lastState) return;
-      var H = lastState.h || {}, now = new Date(), tot = { t: 0, e: 0, a: 0, b: 0, p: 0, o: {}, s: {}, k: {} }, hours = [], i;
-      for (i = 0; i < 24; i++) hours.push(0);
+      var H = lastState.h || {}, now = new Date(), tot = { t: 0, e: 0, a: 0, b: 0, p: 0, o: {}, s: {}, k: {} }, hours = [], hT = [], hO = [], i;
+      for (i = 0; i < 24; i++) { hours.push(0); hT.push(0); hO.push(0); }
       Object.keys(H).forEach(function (k) {
         var dt = new Date(Number(k) * 3600000), b = H[k] || {};
         if (dt.getFullYear() !== now.getFullYear() || dt.getMonth() !== now.getMonth() || dt.getDate() !== now.getDate()) return;
@@ -561,7 +575,7 @@
         Object.keys(b.o || {}).forEach(function (x) { tot.o[x] = (tot.o[x] || 0) + (Number(b.o[x]) || 0); act += Number(b.o[x]) || 0; });
         Object.keys(b.s || {}).forEach(function (x) { tot.s[x] = (tot.s[x] || 0) + (Number(b.s[x]) || 0); });
         Object.keys(b.k || {}).forEach(function (x) { var c = tot.k[x] || [0, 0], v = b.k[x] || []; tot.k[x] = [c[0] + (Number(v[0]) || 0), c[1] + (Number(v[1]) || 0)]; });
-        hours[dt.getHours()] += act;
+        hours[dt.getHours()] += act; hT[dt.getHours()] += Number(b.t) || 0; hO[dt.getHours()] += act - (Number(b.t) || 0);
       });
       todayBody.textContent = "";
       var tools = Object.keys(tot.o).reduce(function (n, x) { return n + tot.o[x]; }, 0), alerts = tot.e + tot.a + tot.b + tot.p;
@@ -579,7 +593,7 @@
       var srcs = Object.keys(tot.s).sort(function (a, b) { return tot.s[b] - tot.s[a]; });
       if (srcs.length) {
         var ul2 = section(ui("todaySources"));
-        srcs.forEach(function (k) { var li = el("li", "", ul2), p = k.toLowerCase(); el("span", "", li).textContent = INTERACTIVE.indexOf(p) >= 0 ? ui("srcInteractive") : (ui("src_" + p) || k); el("b", "", li).textContent = fmtN(tot.s[k]); });
+        srcs.forEach(function (k) { var li = el("li", "", ul2); el("span", "", li).textContent = platformName(k); el("b", "", li).textContent = fmtN(tot.s[k]); });
       }
       if (alerts) {
         var ul3 = section(ui("todayAlerts"));
@@ -592,9 +606,15 @@
         var ul4 = section(ui("todayTokens"));
         models.forEach(function (k) { var li = el("li", "", ul4); el("span", "", li).textContent = shortModel(k); el("b", "", li).textContent = fmtN(tot.k[k][0]) + " / " + fmtN(tot.k[k][1]); });
       }
-      var bars = el("div", "t-bars", el("section", "", todayBody)), mx = Math.max.apply(null, hours) || 1;
-      bars.parentNode.insertBefore(el("h3", ""), bars).textContent = ui("todayHours");
-      hours.forEach(function (v, h) { var bar = el("i", h === now.getHours() ? "now" : "", bars); bar.style.height = Math.max(2, Math.round(v / mx * 100)) + "%"; bar.title = h + ":00 · " + v; });
+      var hs = el("section", "", todayBody); el("h3", "", hs).textContent = ui("todayHours");
+      var bars = el("div", "t-bars", hs), mx = Math.max.apply(null, hours) || 1, peak = hours.indexOf(Math.max.apply(null, hours));
+      hours.forEach(function (v, h) {
+        var bar = el("i", (h === now.getHours() ? "now" : "") + (h === peak && v ? " peak" : ""), bars);
+        bar.style.height = Math.max(2, Math.round(v / mx * 100)) + "%"; bar.title = h + ":00 – " + (h + 1) + ":00 · " + hT[h] + " / " + hO[h];
+      });
+      var axis = el("div", "t-axis", hs);
+      [0, 6, 12, 18, 24].forEach(function (h) { var t = el("span", "", axis); t.textContent = h + (LANG === "fr" ? " h" : ":00"); t.style.left = (h / 24 * 100) + "%"; });
+      if (hours[peak]) el("p", "t-peak", hs).textContent = ui("todayPeak", { h: peak, h2: peak + 1, t: hT[peak], o: hO[peak] });
     }
     if (todayBtn && todayBox) {
       todayBtn.addEventListener("click", function () {
