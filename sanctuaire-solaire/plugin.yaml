@@ -1,7 +1,7 @@
 # Le Sanctuaire Solaire — plugin Hermes (agent + tableau de bord + Desktop)
-# 2026-11-05 ≈11:20 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin
+# 2026-11-05 ≈11:20, mis à jour ≈12:35 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin
 name: sanctuaire-solaire
-version: 2.0.0
+version: 2.1.0
 manifest_version: 2
 api_version: 1
 description: "A living, playful view of your agent: five animated companions wake up when Hermes uses their tools (tool names and times only, never content)."
@@ -9,7 +9,7 @@ author: "Médéric Morin"
 license: Apache-2.0
 homepage: https://github.com/Med34000/sanctuaire-solaire-hermes
 tags: [dashboard, desktop, visualization, fun]
-requires_hermes: ">=0.22.0"
+requires_hermes: ">=0.22.5"
 provides_tools: []
 provides_hooks:
   - pre_tool_call
@@ -17,6 +17,7 @@ provides_hooks:
   - pre_llm_call
   - post_llm_call
   - on_session_end
+  - post_api_request
   - api_request_error
   - pre_approval_request
   - post_approval_response

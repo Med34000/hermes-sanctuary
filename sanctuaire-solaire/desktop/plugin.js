@@ -3,7 +3,8 @@
 // SDK's sandboxed frame; this file feeds it the theme, the images (from the plugin's own routes) and the activity:
 // instant tool / turn events from the app, plus the merged state of every Hermes process (crons, Discord…).
 // Only tool NAMES are forwarded, never arguments, results or messages.
-// 2026-11-05 ≈11:45 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin
+// 2026-11-05 ≈11:45, mis à jour ≈12:50 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin
+// 2026-11-05 ≈12:50 : notifications natives du Shiba (modèle de secours, autorisation en attente sur la messagerie)
 // Copyright 2026 Médéric Morin — Apache License 2.0
 import { SandboxedFrame, ROUTES_AREA, SIDEBAR_NAV_AREA } from '@hermes/plugin-sdk'
 import { useEffect, useRef, useState } from 'react'
@@ -12,8 +13,23 @@ import { jsx } from 'react/jsx-runtime'
 const ID = 'sanctuaire-solaire'
 const POLL_MS = 1500
 const listeners = new Set()
+const NOTIFY_GAP_MS = 120000
+const lastNotify = {}
 let api = null
 let bundle = null
+
+// The Shiba's alerts (fallback model, permission waiting on Discord/Telegram) as a native notification,
+// at most one per kind every 2 minutes. Title and text are written by the panorama, never by the frame's caller.
+function notify(msg) {
+  const kind = msg.kind === 'fallback' || msg.kind === 'approval' ? msg.kind : null
+  if (!kind || !api || !api.os || typeof api.os.notify !== 'function') return
+  const now = Date.now()
+  if (now - (lastNotify[kind] || 0) < NOTIFY_GAP_MS) return
+  lastNotify[kind] = now
+  const title = String(msg.title || 'Sanctuaire').slice(0, 80)
+  const body = String(msg.body || '').slice(0, 240)
+  Promise.resolve(api.os.notify({ title, body })).catch(() => {})
+}
 
 function emit(msg) {
   listeners.forEach(fn => {
@@ -84,7 +100,9 @@ function Panorama({ height }) {
     }
     const onMessage = ev => {
       const w = ref.current && ref.current.contentWindow
-      if (!w || ev.source !== w || !ev.data || ev.data.type !== 'sanctuaire:ready' || started) return
+      if (!w || ev.source !== w || !ev.data || typeof ev.data.type !== 'string') return
+      if (ev.data.type === 'sanctuaire:notify') { notify(ev.data); return }
+      if (ev.data.type !== 'sanctuaire:ready' || started) return
       started = true
       post({ type: 'sanctuaire:theme', theme: data.theme, assets: data.assets })
       poll()

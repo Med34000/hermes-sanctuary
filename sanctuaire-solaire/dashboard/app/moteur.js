@@ -44,8 +44,28 @@
 
   /* ---- langue (2026-11-04) : ?lang=fr|en (mémorisée, ?lang=auto pour revenir au navigateur), sinon la langue du
      navigateur ; français pour fr-*, anglais pour tout le reste. Textes du thème : theme.json → "i18n": { "en": {…} } ---- */
-  var UI = { fr: {"srcLive": "En direct · Hermes", "srcLost": "Connexion perdue · Hermes", "srcDemo": "Démo · événements simulés", "logLive": "flux en direct", "logLost": "connexion perdue", "logDemo": "flux simulé", "hlLive": "En direct de Hermes", "hlLost": "Connexion perdue · nouvelle tentative", "done": "Terminé", "listening": "Écoute", "and": " et ", "themeMissing": "Habillage introuvable ({e}).", "docTitle": "Sanctuaire · Panorama", "demoBtn": "Démo auto", "scenes": "Les 5 scènes", "loading": "Chargement…", "logTitle": "Sous le capot", "logAria": "Journal", "chatAria": "Discussion avec Kitsune", "folderMenuTitle": "Renommer ou archiver ce dossier", "newBtn": "Nouvelle", "newTitle": "Commencer une nouvelle conversation", "open": "Ouvrir", "close": "Fermer", "foldersTitle": "Dossiers / Projets", "foldersAria": "Dossiers et projets", "folderAdd": "+ Nouveau", "folderAddTitle": "Créer un dossier ou un projet (une conversation à part, gardée par Hermes)", "foldersHint": "Crée un dossier par projet pour ranger tes conversations.", "attach": "Joindre une image", "attachTitle": "Joindre une image (tu peux aussi la coller ou la glisser ici)", "inputAria": "Ton message pour Kitsune", "send": "Envoyer", "removeImg": "Retirer l'image {n}", "activity": "Activité", "sessionTitle": "Sanctuaire", "locale": "fr-CH"},
-    en: {"srcLive": "Live · Hermes", "srcLost": "Connection lost · Hermes", "srcDemo": "Demo · simulated events", "logLive": "live feed", "logLost": "connection lost", "logDemo": "simulated feed", "hlLive": "Live from Hermes", "hlLost": "Connection lost · retrying", "done": "Done", "listening": "Listening", "and": " and ", "themeMissing": "Theme not found ({e}).", "docTitle": "Sanctuary · Panorama", "demoBtn": "Auto demo", "scenes": "The 5 scenes", "loading": "Loading…", "logTitle": "Under the hood", "logAria": "Log", "chatAria": "Chat with Kitsune", "folderMenuTitle": "Rename or archive this folder", "newBtn": "New", "newTitle": "Start a new conversation", "open": "Open", "close": "Close", "foldersTitle": "Folders / Projects", "foldersAria": "Folders and projects", "folderAdd": "+ New", "folderAddTitle": "Create a folder or project (a separate conversation, kept by Hermes)", "foldersHint": "Create one folder per project to keep your conversations tidy.", "attach": "Attach an image", "attachTitle": "Attach an image (you can also paste or drop it here)", "inputAria": "Your message to Kitsune", "send": "Send", "removeImg": "Remove image {n}", "activity": "Activity", "sessionTitle": "Sanctuary", "locale": "en-US"} };
+  var UI = { fr: {"srcLive": "En direct · Hermes", "srcLost": "Connexion perdue · Hermes", "srcDemo": "Démo · événements simulés", "logLive": "flux en direct", "logLost": "connexion perdue", "logDemo": "flux simulé", "hlLive": "En direct de Hermes", "hlLost": "Connexion perdue · nouvelle tentative", "done": "Terminé", "listening": "Écoute", "and": " et ", "themeMissing": "Habillage introuvable ({e}).", "docTitle": "Sanctuaire · Panorama", "demoBtn": "Démo auto", "scenes": "Les 5 scènes", "loading": "Chargement…", "logTitle": "Sous le capot", "logAria": "Journal", "chatAria": "Discussion avec Kitsune", "folderMenuTitle": "Renommer ou archiver ce dossier", "newBtn": "Nouvelle", "newTitle": "Commencer une nouvelle conversation", "open": "Ouvrir", "close": "Fermer", "foldersTitle": "Dossiers / Projets", "foldersAria": "Dossiers et projets", "folderAdd": "+ Nouveau", "folderAddTitle": "Créer un dossier ou un projet (une conversation à part, gardée par Hermes)", "foldersHint": "Crée un dossier par projet pour ranger tes conversations.", "attach": "Joindre une image", "attachTitle": "Joindre une image (tu peux aussi la coller ou la glisser ici)", "inputAria": "Ton message pour Kitsune", "send": "Envoyer", "removeImg": "Retirer l'image {n}", "activity": "Activité", "sessionTitle": "Sanctuaire", "locale": "fr-CH",
+      "src_discord": "Discord", "src_telegram": "Telegram", "src_slack": "Slack", "src_whatsapp": "WhatsApp", "src_signal": "Signal",
+      "src_email": "e-mail", "src_api_server": "API", "src_cron": "tâche planifiée", "srcStart": "{coord} part sur {src}.",
+      "srcStartCron": "{coord} lance la tâche planifiée « {name} ».", "fallback": "{name} aboie : Hermes a basculé de {de} vers {vers} (modèle de secours).",
+      "fallbackTitle": "Modèle de secours", "approvalWhat": "{name} monte la garde : Hermes demande l'autorisation ({quoi}){ou}.",
+      "approvalWhere": ", à valider sur {ou}", "approvalTitle": "Autorisation demandée", "todayBtn": "Aujourd'hui",
+      "todayTitle": "Journal du jour", "todayTurns": "Tours", "todayTools": "Outils", "todayAlerts": "Alertes",
+      "todaySources": "D'où ça vient", "todayTokens": "Tokens (entrée / sortie)", "todayErrTools": "erreurs d'outils",
+      "todayErrApi": "erreurs de fournisseur", "todayFallbacks": "bascules", "todayApprovals": "autorisations",
+      "todayEmpty": "Rien encore aujourd'hui.", "todayHours": "Heure par heure", "todayBusiest": "Le plus actif : {name}",
+      "srcInteractive": "toi", "src_gateway": "ta messagerie (Discord, Telegram…)"},
+    en: {"srcLive": "Live · Hermes", "srcLost": "Connection lost · Hermes", "srcDemo": "Demo · simulated events", "logLive": "live feed", "logLost": "connection lost", "logDemo": "simulated feed", "hlLive": "Live from Hermes", "hlLost": "Connection lost · retrying", "done": "Done", "listening": "Listening", "and": " and ", "themeMissing": "Theme not found ({e}).", "docTitle": "Sanctuary · Panorama", "demoBtn": "Auto demo", "scenes": "The 5 scenes", "loading": "Loading…", "logTitle": "Under the hood", "logAria": "Log", "chatAria": "Chat with Kitsune", "folderMenuTitle": "Rename or archive this folder", "newBtn": "New", "newTitle": "Start a new conversation", "open": "Open", "close": "Close", "foldersTitle": "Folders / Projects", "foldersAria": "Folders and projects", "folderAdd": "+ New", "folderAddTitle": "Create a folder or project (a separate conversation, kept by Hermes)", "foldersHint": "Create one folder per project to keep your conversations tidy.", "attach": "Attach an image", "attachTitle": "Attach an image (you can also paste or drop it here)", "inputAria": "Your message to Kitsune", "send": "Send", "removeImg": "Remove image {n}", "activity": "Activity", "sessionTitle": "Sanctuary", "locale": "en-US",
+      "src_discord": "Discord", "src_telegram": "Telegram", "src_slack": "Slack", "src_whatsapp": "WhatsApp", "src_signal": "Signal",
+      "src_email": "e-mail", "src_api_server": "API", "src_cron": "scheduled task", "srcStart": "{coord} heads off to {src}.",
+      "srcStartCron": "{coord} starts the scheduled task “{name}”.", "fallback": "{name} barks: Hermes switched from {de} to {vers} (fallback model).",
+      "fallbackTitle": "Fallback model", "approvalWhat": "{name} stands guard: Hermes asks for permission ({quoi}){ou}.",
+      "approvalWhere": ", to approve on {ou}", "approvalTitle": "Permission requested", "todayBtn": "Today",
+      "todayTitle": "Today's journal", "todayTurns": "Turns", "todayTools": "Tools", "todayAlerts": "Alerts",
+      "todaySources": "Where it came from", "todayTokens": "Tokens (in / out)", "todayErrTools": "tool errors",
+      "todayErrApi": "provider errors", "todayFallbacks": "fallbacks", "todayApprovals": "permissions",
+      "todayEmpty": "Nothing yet today.", "todayHours": "Hour by hour", "todayBusiest": "Busiest: {name}",
+      "srcInteractive": "you", "src_gateway": "your messaging app (Discord, Telegram…)"} };
   var LANG = (function () {
     var q = new URLSearchParams(location.search).get("lang") || (window.SANCTUAIRE_LANG || null), s = null;
     try {
@@ -395,8 +415,32 @@
       phase[role] = "work"; tick();
     }
     function set(role, s) { phase[role] = s; if (!inFlight[role] && !demoOn) setState(role, s); }
+    /* d'où vient le travail (2026-11-05) : plateforme du tour ou nom de la tâche planifiée — noms seulement */
+    var INTERACTIVE = ["", "?", "cli", "tui", "desktop", "dashboard", "webapp", "web", "local", "acp"];
+    var lastTourT = 0, bgSrc = "", lastState = null;
+    function srcName(tr) {
+      if (!tr) return "";
+      var p = String(tr.plateforme || "").toLowerCase();
+      if (tr.tache || p === "cron") return tr.tache ? "\u23F0 " + String(tr.tache).slice(0, 24) : ui("src_cron");
+      if (INTERACTIVE.indexOf(p) >= 0) return "";
+      return ui("src_" + p) || p.slice(0, 16);
+    }
+    function sources(e) {
+      var tours = Array.isArray(e.tours) ? e.tours : [], maxT = lastTourT;
+      bgSrc = "";
+      tours.forEach(function (tr) {
+        if (!tr || typeof tr !== "object") return;
+        var n = srcName(tr);
+        if (n) bgSrc = n;
+        if (prev && tr.debut > lastTourT && n)
+          log("HERMES", tr.tache ? ui("srcStartCron", { coord: coord.short, name: String(tr.tache).slice(0, 60) }) : ui("srcStart", { coord: coord.short, src: n }));
+        if (tr.debut > maxT) maxT = tr.debut;
+      });
+      lastTourT = maxT;
+    }
     function apply(e) {
       var now = Date.now(), r = e.renard || {};
+      lastState = e; sources(e); renderToday();
       if (!prev) { prev = e; return; }
       var pr = prev.renard || {};
       coordBusy = !!r.en_cours && (e.maj - (r.debut || 0) < STALE);
@@ -425,16 +469,36 @@
         set("securite", "work");
         if (sen.erreurs_api > prevSen.erreurs_api) log("ALERTE", say("errorApi", "securite"));
         if (sen.erreurs_outils > prevSen.erreurs_outils) log("ALERTE", say("errorTool", "securite"));
-        if (sen.approbation.n > prevSen.approbation.n) log("GARDE", say("approval", "securite"));
+        if (sen.approbation.n > prevSen.approbation.n) {
+          var ap = sen.approbation, ou = ap.ou === "gateway" ? ui("approvalWhere", { ou: ui("src_gateway") }) : "";
+          var msgA = ap.quoi ? ui("approvalWhat", { name: R.securite.short, quoi: String(ap.quoi).slice(0, 80), ou: ou }) : say("approval", "securite");
+          log("GARDE", msgA);
+          if (ap.ou === "gateway") toHost({ type: "sanctuaire:notify", kind: "approval", title: ui("approvalTitle"), body: msgA });
+        }
+        var bs = sen.bascule || {}, pbs = prevSen.bascule || {};
+        if ((bs.n || 0) > (pbs.n || 0)) {
+          alertUntil = Date.now() + WORK_HOLD;
+          if (A.securite) A.securite.el.setAttribute("data-alert", "1");
+          var msgB = ui("fallback", { name: R.securite.short, de: shortModel(bs.de), vers: shortModel(bs.vers) });
+          log("ALERTE", msgB);
+          toHost({ type: "sanctuaire:notify", kind: "fallback", title: ui("fallbackTitle"), body: msgB });
+        }
       }
       prevSen = sen;
     }
+    function shortModel(m) { m = String(m || "?"); return m.slice(m.lastIndexOf("/") + 1).slice(0, 40); }
     function tick() {
       var now = Date.now();
       if (!demoOn && A.securite) A.securite.el.setAttribute("data-alert", now < alertUntil ? "1" : "0");
       if (approval) lastWork.securite = now;
       var cs = (coordBusy || chatBusyFlag) ? "work" : now - coordDoneAt < DONE_HOLD ? "done" : "rest";
       if (!(cs === "rest" && A.coordination && A.coordination.state === "listen")) set("coordination", cs);
+      /* Kitsune affiche d'où vient le travail en cours (Discord, tâche planifiée…) */
+      var ac = A.coordination;
+      if (ac && !demoOn) {
+        if (ac.state === "work" && bgSrc && coordBusy) { ac.label.textContent = ac.c.short + " \u00B7 " + bgSrc; ac.srcShown = true; }
+        else if (ac.srcShown) { ac.srcShown = false; if (ac.state === "work") ac.label.textContent = ac.c.short + " \u00B7 " + ac.c.work; }
+      }
       WORKERS.forEach(function (role) {
         if (!lastWork[role]) return;
         var age = now - lastWork[role];
@@ -480,6 +544,64 @@
       if (role === "coordination") { tick(); return; }
       if (phase[role] !== "work") { phase[role] = "work"; inFlight[role] = true; deliver(role, function () { arrived(role); }); }
       else set(role, "work");
+    }
+
+    /* ---- journal du jour (2026-11-05) : sommes heure par heure envoyées par le plugin, jour local du navigateur ---- */
+    var todayBox = $("today"), todayBody = $("today-body"), todayBtn = $("today-btn");
+    function fmtN(n) { n = Number(n) || 0; return n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e4 ? Math.round(n / 1e3) + "k" : n >= 1e3 ? (n / 1e3).toFixed(1) + "k" : String(n); }
+    function renderToday() {
+      if (!todayBox || !todayBody || todayBox.hidden || !lastState) return;
+      var H = lastState.h || {}, now = new Date(), tot = { t: 0, e: 0, a: 0, b: 0, p: 0, o: {}, s: {}, k: {} }, hours = [], i;
+      for (i = 0; i < 24; i++) hours.push(0);
+      Object.keys(H).forEach(function (k) {
+        var dt = new Date(Number(k) * 3600000), b = H[k] || {};
+        if (dt.getFullYear() !== now.getFullYear() || dt.getMonth() !== now.getMonth() || dt.getDate() !== now.getDate()) return;
+        ["t", "e", "a", "b", "p"].forEach(function (f) { tot[f] += Number(b[f]) || 0; });
+        var act = Number(b.t) || 0;
+        Object.keys(b.o || {}).forEach(function (x) { tot.o[x] = (tot.o[x] || 0) + (Number(b.o[x]) || 0); act += Number(b.o[x]) || 0; });
+        Object.keys(b.s || {}).forEach(function (x) { tot.s[x] = (tot.s[x] || 0) + (Number(b.s[x]) || 0); });
+        Object.keys(b.k || {}).forEach(function (x) { var c = tot.k[x] || [0, 0], v = b.k[x] || []; tot.k[x] = [c[0] + (Number(v[0]) || 0), c[1] + (Number(v[1]) || 0)]; });
+        hours[dt.getHours()] += act;
+      });
+      todayBody.textContent = "";
+      var tools = Object.keys(tot.o).reduce(function (n, x) { return n + tot.o[x]; }, 0), alerts = tot.e + tot.a + tot.b + tot.p;
+      if (!tot.t && !tools && !alerts) { el("p", "t-empty", todayBody).textContent = ui("todayEmpty"); return; }
+      var big = el("div", "t-big", todayBody);
+      [[tot.t, "todayTurns"], [tools, "todayTools"], [alerts, "todayAlerts"]].forEach(function (x) {
+        var c = el("div", "", big); el("b", "", c).textContent = fmtN(x[0]); el("span", "", c).textContent = ui(x[1]);
+      });
+      function section(title) { var sct = el("section", "", todayBody); el("h3", "", sct).textContent = title; return el("ul", "", sct); }
+      var keys = Object.keys(tot.o).sort(function (a, b) { return tot.o[b] - tot.o[a]; });
+      if (keys.length) {
+        var ul = section(ui("todayTools"));
+        keys.forEach(function (k) { var role = KEY2ROLE[k], li = el("li", "", ul); el("span", "", li).textContent = role && R[role] ? R[role].name : k; el("b", "", li).textContent = fmtN(tot.o[k]); });
+      }
+      var srcs = Object.keys(tot.s).sort(function (a, b) { return tot.s[b] - tot.s[a]; });
+      if (srcs.length) {
+        var ul2 = section(ui("todaySources"));
+        srcs.forEach(function (k) { var li = el("li", "", ul2), p = k.toLowerCase(); el("span", "", li).textContent = INTERACTIVE.indexOf(p) >= 0 ? ui("srcInteractive") : (ui("src_" + p) || k); el("b", "", li).textContent = fmtN(tot.s[k]); });
+      }
+      if (alerts) {
+        var ul3 = section(ui("todayAlerts"));
+        [[tot.e, "todayErrTools"], [tot.a, "todayErrApi"], [tot.b, "todayFallbacks"], [tot.p, "todayApprovals"]].forEach(function (x) {
+          if (!x[0]) return; var li = el("li", "", ul3); el("span", "", li).textContent = ui(x[1]); el("b", "", li).textContent = fmtN(x[0]);
+        });
+      }
+      var models = Object.keys(tot.k);
+      if (models.length) {
+        var ul4 = section(ui("todayTokens"));
+        models.forEach(function (k) { var li = el("li", "", ul4); el("span", "", li).textContent = shortModel(k); el("b", "", li).textContent = fmtN(tot.k[k][0]) + " / " + fmtN(tot.k[k][1]); });
+      }
+      var bars = el("div", "t-bars", el("section", "", todayBody)), mx = Math.max.apply(null, hours) || 1;
+      bars.parentNode.insertBefore(el("h3", ""), bars).textContent = ui("todayHours");
+      hours.forEach(function (v, h) { var bar = el("i", h === now.getHours() ? "now" : "", bars); bar.style.height = Math.max(2, Math.round(v / mx * 100)) + "%"; bar.title = h + ":00 · " + v; });
+    }
+    if (todayBtn && todayBox) {
+      todayBtn.addEventListener("click", function () {
+        todayBox.hidden = !todayBox.hidden; todayBtn.setAttribute("aria-pressed", todayBox.hidden ? "false" : "true"); renderToday();
+      });
+      var todayClose = $("today-close");
+      if (todayClose) todayClose.addEventListener("click", function () { todayBox.hidden = true; todayBtn.setAttribute("aria-pressed", "false"); });
     }
 
     /* ---- démo : le coordinateur distribue des tâches au hasard ---- */

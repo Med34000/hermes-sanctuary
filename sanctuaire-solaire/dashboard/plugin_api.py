@@ -8,7 +8,7 @@ Read-only. Serves:
 
 Reads nothing outside this plugin's folder and its own data folder. No network, no secrets.
 
-2026-11-05 ≈11:25 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin
+2026-11-05 ≈11:25, mis à jour ≈12:35 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin
 Copyright 2026 Médéric Morin — Apache License 2.0
 """
 
@@ -51,12 +51,40 @@ def _num(x: Any) -> float:
     return float(x) if isinstance(x, (int, float)) and not isinstance(x, bool) else 0.0
 
 
+def _txt(x: Any, n: int) -> str:
+    return " ".join(str(x or "").split())[:n] if isinstance(x, str) else ""
+
+
+def _merge_hours(dst: dict, src: Any, now: float) -> None:
+    """Sum the hourly journals of every process (last 49 hours only)."""
+    if not isinstance(src, dict):
+        return
+    oldest = int(now // 3600) - 49
+    for k, b in src.items():
+        if not (isinstance(k, str) and k.isdigit() and int(k) >= oldest and isinstance(b, dict)):
+            continue
+        o = dst.setdefault(k, {"t": 0, "o": {}, "e": 0, "a": 0, "b": 0, "p": 0, "s": {}, "k": {}})
+        for f in ("t", "e", "a", "b", "p"):
+            o[f] += int(_num(b.get(f)))
+        for f in ("o", "s"):
+            for name, n in (b.get(f) or {}).items() if isinstance(b.get(f), dict) else []:
+                if isinstance(name, str) and len(o[f]) < 30:
+                    o[f][name[:40]] = o[f].get(name[:40], 0) + int(_num(n))
+        for model, io in (b.get("k") or {}).items() if isinstance(b.get("k"), dict) else []:
+            if isinstance(model, str) and isinstance(io, list) and len(io) == 2 and len(o["k"]) < 12:
+                cur = o["k"].setdefault(model[:80], [0, 0])
+                cur[0] += int(_num(io[0]))
+                cur[1] += int(_num(io[1]))
+
+
 def _merge(states: list[dict]) -> dict:
     now = time.time()
     out: dict[str, Any] = {
-        "v": 2, "maj": 0, "animaux": {}, "renard": {"en_cours": False, "debut": 0, "fin": 0},
+        "v": 3, "maj": 0, "animaux": {}, "renard": {"en_cours": False, "debut": 0, "fin": 0}, "tours": [],
         "sentinelle": {"maj": 0, "dernier": 0, "erreurs_outils": 0, "erreurs_api": 0,
-                       "approbation": {"en_attente": False, "debut": 0, "fin": 0, "n": 0}},
+                       "approbation": {"en_attente": False, "debut": 0, "fin": 0, "n": 0, "quoi": "", "ou": ""},
+                       "bascule": {"n": 0, "dernier": 0, "de": "", "vers": ""}},
+        "h": {},
     }
     for st in states:
         out["maj"] = max(out["maj"], _num(st.get("maj")))
@@ -83,9 +111,24 @@ def _merge(states: list[dict]) -> dict:
         ap = s.get("approbation") or {}
         if ap.get("en_attente") is True and now - _num(ap.get("debut")) < STALE:
             so["approbation"]["en_attente"] = True
+        if _num(ap.get("debut")) >= so["approbation"]["debut"]:
+            so["approbation"]["quoi"] = _txt(ap.get("quoi"), 80)
+            so["approbation"]["ou"] = _txt(ap.get("ou"), 40)
         so["approbation"]["debut"] = max(so["approbation"]["debut"], _num(ap.get("debut")))
         so["approbation"]["fin"] = max(so["approbation"]["fin"], _num(ap.get("fin")))
         so["approbation"]["n"] += int(_num(ap.get("n")))
+        ba = s.get("bascule") or {}
+        bo = so["bascule"]
+        bo["n"] += int(_num(ba.get("n")))
+        if _num(ba.get("dernier")) > bo["dernier"]:
+            bo.update(dernier=_num(ba.get("dernier")), de=_txt(ba.get("de"), 80), vers=_txt(ba.get("vers"), 80))
+        if r.get("en_cours") is True and now - _num(r.get("debut")) < STALE:
+            for tr in (st.get("tours") or [])[:5]:
+                if isinstance(tr, dict) and now - _num(tr.get("debut")) < STALE:
+                    out["tours"].append({"plateforme": _txt(tr.get("plateforme"), 30), "tache": _txt(tr.get("tache"), 60),
+                                         "debut": _num(tr.get("debut"))})
+        _merge_hours(out["h"], st.get("h"), now)
+    out["tours"] = sorted(out["tours"], key=lambda x: x["debut"])[-8:]
     for key in ("castor", "chouette", "taupe", "renard", "shiba"):
         out["animaux"].setdefault(key, {"dernier": 0, "n": 0})
     out["sentinelle"]["maj"] = max(out["sentinelle"]["maj"], out["maj"])
@@ -98,7 +141,7 @@ def _read_state() -> dict:
     if d.is_dir():
         for f in sorted(d.glob("*.json"))[:64]:
             try:
-                if f.stat().st_size > 64 * 1024:
+                if f.stat().st_size > 256 * 1024:
                     continue
                 st = json.loads(f.read_text(encoding="utf-8"))
                 if isinstance(st, dict):
