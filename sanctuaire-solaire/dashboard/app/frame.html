@@ -77,6 +77,11 @@ body { background: var(--night); color: var(--ink); font-family: var(--body); ov
 .actor.has-video[data-state="work"][data-vphase="intro"] .vsheet.intro { opacity: 1; }
 .actor.has-video[data-state="listen"] .breath { opacity: 0; animation: none; }
 .actor.has-video[data-state="listen"] .vsheet.listen { opacity: 1; }
+/* pause (2026-11-05) : la petite vidéo remplace l'image fixe, en fondu court */
+.vsheet.idle { transition: opacity .3s ease; }
+.actor .breath { transition: opacity .3s ease; }
+.actor[data-idle="1"][data-state="rest"] .vsheet.idle { opacity: 1; }
+.actor[data-idle="1"][data-state="rest"] .breath { opacity: 0; }
 
 .tag {
   position: absolute; left: 50%; bottom: 100%; transform: translate(-50%, -6px);

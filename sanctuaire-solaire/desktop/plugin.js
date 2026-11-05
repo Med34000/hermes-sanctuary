@@ -7,6 +7,7 @@
 // 2026-11-05 ≈12:50 : notifications natives du Shiba (modèle de secours, autorisation en attente sur la messagerie)
 // 2026-11-05 ≈15:15 : choix de l'univers (Olympe, Clairière), notification « tour trop lourd »
 // 2026-11-05 ≈16:10 : boucle, budget du jour (réglage gardé ici), image « Ma journée » à télécharger, replay de la journée
+// 2026-11-05 ≈16:35 : vidéos de pause chargées après l'affichage du panorama
 // Copyright 2026 Médéric Morin — Apache License 2.0
 import { SandboxedFrame, ROUTES_AREA, SIDEBAR_NAV_AREA } from '@hermes/plugin-sdk'
 import { useEffect, useRef, useState } from 'react'
@@ -107,6 +108,12 @@ function assetNames(theme) {
   return [...names]
 }
 
+// The idle videos are not needed to show the panorama: they are sent once it is on screen.
+function idleNames(theme) {
+  const roles = theme && typeof theme.roles === 'object' ? Object.values(theme.roles) : []
+  return roles.map(r => r && r.idle && r.idle.src).filter(n => typeof n === 'string')
+}
+
 async function loadAssets(names, themeId) {
   const out = {}
   let i = 0
@@ -131,8 +138,11 @@ function loadBundle(want) {
       const [frame, theme] = await Promise.all([api.rest('/frame'), api.rest('/theme?id=' + encodeURIComponent(id))])
       // The clearing keeps its images at the root of app/ (base ""); other worlds in their own folder.
       const folder = typeof theme.base === 'string' && theme.base.startsWith('themes/') ? id : ''
-      const assets = await loadAssets(assetNames(theme), folder)
-      return { src: 'data:text/html;charset=utf-8,' + encodeURIComponent(frame.html), theme, assets, worlds, world: id }
+      const later = idleNames(theme)
+      const assets = await loadAssets(assetNames(theme).filter(n => !later.includes(n)), folder)
+      let lateP = null
+      const late = () => (lateP = lateP || loadAssets(later, folder))
+      return { src: 'data:text/html;charset=utf-8,' + encodeURIComponent(frame.html), theme, assets, worlds, world: id, late }
     })()
     bundles[want] = p
     p.catch(() => { delete bundles[want] })
@@ -191,6 +201,7 @@ function Panorama({ height }) {
       started = true
       post({ type: 'sanctuaire:theme', theme: data.theme, assets: data.assets, worlds: data.worlds, world: data.world, settings: readSettings() })
       poll()
+      data.late().then(a => { if (alive && Object.keys(a).length) post({ type: 'sanctuaire:assets', assets: a }) }, () => {})
     }
     const live = msg => { if (started) post(msg) }
     window.addEventListener('message', onMessage)

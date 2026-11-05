@@ -276,6 +276,12 @@
       if (c.alertLoop) a.vAlert = addLoop(c.alertLoop, "alert");
       if (c.intro) a.vIntro = addLoop(c.intro, "intro");
       if (c.listen) a.vListen = addLoop(c.listen, "listen");
+      /* petite vidéo de pause (2026-11-05) : jouée de temps en temps quand le personnage n'a rien à faire */
+      if (c.idle) {
+        a.vIdle = addLoop(c.idle, "idle");
+        a.idleSrc = c.idle.src;
+        var pi = new Image(); pi.onload = function () { a.idleReady = true; }; pi.src = url(c.idle.src);
+      }
       if (c.loop) {
         var im = new Image();
         im.onload = function () { e.classList.add("has-video"); clearInterval(a.hit); };
@@ -376,6 +382,45 @@
       requestAnimationFrame(loops);
     }
     requestAnimationFrame(loops);
+
+    /* ---- pauses (2026-11-05) : les personnages au repos jouent leur petite vidéo « j'attends du travail »,
+       au hasard, presque tout le temps : au plus idleMax à la fois (2 par défaut), un nouveau départ toutes les
+       idleEvery secondes ([2, 6] par défaut), et chacun se repose un peu entre deux de ses pauses ---- */
+    var idleOn = {}, idleEnd = {}, nextIdle = performance.now() + 2500 + Math.random() * 2500;
+    var IDLE_EVERY = Array.isArray(T.idleEvery) ? T.idleEvery : [2, 6], IDLE_MAX = T.idleMax || 2, IDLE_REST = 4000;
+    function idleDur(c) { return (c.idle.pingpong ? 2 * (c.idle.frames - 1) : c.idle.frames) * 1000 / c.idle.fps; }
+    function idleStop(role, now) { var a = A[role]; if (a) a.el.removeAttribute("data-idle"); delete idleOn[role]; idleEnd[role] = now; }
+    function idleTick(now) {
+      if (reduce) return;
+      Object.keys(idleOn).forEach(function (role) {
+        var a = A[role], c = a.c, t = now - idleOn[role];
+        if (a.state !== "rest" || a.sprite.style.opacity === "0" || (walking && role === "coordination") || t >= idleDur(c)) { idleStop(role, now); return; }
+        var f = frameOf(t, c.idle);
+        if (f !== a.idleF) { a.idleF = f; a.vIdle.style.backgroundPosition = sheetPos(f, c.idle.cols, c.idle.rows); }
+      });
+      if (now < nextIdle || document.hidden || Object.keys(idleOn).length >= IDLE_MAX) return;
+      var cand = ROLES.filter(function (r) {
+        var x = A[r];
+        return x && x.vIdle && x.idleReady && !idleOn[r] && x.state === "rest" && x.sprite.style.opacity !== "0"
+          && now - (idleEnd[r] || 0) > IDLE_REST && !(walking && r === "coordination");
+      });
+      nextIdle = now + (IDLE_EVERY[0] + Math.random() * (IDLE_EVERY[1] - IDLE_EVERY[0])) * 1000;
+      if (!cand.length) return;
+      var role = cand[Math.floor(Math.random() * cand.length)], b = A[role];
+      idleOn[role] = now; b.idleF = 0; b.vIdle.style.backgroundPosition = sheetPos(0, b.c.idle.cols, b.c.idle.rows);
+      b.el.setAttribute("data-idle", "1");
+    }
+    (function idleLoop(now) { idleTick(now); requestAnimationFrame(idleLoop); })(performance.now());
+    /* images arrivées après coup (le Desktop envoie les vidéos de pause une fois le panorama affiché) */
+    function lateAssets(assets) {
+      if (!assets || typeof assets !== "object") return;
+      Object.keys(assets).forEach(function (k) { var v = assets[k]; if (typeof v === "string" && /^(data:image\/|blob:)/.test(v)) ASSETS[k] = v; });
+      ROLES.forEach(function (r) {
+        var a = A[r]; if (!a || !a.vIdle || !ASSETS[a.idleSrc]) return;
+        a.vIdle.style.backgroundImage = "url('" + ASSETS[a.idleSrc] + "')";
+        var pi = new Image(); pi.onload = function () { a.idleReady = true; }; pi.src = ASSETS[a.idleSrc];
+      });
+    }
 
     /* ---- envol (ex. la Chouette part chercher et revient) ---- */
     ROLES.forEach(function (role) {
@@ -675,6 +720,7 @@
        plus des événements instantanés du Desktop (outil, début et fin de tour, erreur) */
     function fromHost(d) {
       if (d.type === "sanctuaire:timeline") { startReplay(d.events); return; }
+      if (d.type === "sanctuaire:assets") { lateAssets(d.assets); return; }
       if (replaying && d.type === "sanctuaire:state") {
         /* pendant le replay, l'activité réelle est suivie sans être jouée (pas de rattrapage à la fin) */
         if (d.state && d.state.animaux) { lastState = d.state; prev = d.state; if (d.state.sentinelle && d.state.sentinelle.approbation) prevSen = d.state.sentinelle; }

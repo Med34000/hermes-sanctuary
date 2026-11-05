@@ -88,6 +88,7 @@ Options d'habillage utiles (voir `themes/olympe/theme.json`) :
 - `layers` : décor animé posé sur le panorama (`img` avec `anim` `sway` ou `flow`, `smoke`, `sparkle`, `glow`), devant (`front`) ou derrière (`back`) les personnages. Une image découpée du panorama posée devant sert à cacher un personnage (Héphaïstos derrière son enclume).
 - `calm: true` : pas de respiration, de sautillement ni de halo au sol (personnages réalistes).
 - `doves` : des colombes en vol à la place des clones pour les sous-agents.
+- `idle` (rôle) : petite vidéo de pause (planche comme `loop`), jouée au hasard quand le personnage est au repos, presque en continu : deux personnages au plus à la fois (`idleMax`), un nouveau départ toutes les 2 à 6 s (`idleEvery`), et 4 s de repos minimum entre deux pauses d'un même personnage. Elle doit commencer et finir sur l'image au repos. Hermes Desktop l'envoie après l'affichage du panorama.
 - `fade` (rôle) : fondu du bas de l'image ; `fly.anchor` : point d'attache de l'oiseau en vol.
 
 Recette d'animation qui a fait ses preuves :

@@ -2,7 +2,7 @@
 
 **A living view of your agent.** Five animated characters wake up when Hermes uses their tools, in two worlds:
 
-- **Olympus** (default): Hermes reads the message and hands out the work, Athena's owl flies off to search the web, Hephaestus forges code behind his anvil, Mnemosyne searches files and memory, and Cerberus barks at errors and guards approvals. Leaves, water, forge fire and smoke move gently.
+- **Olympus** (default): Hermes reads the message and hands out the work, Athena's owl flies off to search the web, Hephaestus forges code behind his anvil, Mnemosyne searches files and memory, and Cerberus barks at errors and guards approvals. Leaves, water, forge fire and smoke move gently, and the idle characters keep living: one or two at a time play a short "waiting for work" moment of their own (Hephaestus wipes his brow, Cerberus yawns…).
 - **The Clearing**: the owl, the beaver, the mole, the Shiba and Kitsune with her paper planes.
 
 Switch worlds with the button in the panorama's bar (🏛 Olympus / ☀ Clearing); the choice is remembered.
@@ -70,7 +70,7 @@ The engine and the look are separate: one environment = one `dashboard/app/theme
 
 ## 🇫🇷 En bref
 
-Le Sanctuaire Solaire montre ce que fait ton agent : chaque outil utilisé par Hermes réveille un personnage, dans deux univers au choix, l'**Olympe** (par défaut : Hermès, Héphaïstos à sa forge, la chouette d'Athéna, Mnémosyne, Cerbère) ou la **Clairière** (Kitsune, le castor, la chouette, la taupe, le Shiba). Il fonctionne dans **Hermes Desktop** (Mac, Windows, Linux) et dans le **tableau de bord web**, en français ou en anglais selon la langue de ton système.
+Le Sanctuaire Solaire montre ce que fait ton agent : chaque outil utilisé par Hermes réveille un personnage, dans deux univers au choix, l'**Olympe** (par défaut : Hermès, Héphaïstos à sa forge, la chouette d'Athéna, Mnémosyne, Cerbère ; quand ils n'ont rien à faire, chacun a de temps en temps sa petite scène d'attente) ou la **Clairière** (Kitsune, le castor, la chouette, la taupe, le Shiba). Il fonctionne dans **Hermes Desktop** (Mac, Windows, Linux) et dans le **tableau de bord web**, en français ou en anglais selon la langue de ton système.
 
 ```bash
 hermes plugins install Med34000/sanctuaire-solaire-hermes/sanctuaire-solaire --enable
@@ -90,4 +90,4 @@ Code: [Apache 2.0](LICENSE) · Images and characters: [CC BY 4.0](LICENSE-ASSETS
 
 Independent project, not affiliated with Nous Research.
 
-*2026-11-05 ≈12:00, mis à jour ≈13:00, ≈15:00 et ≈16:20 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin*
+*2026-11-05 ≈12:00, mis à jour ≈13:00, ≈15:00, ≈16:20 et ≈17:00 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin*
