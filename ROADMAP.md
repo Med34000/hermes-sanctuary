@@ -1,6 +1,6 @@
 # Feuille de route · Roadmap
 
-*2026-11-04 ≈18:55 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin*
+*2026-11-04 ≈18:55, mis à jour 2026-11-05 ≈11:35 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin*
 
 ## ✅ Fait · Done
 - Panorama avec 5 compagnons animés, reliés en direct aux outils de Hermes. / Panorama with 5 animated companions, live from Hermes tools.
@@ -9,6 +9,7 @@
 - Moteur et habillage séparés : un environnement = un dossier `themes/<id>/`. / Engine and theme are separate: one environment = one `themes/<id>/` folder.
 - Installation guidée (`install.sh`), installable par Hermes lui-même (`AGENTS.md`). / Guided installer, installable by Hermes itself.
 - Français et anglais, selon la langue du navigateur. / French and English, from the browser language.
+- **Plugin Hermes** (bêta) : Hermes Desktop sur Mac, Windows et Linux, et tableau de bord web, installable en une commande. / **Hermes plugin** (beta): Hermes Desktop on macOS, Windows and Linux, plus the web dashboard, one-command install.
 
 ## 🔜 Prochaines étapes · Next
 - **Approbations depuis le chat** : boutons Autoriser / Refuser, avec le Shiba qui monte la garde. / Approvals from the chat (Allow / Deny).

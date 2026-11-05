@@ -35,7 +35,17 @@ Plus a **chat panel**: Kitsune listens while you type, reads your letter, thinks
 - Everything listens on **127.0.0.1 only**, with no open port. You reach it through an SSH tunnel.
 - The Hermes API key stays on the server and is **never sent to the page**.
 
-### Quick start
+### Install as a Hermes plugin (macOS, Windows, Linux) — new, beta
+```bash
+hermes plugins install Med34000/sanctuaire-solaire-hermes/sanctuaire-solaire --enable
+```
+Restart Hermes, then:
+- **Hermes Desktop**: turn on *Le Sanctuaire Solaire* in **Capabilities → Plugins**. The panorama appears in a pane under the conversation, and as a **Sanctuaire** page in the sidebar.
+- **Web dashboard**: a **Sanctuaire** tab, and a foldable strip above the **Chat** tab.
+
+You chat with Hermes in its own chat; the Sanctuary shows what it is doing, background work included. Details: [sanctuaire-solaire/README.md](sanctuaire-solaire/README.md).
+
+### Server mode (with the Sanctuary's own chat)
 Requirements: Linux server, Hermes Agent running as a **systemd service**, `python3`, `sudo`.
 
 ```bash
@@ -79,7 +89,17 @@ Cinq compagnons dans une grande clairière, chacun lié à une famille d'outils 
 - Tout écoute **en local uniquement** (127.0.0.1), sans aucun port ouvert. L'accès se fait par tunnel SSH.
 - La clé de l'API reste sur le serveur, **jamais dans la page**.
 
-### Installer
+### Installer comme plugin Hermes (Mac, Windows, Linux) — nouveau, en bêta
+```bash
+hermes plugins install Med34000/sanctuaire-solaire-hermes/sanctuaire-solaire --enable
+```
+Redémarre Hermes, puis :
+- **Hermes Desktop** : active *Le Sanctuaire Solaire* dans **Capabilities → Plugins**. Le panorama s'affiche dans un panneau sous la conversation, et dans une page **Sanctuaire**.
+- **Tableau de bord web** : un onglet **Sanctuaire**, et un bandeau repliable au-dessus de l'onglet **Chat**.
+
+Tu discutes avec Hermes dans son propre chat ; le Sanctuaire montre ce qu'il fait, y compris les tâches de fond.
+
+### Mode serveur (avec le chat du Sanctuaire)
 ```bash
 sudo git clone https://github.com/Med34000/sanctuaire-solaire-hermes /opt/sanctuaire
 cd /opt/sanctuaire
@@ -106,4 +126,4 @@ Que ce soit une critique, une idée, une optimisation ou un conseil de sécurit�
 
 Independent project, not affiliated with Nous Research. / Projet indépendant, sans lien avec Nous Research.
 
-*2026-11-04 ≈18:55 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin*
+*2026-11-04 ≈18:55, mis à jour 2026-11-05 ≈11:35 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin*
