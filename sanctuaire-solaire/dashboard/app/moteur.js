@@ -887,8 +887,8 @@
       WORLDS.forEach(function (w, k) { if (w.id === (WORLD || T.id)) wi = k; });
       var next = WORLDS[(wi + 1) % WORLDS.length];
       var wname = function (w) { var n = (w.names && (w.names[LANG] || w.names.fr)) || w.id; return String(n).slice(0, 24); };
-      var here = T.world || {};
-      worldBtn.textContent = (here.icon || "\u21C4") + " " + (here.name || wname(WORLDS[wi]));
+      /* le bouton montre l'univers où l'on va (l'univers actuel est déjà dans le titre) */
+      worldBtn.textContent = (next.icon ? String(next.icon).slice(0, 4) + " " : "\u21C4 ") + wname(next);
       worldBtn.title = ui("worldTitle", { name: wname(next) });
       worldBtn.setAttribute("aria-label", worldBtn.title);
       worldBtn.hidden = false;
