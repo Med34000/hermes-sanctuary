@@ -58,7 +58,15 @@
       "src_desktop": "Desktop", "src_gui": "Desktop", "src_tui": "Terminal (TUI)", "src_cli": "Terminal", "src_local": "Local",
       "src_dashboard": "Tableau de bord", "src_webapp": "Tableau de bord", "src_web": "Web", "src_acp": "Éditeur (ACP)",
       "src_mattermost": "Mattermost", "src_matrix": "Matrix", "src_sms": "SMS", "todayPeak": "Pic : {h} h – {h2} h · {t} tours, {o} outils",
-      "todayNow": "maintenant"},
+      "todayNow": "maintenant", "heavy": "{name} grogne : un tour vient de lire {tokens} tokens ({src}). La conversation est longue : pense à /new.",
+      "heavyTitle": "Tour très lourd", "todayHeavy": "tours trop lourds", "todayHeavyList": "Tours les plus lourds",
+      "cardToday": "aujourd'hui", "cardLast": "dernier passage", "cardNever": "pas encore aujourd'hui", "cardRecent": "Derniers outils",
+      "cardRole_coordination": "Coordonne chaque tour : reçoit ta demande, répartit le travail et répond. Envoie aussi les messages et délègue.",
+      "cardRole_fabrication": "Écrit et exécute : fichiers, modifications, terminal, code.",
+      "cardRole_recherche": "Cherche dehors : web, pages, images, navigateur.",
+      "cardRole_analyse": "Fouille ce qui existe déjà : fichiers, mémoire, anciennes conversations, skills.",
+      "cardRole_securite": "Veille : erreurs d'outils et de fournisseur, bascules de modèle, tours trop lourds, autorisations.",
+      "subagents": "{coord} délègue à {n} sous-agent(s).", "soundOn": "Sons activés", "soundOff": "Sons coupés", "soundTitle": "Sons"},
     en: {"srcLive": "Live · Hermes", "srcLost": "Connection lost · Hermes", "srcDemo": "Demo · simulated events", "logLive": "live feed", "logLost": "connection lost", "logDemo": "simulated feed", "hlLive": "Live from Hermes", "hlLost": "Connection lost · retrying", "done": "Done", "listening": "Listening", "and": " and ", "themeMissing": "Theme not found ({e}).", "docTitle": "Sanctuary · Panorama", "demoBtn": "Auto demo", "scenes": "The 5 scenes", "loading": "Loading…", "logTitle": "Under the hood", "logAria": "Log", "chatAria": "Chat with Kitsune", "folderMenuTitle": "Rename or archive this folder", "newBtn": "New", "newTitle": "Start a new conversation", "open": "Open", "close": "Close", "foldersTitle": "Folders / Projects", "foldersAria": "Folders and projects", "folderAdd": "+ New", "folderAddTitle": "Create a folder or project (a separate conversation, kept by Hermes)", "foldersHint": "Create one folder per project to keep your conversations tidy.", "attach": "Attach an image", "attachTitle": "Attach an image (you can also paste or drop it here)", "inputAria": "Your message to Kitsune", "send": "Send", "removeImg": "Remove image {n}", "activity": "Activity", "sessionTitle": "Sanctuary", "locale": "en-US",
       "src_discord": "Discord", "src_telegram": "Telegram", "src_slack": "Slack", "src_whatsapp": "WhatsApp", "src_signal": "Signal",
       "src_email": "e-mail", "src_api_server": "API", "src_cron": "Scheduled task", "srcStart": "{coord} heads off to {src}.",
@@ -73,7 +81,15 @@
       "src_desktop": "Desktop", "src_gui": "Desktop", "src_tui": "Terminal (TUI)", "src_cli": "Terminal", "src_local": "Local",
       "src_dashboard": "Dashboard", "src_webapp": "Dashboard", "src_web": "Web", "src_acp": "Editor (ACP)",
       "src_mattermost": "Mattermost", "src_matrix": "Matrix", "src_sms": "SMS", "todayPeak": "Peak: {h}:00 – {h2}:00 · {t} turns, {o} tools",
-      "todayNow": "now"} };
+      "todayNow": "now", "heavy": "{name} growls: a turn just read {tokens} tokens ({src}). The conversation is long: consider /new.",
+      "heavyTitle": "Very heavy turn", "todayHeavy": "heavy turns", "todayHeavyList": "Heaviest turns",
+      "cardToday": "today", "cardLast": "last seen", "cardNever": "not yet today", "cardRecent": "Recent tools",
+      "cardRole_coordination": "Runs every turn: takes your request, hands out the work and answers. Also sends messages and delegates.",
+      "cardRole_fabrication": "Writes and runs: files, edits, terminal, code.",
+      "cardRole_recherche": "Searches outside: web, pages, images, browser.",
+      "cardRole_analyse": "Digs through what already exists: files, memory, past conversations, skills.",
+      "cardRole_securite": "Keeps watch: tool and provider errors, model fallbacks, heavy turns, permissions.",
+      "subagents": "{coord} delegates to {n} subagent(s).", "soundOn": "Sound on", "soundOff": "Sound off", "soundTitle": "Sound"} };
   var LANG = (function () {
     var q = new URLSearchParams(location.search).get("lang") || (window.SANCTUAIRE_LANG || null), s = null;
     try {
@@ -235,6 +251,8 @@
         a.hit = setInterval(function () { a.el.setAttribute("data-hit", "1"); setTimeout(function () { a.el.setAttribute("data-hit", "0"); }, 180); }, 1000);
       if (fly[role]) fly[role].state(s);
       if (s === "work" && role !== "coordination") log(c.short.toUpperCase(), say("work", role));
+      if (s === "work" && role === "fabrication") sound("clink");
+      if (s === "work" && role === "analyse") sound("dig");
       if (s === "done") log("TERMINE", say("done", role));
     }
 
@@ -278,7 +296,7 @@
         raf = requestAnimationFrame(step);
       }
       function leave() {
-        mode = "leaving"; wantBack = false; hide(true);
+        mode = "leaving"; wantBack = false; hide(true); sound("hoot");
         go(F.perch, F.away, false, function (k) { return k * k; }, function () {
           box.style.display = "none"; mode = "away"; log("ENVOL", say("flyAway", role));
           if (wantBack) setTimeout(back, 300);
@@ -350,7 +368,7 @@
     var PLANE = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M2 9 L38 20 L12 20 Z" fill="#FFF8EA" stroke="#7A5A3C" stroke-width="1.3" stroke-linejoin="round"/>' +
                 '<path d="M2 31 L38 20 L12 20 Z" fill="#EAD7B5" stroke="#7A5A3C" stroke-width="1.3" stroke-linejoin="round"/></svg>';
     function launch(from, role, cb) {
-      var c = R[role], p = el("div", "plane", pano); p.innerHTML = PLANE;
+      var c = R[role], p = el("div", "plane", pano); p.innerHTML = PLANE; sound("whoosh");
       var a = [from[0], from[1] - from[2] * .55], b = [c.pos.x, c.pos.y - c.pos.h * .6];
       var dx = b[0] - a[0], dy = b[1] - a[1], lift = Math.max(7, Math.hypot(dx, dy / RATIO * 2.4) * .22), t0 = performance.now();
       function at(k) { return [a[0] + dx * k, a[1] + dy * k - Math.sin(k * Math.PI) * lift]; }
@@ -454,7 +472,8 @@
     }
     function apply(e) {
       var now = Date.now(), r = e.renard || {};
-      lastState = e; sources(e); renderToday();
+      lastState = e; sources(e); renderToday(); renderCard();
+      showSubagents(((e.sous_agents || {}).actifs) || 0);
       if (!prev) { prev = e; return; }
       var pr = prev.renard || {};
       coordBusy = !!r.en_cours && (e.maj - (r.debut || 0) < STALE);
@@ -481,7 +500,7 @@
         if (sen.approbation.n > prevSen.approbation.n) alertUntil = 0;
         if (A.securite) A.securite.el.setAttribute("data-alert", Date.now() < alertUntil ? "1" : "0");
         set("securite", "work");
-        if (sen.erreurs_api > prevSen.erreurs_api) log("ALERTE", say("errorApi", "securite"));
+        if (sen.erreurs_api > prevSen.erreurs_api) { log("ALERTE", say("errorApi", "securite")); sound("bark"); }
         if (sen.erreurs_outils > prevSen.erreurs_outils) log("ALERTE", say("errorTool", "securite"));
         if (sen.approbation.n > prevSen.approbation.n) {
           var ap = sen.approbation, ou = ap.ou === "gateway" ? ui("approvalWhere", { ou: ui("src_gateway") }) : "";
@@ -496,6 +515,16 @@
           var msgB = ui("fallback", { name: R.securite.short, de: shortModel(bs.de), vers: shortModel(bs.vers) });
           log("ALERTE", msgB);
           toHost({ type: "sanctuaire:notify", kind: "fallback", title: ui("fallbackTitle"), body: msgB });
+          sound("bark");
+        }
+        var lo = sen.lourd || {}, plo = prevSen.lourd || {};
+        if ((lo.n || 0) > (plo.n || 0)) {
+          alertUntil = Date.now() + WORK_HOLD;
+          if (A.securite) A.securite.el.setAttribute("data-alert", "1");
+          var msgH = ui("heavy", { name: R.securite.short, tokens: fmtN(lo.tokens), src: platformName(lo.plateforme) });
+          log("ALERTE", msgH);
+          toHost({ type: "sanctuaire:notify", kind: "heavy", title: ui("heavyTitle"), body: msgH });
+          sound("bark");
         }
       }
       prevSen = sen;
@@ -565,12 +594,12 @@
     function fmtN(n) { n = Number(n) || 0; return n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e4 ? Math.round(n / 1e3) + "k" : n >= 1e3 ? (n / 1e3).toFixed(1) + "k" : String(n); }
     function renderToday() {
       if (!todayBox || !todayBody || todayBox.hidden || !lastState) return;
-      var H = lastState.h || {}, now = new Date(), tot = { t: 0, e: 0, a: 0, b: 0, p: 0, o: {}, s: {}, k: {} }, hours = [], hT = [], hO = [], i;
+      var H = lastState.h || {}, now = new Date(), tot = { t: 0, e: 0, a: 0, b: 0, p: 0, g: 0, o: {}, s: {}, k: {} }, hours = [], hT = [], hO = [], i;
       for (i = 0; i < 24; i++) { hours.push(0); hT.push(0); hO.push(0); }
       Object.keys(H).forEach(function (k) {
         var dt = new Date(Number(k) * 3600000), b = H[k] || {};
         if (dt.getFullYear() !== now.getFullYear() || dt.getMonth() !== now.getMonth() || dt.getDate() !== now.getDate()) return;
-        ["t", "e", "a", "b", "p"].forEach(function (f) { tot[f] += Number(b[f]) || 0; });
+        ["t", "e", "a", "b", "p", "g"].forEach(function (f) { tot[f] += Number(b[f]) || 0; });
         var act = Number(b.t) || 0;
         Object.keys(b.o || {}).forEach(function (x) { tot.o[x] = (tot.o[x] || 0) + (Number(b.o[x]) || 0); act += Number(b.o[x]) || 0; });
         Object.keys(b.s || {}).forEach(function (x) { tot.s[x] = (tot.s[x] || 0) + (Number(b.s[x]) || 0); });
@@ -578,7 +607,7 @@
         hours[dt.getHours()] += act; hT[dt.getHours()] += Number(b.t) || 0; hO[dt.getHours()] += act - (Number(b.t) || 0);
       });
       todayBody.textContent = "";
-      var tools = Object.keys(tot.o).reduce(function (n, x) { return n + tot.o[x]; }, 0), alerts = tot.e + tot.a + tot.b + tot.p;
+      var tools = Object.keys(tot.o).reduce(function (n, x) { return n + tot.o[x]; }, 0), alerts = tot.e + tot.a + tot.b + tot.p + tot.g;
       if (!tot.t && !tools && !alerts) { el("p", "t-empty", todayBody).textContent = ui("todayEmpty"); return; }
       var big = el("div", "t-big", todayBody);
       [[tot.t, "todayTurns"], [tools, "todayTools"], [alerts, "todayAlerts"]].forEach(function (x) {
@@ -597,8 +626,17 @@
       }
       if (alerts) {
         var ul3 = section(ui("todayAlerts"));
-        [[tot.e, "todayErrTools"], [tot.a, "todayErrApi"], [tot.b, "todayFallbacks"], [tot.p, "todayApprovals"]].forEach(function (x) {
+        [[tot.e, "todayErrTools"], [tot.a, "todayErrApi"], [tot.b, "todayFallbacks"], [tot.g, "todayHeavy"], [tot.p, "todayApprovals"]].forEach(function (x) {
           if (!x[0]) return; var li = el("li", "", ul3); el("span", "", li).textContent = ui(x[1]); el("b", "", li).textContent = fmtN(x[0]);
+        });
+      }
+      var heavy = (lastState.lourds || []).filter(function (x) { var d = new Date(x.t * 1000); return d.toDateString() === now.toDateString(); });
+      if (heavy.length) {
+        var ul5 = section(ui("todayHeavyList"));
+        heavy.slice(0, 5).forEach(function (x) {
+          var li = el("li", "", ul5), d = new Date(x.t * 1000);
+          el("span", "", li).textContent = d.toTimeString().slice(0, 5) + " \u00B7 " + (x.tache ? "\u23F0 " + x.tache : platformName(x.plateforme));
+          el("b", "", li).textContent = fmtN(x.tokens);
         });
       }
       var models = Object.keys(tot.k);
@@ -622,6 +660,125 @@
       });
       var todayClose = $("today-close");
       if (todayClose) todayClose.addEventListener("click", function () { todayBox.hidden = true; todayBtn.setAttribute("aria-pressed", "false"); });
+    }
+
+    /* ---- fiche d'un compagnon (2026-11-05) : clic → rôle, compteur du jour, derniers outils ---- */
+    var card = el("div", "card", pano), cardRole = null;
+    card.hidden = true; card.setAttribute("role", "dialog");
+    function roleKey(role) { return Object.keys(KEY2ROLE).filter(function (k) { return KEY2ROLE[k] === role; })[0]; }
+    function renderCard() {
+      if (!cardRole || card.hidden) return;
+      var c = R[cardRole], key = roleKey(cardRole), st = lastState || {}, an = (st.animaux || {})[key] || {}, now = new Date(), n = 0;
+      Object.keys(st.h || {}).forEach(function (k) { var d = new Date(Number(k) * 3600000); if (d.toDateString() === now.toDateString()) n += Number(((st.h[k] || {}).o || {})[key]) || 0; });
+      if (cardRole === "coordination") Object.keys(st.h || {}).forEach(function (k) { var d = new Date(Number(k) * 3600000); if (d.toDateString() === now.toDateString()) n += Number((st.h[k] || {}).t) || 0; });
+      card.textContent = "";
+      var head = el("header", "", card); el("b", "", head).textContent = c.name;
+      var x = el("button", "", head); x.type = "button"; x.textContent = "\u00D7"; x.setAttribute("aria-label", ui("close"));
+      x.addEventListener("click", function (ev) { ev.stopPropagation(); card.hidden = true; cardRole = null; });
+      el("p", "c-role", card).textContent = c.desc || ui("cardRole_" + cardRole);
+      var stats = el("p", "c-stats", card), last = Number(an.dernier) || 0;
+      stats.textContent = n + " \u00B7 " + ui("cardToday") + (last && new Date(last * 1000).toDateString() === now.toDateString() ? " \u00B7 " + ui("cardLast") + " " + new Date(last * 1000).toTimeString().slice(0, 5) : n ? "" : " \u00B7 " + ui("cardNever"));
+      var rec = (an.recents || []).slice(0, 5);
+      if (rec.length) {
+        el("h4", "", card).textContent = ui("cardRecent");
+        var ul = el("ul", "", card);
+        rec.forEach(function (r) { var li = el("li", "", ul); el("code", "", li).textContent = String(r[0]).slice(0, 40); el("span", "", li).textContent = new Date(r[1] * 1000).toTimeString().slice(0, 5); });
+      }
+      card.style.left = Math.min(Math.max(c.pos.x, 14), 86) + "%";
+      card.style.top = Math.max(4, c.pos.y - c.pos.h - 4) + "%";
+      card.setAttribute("aria-label", c.name);
+    }
+    function openCard(role) {
+      if (cardRole === role && !card.hidden) { card.hidden = true; cardRole = null; return; }
+      cardRole = role; card.hidden = false; renderCard();
+    }
+    if (!T.scenes) ROLES.forEach(function (role) {
+      var a = A[role]; if (!a) return;
+      a.el.addEventListener("click", function (ev) { ev.stopPropagation(); openCard(role); });
+      a.el.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); openCard(role); } });
+    });
+    pano.addEventListener("click", function () { if (!card.hidden) { card.hidden = true; cardRole = null; } });
+
+    /* ---- sous-agents (2026-11-05) : de petits clones du coordinateur travaillent à côté de lui ---- */
+    var subs = [], subsShown = 0, SUB_SLOTS = coord.subagents || [[-4.8, -6], [5.2, -5.5], [-8.8, -4.5], [9.2, -4]];
+    function showSubagents(n) {
+      n = Math.max(0, Math.min(Number(n) || 0, SUB_SLOTS.length));
+      if (n === subsShown) return;
+      if (n > subsShown && lastState) log("HERMES", ui("subagents", { coord: coord.short, n: (lastState.sous_agents || {}).actifs || n }));
+      subsShown = n;
+      var src = coord.sprites && (coord.sprites.work || coord.sprites.rest);
+      while (subs.length < n) {
+        var i = subs.length, slot = SUB_SLOTS[i], m = el("div", "subag", pano), im = el("img", "", m);
+        im.src = url(src); im.alt = "";
+        m.style.left = (coord.pos.x + slot[0]) + "%"; m.style.top = (coord.pos.y + slot[1]) + "%";
+        m.style.height = (coord.pos.h * .5) + "%"; m.style.animationDelay = (i * .17) + "s";
+        if (slot[0] > 0) im.style.transform = "translateX(-50%) scaleX(-1)";
+        subs.push(m);
+      }
+      subs.forEach(function (m, i) { m.classList.toggle("on", i < n); });
+    }
+
+    /* ---- nuit (2026-11-05) : le soir le panorama s'assombrit et des lucioles apparaissent (heure locale) ---- */
+    var night = el("div", "night", pano), flies = el("div", "flies", pano), forced = new URLSearchParams(location.search).get("night");
+    pano.insertBefore(night, pano.firstChild);
+    for (var fi = 0; fi < 14; fi++) {
+      var fl = el("i", "", flies);
+      fl.style.left = (8 + Math.random() * 84) + "%"; fl.style.top = (45 + Math.random() * 45) + "%";
+      fl.style.animationDelay = (Math.random() * 6).toFixed(2) + "s"; fl.style.animationDuration = (4 + Math.random() * 5).toFixed(2) + "s";
+    }
+    function nightLevel() {
+      if (forced === "1") return 1; if (forced === "0") return 0;
+      var d = new Date(), h = d.getHours() + d.getMinutes() / 60;
+      if (h >= 21 || h < 5.5) return 1;
+      if (h >= 18.5) return (h - 18.5) / 2.5;
+      if (h < 7) return (7 - h) / 1.5;
+      return 0;
+    }
+    function applyNight() {
+      var lv = reduce ? Math.round(nightLevel()) : nightLevel();
+      pano.style.setProperty("--night", lv.toFixed(2));
+      pano.setAttribute("data-night", lv > .6 ? "1" : "0");
+    }
+    applyNight(); setInterval(applyNight, 60000);
+
+    /* ---- sons (2026-11-05) : synthétisés sur place (aucun fichier, aucun réseau), coupés par défaut ---- */
+    var soundOn = false, actx = null, lastSound = {}, soundBtn = $("sound-btn");
+    try { soundOn = localStorage.getItem("sanctuaire.sound") === "1"; } catch (e) { soundOn = false; }
+    function audio() {
+      if (!actx) { var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; actx = new AC(); }
+      if (actx.state === "suspended") actx.resume();
+      return actx;
+    }
+    function tone(ctx, type, f0, f1, t0, dur, vol) {
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = type; o.frequency.setValueAtTime(f0, t0); o.frequency.exponentialRampToValueAtTime(f1, t0 + dur);
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + .02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(g); g.connect(ctx.destination); o.start(t0); o.stop(t0 + dur + .05);
+    }
+    function sound(kind) {
+      if (!soundOn || document.hidden) return;
+      var now = Date.now(); if (now - (lastSound[kind] || 0) < 1500) return; lastSound[kind] = now;
+      var ctx = audio(); if (!ctx) return;
+      var t = ctx.currentTime + .01;
+      if (kind === "hoot") { tone(ctx, "sine", 420, 380, t, .35, .12); tone(ctx, "sine", 400, 330, t + .45, .55, .12); }
+      else if (kind === "bark") { tone(ctx, "sawtooth", 520, 260, t, .12, .07); tone(ctx, "sawtooth", 560, 240, t + .2, .14, .07); }
+      else if (kind === "whoosh") { tone(ctx, "triangle", 900, 300, t, .35, .05); }
+      else if (kind === "clink") { tone(ctx, "triangle", 1650, 1500, t, .18, .06); tone(ctx, "triangle", 1650, 1480, t + .3, .16, .05); }
+      else if (kind === "dig") { tone(ctx, "square", 140, 90, t, .09, .04); tone(ctx, "square", 150, 95, t + .22, .09, .04); }
+    }
+    function paintSound() {
+      if (!soundBtn) return;
+      soundBtn.textContent = soundOn ? "\uD83D\uDD0A" : "\uD83D\uDD07";
+      soundBtn.setAttribute("aria-pressed", soundOn ? "true" : "false");
+      soundBtn.setAttribute("aria-label", ui(soundOn ? "soundOn" : "soundOff")); soundBtn.title = ui("soundTitle");
+    }
+    if (soundBtn) {
+      paintSound();
+      soundBtn.addEventListener("click", function () {
+        soundOn = !soundOn; paintSound();
+        try { localStorage.setItem("sanctuaire.sound", soundOn ? "1" : "0"); } catch (e) { /* stockage indisponible */ }
+        if (soundOn) { audio(); sound("hoot"); }
+      });
     }
 
     /* ---- démo : le coordinateur distribue des tâches au hasard ---- */

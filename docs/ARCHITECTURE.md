@@ -18,10 +18,11 @@ dashboard/plugin_api.py  ── GET /state (fusion) · /theme · /frame · /asse
                                                                               └─> Tableau de bord : onglet « Sanctuaire » + bandeau au-dessus du Chat
 ```
 
-- **`__init__.py`** : les hooks `pre_tool_call`, `post_tool_call`, `pre_llm_call`, `post_llm_call`, `on_session_end`, `post_api_request`, `api_request_error`, `pre_approval_request` et `post_approval_response`. Ils écrivent **un petit fichier par processus** de Hermes, car les processus ne partagent pas leur mémoire :
+- **`__init__.py`** : les hooks `pre_tool_call`, `post_tool_call`, `pre_llm_call`, `post_llm_call`, `on_session_end`, `post_api_request`, `api_request_error`, `pre_approval_request`, `post_approval_response`, `subagent_start` et `subagent_stop`. Ils écrivent **un petit fichier par processus** de Hermes, car les processus ne partagent pas leur mémoire :
   - noms d'outils et heures, tours en cours avec leur provenance (nom de la plateforme, nom de la tâche planifiée) ;
   - compteurs d'erreurs, de **bascules** (un autre modèle répond dans le même tour juste après une erreur du fournisseur) et d'approbations, avec la courte description générique donnée par Hermes ;
-  - un **journal par heure** (tours, outils par compagnon, provenances, alertes, tokens par modèle), gardé 49 heures ; la page en tire « aujourd'hui » dans son propre fuseau horaire.
+  - un **journal par heure** (tours, outils par compagnon, provenances, alertes, tokens par modèle), gardé 49 heures ; la page en tire « aujourd'hui » dans son propre fuseau horaire ;
+  - les **tours trop lourds** (plus de 200 000 tokens d'entrée cumulés sur un tour), les 5 derniers outils de chaque compagnon et le nombre de sous-agents en cours.
 
   Ils ne renvoient jamais rien : Hermes n'est ni bloqué ni ralenti, et les approbations ne sont qu'affichées.
 - **`dashboard/plugin_api.py`** : en lecture seule. `/state` fusionne les fichiers des processus. `/theme`, `/frame` et `/asset` servent l'habillage, la page et les images (Hermes Desktop ne peut pas lire les fichiers directement).

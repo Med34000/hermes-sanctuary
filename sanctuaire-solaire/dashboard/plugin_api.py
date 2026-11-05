@@ -63,8 +63,8 @@ def _merge_hours(dst: dict, src: Any, now: float) -> None:
     for k, b in src.items():
         if not (isinstance(k, str) and k.isdigit() and int(k) >= oldest and isinstance(b, dict)):
             continue
-        o = dst.setdefault(k, {"t": 0, "o": {}, "e": 0, "a": 0, "b": 0, "p": 0, "s": {}, "k": {}})
-        for f in ("t", "e", "a", "b", "p"):
+        o = dst.setdefault(k, {"t": 0, "o": {}, "e": 0, "a": 0, "b": 0, "p": 0, "g": 0, "s": {}, "k": {}})
+        for f in ("t", "e", "a", "b", "p", "g"):
             o[f] += int(_num(b.get(f)))
         for f in ("o", "s"):
             for name, n in (b.get(f) or {}).items() if isinstance(b.get(f), dict) else []:
@@ -80,10 +80,12 @@ def _merge_hours(dst: dict, src: Any, now: float) -> None:
 def _merge(states: list[dict]) -> dict:
     now = time.time()
     out: dict[str, Any] = {
-        "v": 3, "maj": 0, "animaux": {}, "renard": {"en_cours": False, "debut": 0, "fin": 0}, "tours": [],
+        "v": 4, "maj": 0, "animaux": {}, "renard": {"en_cours": False, "debut": 0, "fin": 0}, "tours": [],
+        "lourds": [], "sous_agents": {"actifs": 0, "debut": 0, "n": 0},
         "sentinelle": {"maj": 0, "dernier": 0, "erreurs_outils": 0, "erreurs_api": 0,
                        "approbation": {"en_attente": False, "debut": 0, "fin": 0, "n": 0, "quoi": "", "ou": ""},
-                       "bascule": {"n": 0, "dernier": 0, "de": "", "vers": ""}},
+                       "bascule": {"n": 0, "dernier": 0, "de": "", "vers": ""},
+                       "lourd": {"n": 0, "dernier": 0, "tokens": 0, "plateforme": ""}},
         "h": {},
     }
     for st in states:
@@ -97,6 +99,10 @@ def _merge(states: list[dict]) -> dict:
                 o["dernier"] = _num(a.get("dernier"))
                 if isinstance(a.get("outil"), str):
                     o["outil"] = a["outil"][:60]
+            rec = o.setdefault("recents", [])
+            for e in (a.get("recents") or [])[:5]:
+                if isinstance(e, list) and len(e) == 2 and isinstance(e[0], str):
+                    rec.append([e[0][:60], _num(e[1])])
         r = st.get("renard") or {}
         if r.get("en_cours") is True and now - _num(r.get("debut")) < STALE:
             out["renard"]["en_cours"] = True
@@ -122,6 +128,19 @@ def _merge(states: list[dict]) -> dict:
         bo["n"] += int(_num(ba.get("n")))
         if _num(ba.get("dernier")) > bo["dernier"]:
             bo.update(dernier=_num(ba.get("dernier")), de=_txt(ba.get("de"), 80), vers=_txt(ba.get("vers"), 80))
+        lo, lso = s.get("lourd") or {}, so["lourd"]
+        lso["n"] += int(_num(lo.get("n")))
+        if _num(lo.get("dernier")) > lso["dernier"]:
+            lso.update(dernier=_num(lo.get("dernier")), tokens=int(_num(lo.get("tokens"))), plateforme=_txt(lo.get("plateforme"), 30))
+        for e in (st.get("lourds") or [])[:8]:
+            if isinstance(e, dict):
+                out["lourds"].append({"t": _num(e.get("t")), "tokens": int(_num(e.get("tokens"))),
+                                      "plateforme": _txt(e.get("plateforme"), 30), "tache": _txt(e.get("tache"), 60)})
+        sa = st.get("sous_agents") or {}
+        out["sous_agents"]["n"] += int(_num(sa.get("n")))
+        if int(_num(sa.get("actifs"))) > 0 and now - _num(sa.get("debut")) < STALE:
+            out["sous_agents"]["actifs"] += min(int(_num(sa.get("actifs"))), 20)
+            out["sous_agents"]["debut"] = max(out["sous_agents"]["debut"], _num(sa.get("debut")))
         if r.get("en_cours") is True and now - _num(r.get("debut")) < STALE:
             for tr in (st.get("tours") or [])[:5]:
                 if isinstance(tr, dict) and now - _num(tr.get("debut")) < STALE:
@@ -129,6 +148,14 @@ def _merge(states: list[dict]) -> dict:
                                          "debut": _num(tr.get("debut"))})
         _merge_hours(out["h"], st.get("h"), now)
     out["tours"] = sorted(out["tours"], key=lambda x: x["debut"])[-8:]
+    out["lourds"] = sorted(out["lourds"], key=lambda x: -x["t"])[:8]
+    for a in out["animaux"].values():
+        seen, rec = set(), []
+        for name, t in sorted(a.get("recents", []), key=lambda e: -e[1]):
+            if name not in seen:
+                seen.add(name)
+                rec.append([name, t])
+        a["recents"] = rec[:5]
     for key in ("castor", "chouette", "taupe", "renard", "shiba"):
         out["animaux"].setdefault(key, {"dernier": 0, "n": 0})
     out["sentinelle"]["maj"] = max(out["sentinelle"]["maj"], out["maj"])

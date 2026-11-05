@@ -208,6 +208,33 @@ body.bands .log { display: block; }
 .t-empty { margin: 6px 0; color: var(--muted); }
 #today-btn[aria-pressed="true"] { background: var(--bark); color: var(--cream); }
 
+/* fiche d'un compagnon, sous-agents, nuit (2026-11-05) */
+.card { position: absolute; z-index: 12; transform: translate(-50%, -100%); width: min(270px, 60vw); padding: 9px 12px 10px; border-radius: 14px;
+  background: rgba(255, 249, 236, .97); color: var(--ink); box-shadow: 0 10px 28px rgba(20, 12, 4, .4); font: 600 12px/1.35 var(--body); cursor: default; }
+.card[hidden] { display: none; }
+.card header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.card header b { font: 600 15px/1.2 var(--display); color: var(--bark); }
+.card header button { border: 0; background: none; font: 700 16px/1 var(--body); color: var(--muted); cursor: pointer; padding: 0 2px; }
+.card .c-role { margin: 4px 0 6px; color: var(--ink); }
+.card .c-stats { margin: 0 0 4px; font-weight: 700; color: #B4571C; }
+.card h4 { margin: 6px 0 3px; padding-bottom: 2px; border-bottom: 2px solid rgba(228, 128, 47, .5); font: 700 9.5px/1 var(--body); letter-spacing: .1em; text-transform: uppercase; color: #B4571C; }
+.card ul { list-style: none; margin: 0; padding: 0; }
+.card li { display: flex; justify-content: space-between; gap: 8px; padding: 1px 0; }
+.card code { font: 11px var(--mono); color: var(--bark); }
+.card li span { color: var(--muted); font-variant-numeric: tabular-nums; }
+.subag { position: absolute; transform: translate(-50%, -100%) scale(.2); transform-origin: 50% 100%; opacity: 0; pointer-events: none; transition: opacity .4s ease, transform .5s cubic-bezier(.3, 1.5, .5, 1); z-index: 3; }
+.subag img { position: absolute; left: 50%; bottom: 0; height: 100%; width: auto; transform: translateX(-50%); }
+.subag.on { opacity: 1; transform: translate(-50%, -100%) scale(1); animation: busy .9s ease-in-out infinite; }
+.night { position: absolute; inset: 0; pointer-events: none; opacity: var(--night, 0); transition: opacity 2s ease;
+  background: radial-gradient(ellipse at 70% 15%, rgba(40, 60, 120, .35), rgba(8, 14, 40, .78) 70%); mix-blend-mode: multiply; }
+.flies { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 2s ease; }
+.pano[data-night="1"] .flies { opacity: 1; }
+.flies i { position: absolute; width: .35%; aspect-ratio: 1; border-radius: 50%; background: #FFE98A; box-shadow: 0 0 8px 3px rgba(255, 220, 110, .7); animation: firefly 6s ease-in-out infinite; }
+@keyframes firefly { 0%, 100% { transform: translate(0, 0); opacity: 0; } 20% { opacity: 1; } 50% { transform: translate(18px, -14px); opacity: .7; } 80% { opacity: 1; } }
+.pano[data-night="1"] .actor img, .pano[data-night="1"] .vsheet { filter: brightness(.82) saturate(.9); }
+#sound-btn { padding: 4px 8px; font-size: 12px; }
+@media (prefers-reduced-motion: reduce) { .flies i, .subag.on { animation: none; } }
+
 /* fenêtre très large (bandeau au-dessus du chat, panneau sous la conversation) : le panorama est agrandi et recadré
    sur la bande où vivent les compagnons (de 34 % à 90 % de la hauteur de l'image) au lieu d'être réduit au milieu */
 @media (min-aspect-ratio: 3/1) {
@@ -228,6 +255,7 @@ body.bands .log { display: block; }
   <div class="pills">
     <span class="pill" id="src-pill" data-src="demo"><span class="dot"></span><span id="src-txt" data-i18n="srcDemo">Démo · événements simulés</span></span>
     <button class="pill" id="today-btn" type="button" aria-pressed="false" aria-controls="today" data-i18n="todayBtn">Aujourd'hui</button>
+    <button class="pill" id="sound-btn" type="button" aria-pressed="false">🔇</button>
     <button class="pill" id="demo" type="button" aria-pressed="false" data-i18n="demoBtn">Démo auto</button>
   </div>
 </header>

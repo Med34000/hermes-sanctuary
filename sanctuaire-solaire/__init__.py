@@ -14,6 +14,7 @@ directive: Hermes is never blocked, changed or slowed.
 2026-11-05 ≈11:15 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin
 2026-11-05 ≈12:30 — sources des tours (plateforme, tâche planifiée), bascules de modèle, journal par heure,
                      description des approbations
+2026-11-05 ≈13:20 — tours trop lourds (tokens d'entrée), derniers outils par compagnon, sous-agents en cours
 Copyright 2026 Médéric Morin — Apache License 2.0
 """
 
@@ -41,6 +42,7 @@ _OK = {"ok", "success", "succeeded", "completed", "done"}
 KEEP_SECONDS = 2 * 24 * 3600  # files of processes gone for 2 days are removed at start-up
 KEEP_HOURS = 49               # hourly journal kept ~2 days (the page shows "today" in its own time zone)
 ERROR_WINDOW = 300            # an API error this recent makes a model change count as a fallback
+HEAVY_TOKENS = 200_000        # input tokens summed over one turn above which the Shiba warns (long conversation)
 
 _lock = threading.Lock()
 _ctx: Any = None
@@ -52,6 +54,8 @@ _etat: dict[str, Any] = {
     "animaux": {a: {"dernier": 0, "n": 0} for a in ANIMAUX},
     "renard": {"en_cours": False, "debut": 0, "fin": 0},
     "tours": [],
+    "lourds": [],
+    "sous_agents": {"actifs": 0, "debut": 0, "n": 0},
     "sentinelle": {
         "maj": 0,
         "dernier": 0,
@@ -59,6 +63,7 @@ _etat: dict[str, Any] = {
         "erreurs_api": 0,
         "approbation": {"en_attente": False, "debut": 0, "fin": 0, "n": 0, "quoi": "", "ou": ""},
         "bascule": {"n": 0, "dernier": 0, "de": "", "vers": ""},
+        "lourd": {"n": 0, "dernier": 0, "tokens": 0, "plateforme": ""},
     },
     "h": {},
 }
@@ -143,6 +148,8 @@ def _touche(a: str, t: float, outil: str = "") -> None:
     x["n"] += 1
     if outil:
         x["outil"] = outil
+        r = [e for e in x.get("recents", []) if e[0] != outil][:4]
+        x["recents"] = [[outil, t]] + r
 
 
 def _heure(t: float) -> dict:
@@ -153,7 +160,7 @@ def _heure(t: float) -> dict:
         limite = int(t // 3600) - KEEP_HOURS
         for old in [x for x in h if int(x) < limite]:
             del h[old]
-        h[k] = {"t": 0, "o": {}, "e": 0, "a": 0, "b": 0, "p": 0, "s": {}, "k": {}}
+        h[k] = {"t": 0, "o": {}, "e": 0, "a": 0, "b": 0, "p": 0, "g": 0, "s": {}, "k": {}}
     return h[k]
 
 
@@ -207,7 +214,7 @@ def _debut_tour(session_id: Any = None, platform: Any = "", model: Any = "", **_
 
     def f(t):
         _actifs[str(session_id or "?")[:80]] = {"plateforme": plateforme, "tache": tache, "debut": t,
-                                               "modele": _court(model, 80)}
+                                               "modele": _court(model, 80), "tokens": 0}
         _touche("renard", t)
         _etat["renard"].update(en_cours=True, debut=t)
         _etat["tours"] = _tours()
@@ -222,7 +229,16 @@ def _fin_tour(session_id: Any = None, **_: Any) -> None:
         sid = str(session_id or "?")[:80]
         if sid not in _actifs and not _etat["renard"]["en_cours"]:
             return False
-        _actifs.pop(sid, None)
+        tour = _actifs.pop(sid, None)
+        if tour and tour.get("tokens", 0) >= HEAVY_TOKENS:
+            lo = _etat["sentinelle"]["lourd"]
+            lo.update(dernier=t, tokens=tour["tokens"], plateforme=tour["plateforme"])
+            lo["n"] += 1
+            _etat["sentinelle"]["dernier"] = _etat["sentinelle"]["maj"] = t
+            _etat["lourds"] = ([{"t": t, "tokens": tour["tokens"], "plateforme": tour["plateforme"],
+                                 "tache": tour["tache"]}] + _etat["lourds"])[:8]
+            _heure(t)["g"] += 1
+            _touche("shiba", t)
         _etat["tours"] = _tours()
         if _actifs:
             return None
@@ -248,6 +264,8 @@ def _apres_appel(session_id: Any = None, model: Any = "", usage: Any = None, **_
             k[0] += entree
             k[1] += sortie
         tour = _actifs.get(sid)
+        if tour:
+            tour["tokens"] = tour.get("tokens", 0) + entree
         if not tour or not modele:
             return None
         de = tour.get("modele") or ""
@@ -294,6 +312,26 @@ def _approbation_repondue(**_: Any) -> None:
     _maj(f)
 
 
+def _sous_agent_debut(**_: Any) -> None:
+    def f(t):
+        sa = _etat["sous_agents"]
+        if not sa["actifs"]:
+            sa["debut"] = t
+        sa["actifs"] = min(sa["actifs"] + 1, 20)
+        sa["n"] += 1
+        _touche("renard", t)
+    _maj(f)
+
+
+def _sous_agent_fin(**_: Any) -> None:
+    def f(t):
+        sa = _etat["sous_agents"]
+        if not sa["actifs"]:
+            return False
+        sa["actifs"] -= 1
+    _maj(f)
+
+
 def register(ctx) -> None:
     global _ctx
     _ctx = ctx
@@ -306,3 +344,5 @@ def register(ctx) -> None:
     ctx.register_hook("api_request_error", _erreur_api)
     ctx.register_hook("pre_approval_request", _approbation_demandee)
     ctx.register_hook("post_approval_response", _approbation_repondue)
+    ctx.register_hook("subagent_start", _sous_agent_debut)
+    ctx.register_hook("subagent_stop", _sous_agent_fin)
