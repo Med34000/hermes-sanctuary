@@ -1,4 +1,4 @@
-// Le Sanctuaire Solaire — Hermes Desktop half.
+// Hermes Sanctuary — Hermes Desktop half.
 // A pane under the conversation (and a full page in the sidebar) showing the panorama. The panorama runs in the
 // SDK's sandboxed frame; this file feeds it the theme, the images (from the plugin's own routes) and the activity:
 // instant tool / turn events from the app, plus the merged state of every Hermes process (crons, Discord…).
@@ -13,7 +13,7 @@ import { SandboxedFrame, ROUTES_AREA, SIDEBAR_NAV_AREA } from '@hermes/plugin-sd
 import { useEffect, useRef, useState } from 'react'
 import { jsx } from 'react/jsx-runtime'
 
-const ID = 'sanctuaire-solaire'
+const ID = 'hermes-sanctuary'
 const POLL_MS = 1500
 const listeners = new Set()
 const NOTIFY_GAP_MS = 120000
@@ -217,7 +217,7 @@ function Panorama({ height }) {
   if (failed) {
     return jsx('div', {
       className: 'p-3 text-xs text-(--ui-text-tertiary)',
-      children: 'Sanctuaire: the backend half is not enabled (hermes plugins enable sanctuaire-solaire, then restart Hermes).'
+      children: 'Sanctuaire: the backend half is not enabled (hermes plugins enable hermes-sanctuary, then restart Hermes).'
     })
   }
   if (!data) {
@@ -226,14 +226,14 @@ function Panorama({ height }) {
   return jsx(SandboxedFrame, {
     ref,
     src: data.src,
-    title: 'Le Sanctuaire Solaire',
+    title: 'Hermes Sanctuary',
     style: { width: '100%', height, border: 0, display: 'block', background: '#142016' }
   }, data.world)
 }
 
 export default {
   id: ID,
-  name: 'Le Sanctuaire Solaire',
+  name: 'Hermes Sanctuary',
   register(ctx) {
     api = ctx
     bundles = {}

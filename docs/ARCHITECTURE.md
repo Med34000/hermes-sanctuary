@@ -4,14 +4,14 @@
 
 Le Sanctuaire existe en deux formes, qui partagent le même moteur, le même habillage et les mêmes images :
 
-1. **Le plugin Hermes** (`sanctuaire-solaire/`, recommandé) : Mac, Windows et Linux, dans Hermes Desktop et dans le tableau de bord web. Il s'installe en une commande et utilise le chat natif de Hermes.
+1. **Le plugin Hermes** (`hermes-sanctuary/`, recommandé) : Mac, Windows et Linux, dans Hermes Desktop et dans le tableau de bord web. Il s'installe en une commande et utilise le chat natif de Hermes.
 2. **Le mode serveur** (`web/`, `deploy/`, `install.sh`) : une page autonome avec son propre chat (dossiers, Kitsune qui écoute et lit ta lettre), sur un serveur Linux, par tunnel SSH.
 
-## 1. Le plugin (`sanctuaire-solaire/`)
+## 1. Le plugin (`hermes-sanctuary/`)
 
 ```
 Hermes (chaque processus : gateway, chat, Desktop, crons)
-  └─ __init__.py (hooks) ──> <hermes home>/plugin-data/sanctuaire-solaire/proc/<pid>.json
+  └─ __init__.py (hooks) ──> <hermes home>/plugin-data/hermes-sanctuary/proc/<pid>.json
                                         │
 dashboard/plugin_api.py  ── GET /state (fusion) · /themes · /theme · /frame · /asset ──┐
                                                                               ├─> Hermes Desktop : panneau sous la conversation + page « Sanctuaire »
@@ -64,21 +64,21 @@ Hermes API (127.0.0.1:9119) <──────── relais du chat (clé côt�
 | fabrication | `write_file`, `patch`, `terminal`, `process`, `execute_code`, `skill_manage` (et tout outil inconnu) | Brico-Castor | Héphaïstos |
 | securite | erreurs d'outils, erreurs API, approbations (et commandes slash en mode serveur) | Shiba Sentinel | Cerbère |
 
-La même table existe dans le plugin (`sanctuaire-solaire/__init__.py` → `CARTE`), dans le hook du mode serveur (`hermes-hook/handler.py` → `CARTE`) et dans le moteur (`TOOL_ROLE`). Si tu en changes une, change les autres.
+La même table existe dans le plugin (`hermes-sanctuary/__init__.py` → `CARTE`), dans le hook du mode serveur (`hermes-hook/handler.py` → `CARTE`) et dans le moteur (`TOOL_ROLE`). Si tu en changes une, change les autres.
 
 ## Fichiers
 
-- `sanctuaire-solaire/dashboard/app/moteur.js` : moteur commun à tous les environnements. Il gère les états, l'avion en papier de Kitsune, la promenade quand tout est calme, l'envol, les boucles animées, le journal et la démo. Il lit l'activité soit sur le serveur (mode serveur), soit par messages (`<meta name="sanctuaire-source" content="host">`, plugin).
-- `sanctuaire-solaire/dashboard/app/themes/<id>/theme.json` : habillage d'un environnement (décor, personnages, positions, boucles, textes du chat).
-- `sanctuaire-solaire/dashboard/app/frame.html` : la page compacte du plugin.
-- `web/panorama.html` et `web/chat.js` : la page complète du mode serveur et son chat. `web/moteur.js`, `web/themes` et les images du panorama sont des liens vers `sanctuaire-solaire/dashboard/app/`.
+- `hermes-sanctuary/dashboard/app/moteur.js` : moteur commun à tous les environnements. Il gère les états, l'avion en papier de Kitsune, la promenade quand tout est calme, l'envol, les boucles animées, le journal et la démo. Il lit l'activité soit sur le serveur (mode serveur), soit par messages (`<meta name="sanctuaire-source" content="host">`, plugin).
+- `hermes-sanctuary/dashboard/app/themes/<id>/theme.json` : habillage d'un environnement (décor, personnages, positions, boucles, textes du chat).
+- `hermes-sanctuary/dashboard/app/frame.html` : la page compacte du plugin.
+- `web/panorama.html` et `web/chat.js` : la page complète du mode serveur et son chat. `web/moteur.js`, `web/themes` et les images du panorama sont des liens vers `hermes-sanctuary/dashboard/app/`.
 - `web/index.html` + `web/chouette-vol.js` : vue bonus « 5 scènes ».
 - `deploy/sanctuaire_server.py` : serveur interne et relais. `deploy/sanctuaire-web.service` est un exemple de service, puisque `install.sh` génère le sien.
 - `install.sh` : installation et désinstallation guidées du mode serveur.
 
 ## Créer un nouvel environnement
 
-1. Copier `sanctuaire-solaire/dashboard/app/themes/sanctuaire/` en `themes/<nouveau>/`, et mettre `"base": "themes/<nouveau>/"`.
+1. Copier `hermes-sanctuary/dashboard/app/themes/sanctuaire/` en `themes/<nouveau>/`, et mettre `"base": "themes/<nouveau>/"`.
 2. Y déposer le panorama et les images ou planches des 5 rôles (coordination, fabrication, recherche, analyse, securite).
 3. Ajuster dans `theme.json` les noms, les positions (`pos`, `visit`), les boucles (`loop`, `alertLoop`, `fly`, `walk`) et les textes.
    Langues : les textes de base sont dans la langue indiquée par `"lang"`. Les traductions vont dans `"i18n": { "en": { … } }`, avec la même structure, seulement les textes. Les textes de la page elle-même (boutons, journal) sont dans `moteur.js` → `UI`.

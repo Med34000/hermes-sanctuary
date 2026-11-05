@@ -1,1 +1,1 @@
-../sanctuaire-solaire/dashboard/app/moteur.js
+../hermes-sanctuary/dashboard/app/moteur.js

@@ -1,9 +1,9 @@
 {
-  "name": "sanctuaire-solaire",
+  "name": "hermes-sanctuary",
   "label": "Sanctuaire",
-  "description": "The Solar Sanctuary: animated companions that react to Hermes tools.",
+  "description": "Hermes Sanctuary: animated companions that react to Hermes tools.",
   "icon": "Sparkles",
-  "version": "2.5.1",
+  "version": "2.6.0",
   "tab": { "path": "/sanctuaire", "position": "after:chat" },
   "slots": ["chat:top"],
   "entry": "dist/index.js",

@@ -1,4 +1,4 @@
-/* Le Sanctuaire Solaire — dashboard half (web dashboard of Hermes).
+/* Hermes Sanctuary — dashboard half (web dashboard of Hermes).
    A "Sanctuaire" tab with the full panorama, and a foldable strip above the Chat tab.
    The panorama runs in an iframe (app/frame.html, same engine as the standalone page); this bundle feeds it the
    theme and the merged activity read from the plugin's own routes. No other network call.
@@ -10,7 +10,7 @@
   if (!SDK || !window.__HERMES_PLUGINS__) return;
   var React = SDK.React, h = React.createElement;
   var useEffect = SDK.hooks.useEffect, useRef = SDK.hooks.useRef, useState = SDK.hooks.useState;
-  var NAME = "sanctuaire-solaire";
+  var NAME = "hermes-sanctuary";
   var API = "/api/plugins/" + NAME;
   var FRAME = "/dashboard-plugins/" + NAME + "/app/frame.html";
   var POLL_MS = 1500;
@@ -114,7 +114,7 @@
       return function () { alive = false; clearTimeout(timer); window.removeEventListener("message", onMessage); };
     }, []);
     return h("iframe", {
-      ref: ref, src: FRAME, title: "Le Sanctuaire Solaire",
+      ref: ref, src: FRAME, title: "Hermes Sanctuary",
       style: { width: "100%", height: props.height, border: 0, borderRadius: "12px", display: "block", background: "#142016" }
     });
   }

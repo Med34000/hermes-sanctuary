@@ -1,4 +1,4 @@
-"""Le Sanctuaire Solaire — activity hooks (agent half of the plugin).
+"""Hermes Sanctuary — activity hooks (agent half of the plugin).
 
 Records WHICH tools Hermes uses and WHEN, so the Sanctuary companions can react:
 tool names, turn start/end times and where a turn comes from (platform name, scheduled
@@ -9,7 +9,7 @@ To spot a loop, a short hash of each call (tool name + arguments) is kept IN MEM
 current turn only; it is never written anywhere.
 
 Each Hermes process (gateway, dashboard chat, Desktop backend, cron) writes its own
-small file in <hermes home>/plugin-data/sanctuaire-solaire/proc/; the dashboard
+small file in <hermes home>/plugin-data/hermes-sanctuary/proc/; the dashboard
 route (dashboard/plugin_api.py) merges them. Hooks never raise and never return a
 directive: Hermes is never blocked, changed or slowed.
 
@@ -34,7 +34,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-PLUGIN_ID = "sanctuaire-solaire"
+PLUGIN_ID = "hermes-sanctuary"
 
 # Tool name -> companion key (same mapping as the page; keys kept from v1 for compatibility)
 CARTE = {

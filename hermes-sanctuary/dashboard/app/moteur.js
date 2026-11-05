@@ -73,7 +73,7 @@
       "costOff": "Coût indisponible avec cette version de Hermes.", "budgetLabel": "Budget du jour ($)", "budgetSave": "OK", "budgetUsed": "Budget : {cost} sur {budget} ({pct} %)",
       "budgetAlert": "{name} aboie : le budget du jour est dépassé ({cost} pour {budget}).", "budgetTitle": "Budget du jour dépassé",
       "shareBtn": "📸 Partager", "shareTitle": "Ma journée avec Hermes", "shareDownload": "Télécharger l'image", "shareClose": "Fermer",
-      "shareAlert1": "alerte", "shareBusiest": "le plus actif", "shareFooter": "Le Sanctuaire Solaire · plugin pour Hermes Agent", "shareFile": "ma-journee-avec-hermes",
+      "shareAlert1": "alerte", "shareBusiest": "le plus actif", "shareFooter": "Hermes Sanctuary · plugin pour Hermes Agent", "shareFile": "ma-journee-avec-hermes",
       "shareMaking": "Préparation de l'image…", "replayBtn": "⏪ Rejouer la journée", "replayEmpty": "Rien à rejouer aujourd'hui.", "replayStop": "Arrêter le replay",
       "replayStart": "Replay de ta journée : {n} événements en accéléré.", "replayDone": "Fin du replay, retour en direct.", "replayLoading": "Chargement de la journée…",
       "loopShort": "Hermes tourne en rond : {outil} ×{fois}", "budgetShort": "Budget du jour dépassé : {cost}", "fallbackShort": "Modèle de secours : {vers}",
@@ -107,7 +107,7 @@
       "costOff": "Cost unavailable with this Hermes version.", "budgetLabel": "Daily budget ($)", "budgetSave": "OK", "budgetUsed": "Budget: {cost} of {budget} ({pct}%)",
       "budgetAlert": "{name} barks: today's budget is exceeded ({cost} for {budget}).", "budgetTitle": "Daily budget exceeded",
       "shareBtn": "📸 Share", "shareTitle": "My day with Hermes", "shareDownload": "Download image", "shareClose": "Close",
-      "shareAlert1": "alert", "shareBusiest": "busiest", "shareFooter": "The Solar Sanctuary · a plugin for Hermes Agent", "shareFile": "my-day-with-hermes",
+      "shareAlert1": "alert", "shareBusiest": "busiest", "shareFooter": "Hermes Sanctuary · a plugin for Hermes Agent", "shareFile": "my-day-with-hermes",
       "shareMaking": "Preparing the image…", "replayBtn": "⏪ Replay the day", "replayEmpty": "Nothing to replay today.", "replayStop": "Stop the replay",
       "replayStart": "Replaying your day: {n} events, sped up.", "replayDone": "Replay over, back to live.", "replayLoading": "Loading the day…",
       "loopShort": "Hermes is going in circles: {outil} ×{fois}", "budgetShort": "Daily budget exceeded: {cost}", "fallbackShort": "Fallback model: {vers}",
@@ -950,7 +950,7 @@
           g.fillStyle = "rgba(246,234,211,.72)"; g.font = "700 17px " + sans; g.fillText(String(c[1]).toUpperCase(), cx, PH + 158);
         });
         g.textAlign = "right"; g.font = "600 17px " + sans; g.fillStyle = "rgba(246,234,211,.55)";
-        g.fillText("☀ " + ui("shareFooter") + " · github.com/Med34000/sanctuaire-solaire-hermes", W - 56, Hc - 22);
+        g.fillText("☀ " + ui("shareFooter") + " · github.com/Med34000/hermes-sanctuary", W - 56, Hc - 22);
         if (tot.alerts) { g.textAlign = "left"; g.fillText((T.roles.securite ? R.securite.short + " · " : "") + tot.alerts + " " + (tot.alerts > 1 ? ui("todayAlerts").toLowerCase() : ui("shareAlert1")), 56, Hc - 22); }
         return cv.toDataURL("image/png");
       });

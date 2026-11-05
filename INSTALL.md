@@ -15,7 +15,7 @@
 
 ### Installation guidée (recommandée)
 ```bash
-sudo git clone https://github.com/Med34000/sanctuaire-solaire-hermes /opt/sanctuaire
+sudo git clone https://github.com/Med34000/hermes-sanctuary /opt/sanctuaire
 cd /opt/sanctuaire
 ./install.sh --dry-run   # 1. lis le plan : rien n'est modifié
 ./install.sh             # 2. installe, avec une confirmation à chaque étape
@@ -51,7 +51,7 @@ Alternative : [Tailscale](https://tailscale.com) (réseau privé) si tu veux y a
 
 ### Laisser ton Hermes l'installer
 Envoie-lui :
-> Installe le Sanctuaire Solaire sur ce serveur : https://github.com/Med34000/sanctuaire-solaire-hermes — lis AGENTS.md dans le dépôt et suis-le. Montre-moi le plan (--dry-run) avant de modifier quoi que ce soit.
+> Installe le Hermes Sanctuary sur ce serveur : https://github.com/Med34000/hermes-sanctuary — lis AGENTS.md dans le dépôt et suis-le. Montre-moi le plan (--dry-run) avant de modifier quoi que ce soit.
 
 Il lancera l'essai, te résumera le plan, attendra ton accord, puis installera avec un redémarrage programmé 30 s plus tard, le temps de te répondre. S'il n'a pas les droits `sudo`, il te donnera la commande à taper.
 
@@ -81,7 +81,7 @@ Linux server with **Hermes Agent running as a systemd service** (often `hermes-g
 
 ### Guided install
 ```bash
-sudo git clone https://github.com/Med34000/sanctuaire-solaire-hermes /opt/sanctuaire
+sudo git clone https://github.com/Med34000/hermes-sanctuary /opt/sanctuaire
 cd /opt/sanctuaire
 ./install.sh --dry-run   # read the plan, nothing changes
 ./install.sh             # install, confirming each step
@@ -105,7 +105,7 @@ Options:
 `ssh -N -L 8787:127.0.0.1:8787 user@your-server`, then open **http://localhost:8787/panorama.html**. Nothing is exposed to the Internet. For phone access, Tailscale works well.
 
 ### Let your Hermes install it
-> Install the Sanctuaire Solaire on this server: https://github.com/Med34000/sanctuaire-solaire-hermes — read AGENTS.md in the repo and follow it. Show me the dry-run plan before changing anything.
+> Install the Hermes Sanctuary on this server: https://github.com/Med34000/hermes-sanctuary — read AGENTS.md in the repo and follow it. Show me the dry-run plan before changing anything.
 
 ### Update / uninstall
 To update: `git -C /opt/sanctuaire pull`, then hard-refresh the page. To uninstall: `sudo /opt/sanctuaire/install.sh --uninstall`.

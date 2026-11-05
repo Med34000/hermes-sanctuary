@@ -1,4 +1,6 @@
-# ☀️ Le Sanctuaire Solaire · The Solar Sanctuary — Hermes plugin
+# 🏛 Hermes Sanctuary · Le Sanctuaire — Hermes plugin
+
+*Formerly « Le Sanctuaire Solaire ». / Anciennement « Le Sanctuaire Solaire ».*
 
 **A living view of your agent.** Five animated characters wake up when Hermes uses their tools, in two worlds:
 
@@ -9,24 +11,24 @@ Switch worlds with the button in the panorama's bar (🏛 Olympus / ☀ Clearing
 
 Works in **Hermes Desktop** (macOS, Windows, Linux) and in the **web dashboard**. English or French, from your system language.
 
-![The Solar Sanctuary](../docs/catalog/banner.jpg)
+![Hermes Sanctuary](../docs/catalog/banner.jpg)
 
 ![Today's journal](../docs/catalog/today-en.jpg)
 
 ## Install
 
 ```bash
-hermes plugins install Med34000/sanctuaire-solaire-hermes/sanctuaire-solaire --enable
+hermes plugins install Med34000/hermes-sanctuary/hermes-sanctuary --enable
 ```
 
 Then restart Hermes (gateway / dashboard) so the hooks and routes load.
 
-- **Hermes Desktop**: open **Capabilities → Plugins**, turn on **Le Sanctuaire Solaire**. A pane appears under the conversation, and a **Sanctuaire** page in the sidebar.
+- **Hermes Desktop**: open **Capabilities → Plugins**, turn on **Hermes Sanctuary**. A pane appears under the conversation, and a **Sanctuaire** page in the sidebar.
 - **Web dashboard**: a **Sanctuaire** tab, and a foldable strip above the **Chat** tab.
 
 You chat with Hermes as usual; the Sanctuary shows what it is doing, including background work (crons, Discord, other chats).
 
-**Hermes Desktop connected to a remote Hermes (a server)?** The pane half lives on your computer: in **Capabilities → Plugins → Install from Git**, enter `Med34000/sanctuaire-solaire-hermes/sanctuaire-solaire` and turn on **Force reinstall** if the plugin is already on the server.
+**Hermes Desktop connected to a remote Hermes (a server)?** The pane half lives on your computer: in **Capabilities → Plugins → Install from Git**, enter `Med34000/hermes-sanctuary/hermes-sanctuary` and turn on **Force reinstall** if the plugin is already on the server.
 
 ## What it shows
 
@@ -46,7 +48,7 @@ You chat with Hermes as usual; the Sanctuary shows what it is doing, including b
 
 ## Updating
 
-`hermes plugins update sanctuaire-solaire` (or reinstall with `--force`), then restart the web dashboard. With Hermes Desktop connected to a remote Hermes, also reinstall the pane half (**Install from Git**, **Force reinstall**) and **quit and reopen the app** so its backend loads the new routes.
+`hermes plugins update hermes-sanctuary` (or reinstall with `--force`), then restart the web dashboard. With Hermes Desktop connected to a remote Hermes, also reinstall the pane half (**Install from Git**, **Force reinstall**) and **quit and reopen the app** so its backend loads the new routes.
 
 ## What it records — privacy
 
@@ -54,26 +56,26 @@ You chat with Hermes as usual; the Sanctuary shows what it is doing, including b
 - To spot a loop, a short hash of each tool call (name + arguments) is kept **in memory, for the current turn only**, and never written.
 - The daily budget is kept by Hermes Desktop or your browser, not on the server.
 - **Never** messages, replies, tool arguments, commands, results, error texts, file paths or ids.
-- Stored in `<hermes home>/plugin-data/sanctuaire-solaire/proc/` (one small JSON file per Hermes process; files older than 2 days are removed).
+- Stored in `<hermes home>/plugin-data/hermes-sanctuary/proc/` (one small JSON file per Hermes process; files older than 2 days are removed).
 
 ## Disclosure
 
 - Hooks: `pre_tool_call`, `post_tool_call`, `pre_llm_call`, `post_llm_call`, `on_session_end`, `post_api_request`, `api_request_error`, `pre_approval_request`, `post_approval_response`, `subagent_start`, `subagent_stop`. All are observers: they never block, change or approve anything. Approvals are only shown, never answered: you answer them where Hermes asks.
-- Backend routes (`/api/plugins/sanctuaire-solaire/`): read-only — the merged activity, the day's events for the replay, the worlds, the theme, the page and its images, all from the plugin's own folders.
+- Backend routes (`/api/plugins/hermes-sanctuary/`): read-only — the merged activity, the day's events for the replay, the worlds, the theme, the page and its images, all from the plugin's own folders.
 - The cost is estimated with Hermes's own pricing module (`agent.usage_pricing`), the one Hermes uses for its own usage figures; Hermes may refresh its price list (models.dev, OpenRouter) by itself. The plugin makes no network call of its own.
 - No secrets, no `.env` access, no background process, no telemetry. Hermes Desktop may show native notifications (at most one per kind every 2 minutes).
 - The panorama runs in a sandboxed frame that receives everything by `postMessage` and makes no request of its own.
 
 ## Make your own world
 
-The engine and the look are separate: one environment = one `dashboard/app/themes/<id>/` folder (background, characters, positions, animations, texts). See [docs/ARCHITECTURE.md](https://github.com/Med34000/sanctuaire-solaire-hermes/blob/main/docs/ARCHITECTURE.md). Ideas and new worlds are welcome in the [Discussions](https://github.com/Med34000/sanctuaire-solaire-hermes/discussions).
+The engine and the look are separate: one environment = one `dashboard/app/themes/<id>/` folder (background, characters, positions, animations, texts). See [docs/ARCHITECTURE.md](https://github.com/Med34000/hermes-sanctuary/blob/main/docs/ARCHITECTURE.md). Ideas and new worlds are welcome in the [Discussions](https://github.com/Med34000/hermes-sanctuary/discussions).
 
 ## 🇫🇷 En bref
 
-Le Sanctuaire Solaire montre ce que fait ton agent : chaque outil utilisé par Hermes réveille un personnage, dans deux univers au choix, l'**Olympe** (par défaut : Hermès, Héphaïstos à sa forge, la chouette d'Athéna, Mnémosyne, Cerbère ; quand ils n'ont rien à faire, chacun a de temps en temps sa petite scène d'attente) ou la **Clairière** (Kitsune, le castor, la chouette, la taupe, le Shiba). Il fonctionne dans **Hermes Desktop** (Mac, Windows, Linux) et dans le **tableau de bord web**, en français ou en anglais selon la langue de ton système.
+Hermes Sanctuary montre ce que fait ton agent : chaque outil utilisé par Hermes réveille un personnage, dans deux univers au choix, l'**Olympe** (par défaut : Hermès, Héphaïstos à sa forge, la chouette d'Athéna, Mnémosyne, Cerbère ; quand ils n'ont rien à faire, chacun a de temps en temps sa petite scène d'attente) ou la **Clairière** (Kitsune, le castor, la chouette, la taupe, le Shiba). Il fonctionne dans **Hermes Desktop** (Mac, Windows, Linux) et dans le **tableau de bord web**, en français ou en anglais selon la langue de ton système.
 
 ```bash
-hermes plugins install Med34000/sanctuaire-solaire-hermes/sanctuaire-solaire --enable
+hermes plugins install Med34000/hermes-sanctuary/hermes-sanctuary --enable
 ```
 
 Redémarre ensuite Hermes. Dans Hermes Desktop, active le plugin dans **Capabilities → Plugins**.

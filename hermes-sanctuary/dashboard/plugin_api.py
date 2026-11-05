@@ -1,4 +1,4 @@
-"""Le Sanctuaire Solaire — backend routes, mounted at /api/plugins/sanctuaire-solaire/.
+"""Hermes Sanctuary — backend routes, mounted at /api/plugins/hermes-sanctuary/.
 
 Read-only. Serves:
 - GET /state         the merged activity of every Hermes process (tool names and times only);
@@ -30,7 +30,7 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException
 
-PLUGIN_ID = "sanctuaire-solaire"
+PLUGIN_ID = "hermes-sanctuary"
 APP = Path(__file__).resolve().parent / "app"
 STALE = 15 * 60
 MAX_ASSET = 4 * 1024 * 1024

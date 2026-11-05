@@ -2,7 +2,7 @@
 
 *2026-11-04 ≈18:55 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, for Médéric Morin*
 
-You were asked to **install the Sanctuaire Solaire** on the server you run on. Follow these steps in order. Talk to your human in their language.
+You were asked to **install the Hermes Sanctuary** on the server you run on. Follow these steps in order. Talk to your human in their language.
 
 ## Golden rules
 1. **Never change anything before your human approved the plan** from the dry run.
@@ -13,7 +13,7 @@ You were asked to **install the Sanctuaire Solaire** on the server you run on. F
 ## Steps
 1. **Get the code** (outside any home folder, so the web service can read it):
    ```bash
-   sudo git clone https://github.com/Med34000/sanctuaire-solaire-hermes /opt/sanctuaire
+   sudo git clone https://github.com/Med34000/hermes-sanctuary /opt/sanctuaire
    ```
    If it already exists: `git -C /opt/sanctuaire pull`.
 2. **Dry run**: `cd /opt/sanctuaire && ./install.sh --dry-run`
