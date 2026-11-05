@@ -2,15 +2,18 @@
 
 Read-only. Serves:
 - GET /state         the merged activity of every Hermes process (tool names and times only);
+- GET /timeline      the events of the last day for the replay (event codes and times only);
 - GET /themes        the list of worlds (id and short name) found in dashboard/app/themes/;
 - GET /theme?id=…    a theme (characters, positions, texts) from dashboard/app/themes/<id>/theme.json;
 - GET /frame         the panorama page with its engine inlined (for Hermes Desktop's sandboxed frame);
 - GET /asset?name=…&theme=…  one image of dashboard/app/ (or of themes/<theme>/), base64-encoded
                      (Desktop cannot load files directly).
 
-Reads nothing outside this plugin's folder and its own data folder. No network, no secrets.
+Reads nothing outside this plugin's folder and its own data folder. No secrets.
+The cost of the day is estimated with Hermes's own pricing (agent.usage_pricing), as Hermes does for
+its own usage reports; Hermes may refresh its price list (models.dev, OpenRouter) on its own.
 
-2026-11-05 ≈11:25, mis à jour ≈12:35 et ≈15:10 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin
+2026-11-05 ≈11:25, mis à jour ≈12:35, ≈15:10 et ≈15:50 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin
 Copyright 2026 Médéric Morin — Apache License 2.0
 """
 
@@ -65,9 +68,14 @@ def _merge_hours(dst: dict, src: Any, now: float) -> None:
     for k, b in src.items():
         if not (isinstance(k, str) and k.isdigit() and int(k) >= oldest and isinstance(b, dict)):
             continue
-        o = dst.setdefault(k, {"t": 0, "o": {}, "e": 0, "a": 0, "b": 0, "p": 0, "g": 0, "s": {}, "k": {}})
-        for f in ("t", "e", "a", "b", "p", "g"):
+        o = dst.setdefault(k, {"t": 0, "o": {}, "e": 0, "a": 0, "b": 0, "p": 0, "g": 0, "r": 0, "s": {}, "k": {}, "u": {}})
+        for f in ("t", "e", "a", "b", "p", "g", "r"):
             o[f] += int(_num(b.get(f)))
+        for key, v in (b.get("u") or {}).items() if isinstance(b.get("u"), dict) else []:
+            if isinstance(key, str) and isinstance(v, list) and len(v) == 5 and len(o["u"]) < 12:
+                cur = o["u"].setdefault(key[:120], [0, 0, 0, 0, 0])
+                for i in range(5):
+                    cur[i] += int(_num(v[i]))
         for f in ("o", "s"):
             for name, n in (b.get(f) or {}).items() if isinstance(b.get(f), dict) else []:
                 if isinstance(name, str) and len(o[f]) < 30:
@@ -79,6 +87,67 @@ def _merge_hours(dst: dict, src: Any, now: float) -> None:
                 cur[1] += int(_num(io[1]))
 
 
+_PRICES: dict[tuple, tuple] = {}
+_PRICING: Any = None
+
+
+def _pricing() -> Any:
+    """Hermes's own cost estimator, or False when this Hermes has none we can use."""
+    global _PRICING
+    if _PRICING is None:
+        try:
+            from agent.usage_pricing import CanonicalUsage, estimate_usage_cost
+
+            _PRICING = (CanonicalUsage, estimate_usage_cost)
+        except Exception:
+            _PRICING = False
+    return _PRICING
+
+
+def _price(key: str, v: list) -> tuple:
+    """(usd or None, status) for the summed tokens of one model over one hour, priced per average call."""
+    memo = (key, tuple(v))
+    if memo in _PRICES:
+        return _PRICES[memo]
+    out: tuple = (None, "unknown")
+    p = _pricing()
+    n = max(int(v[4]), 1)
+    if p:
+        provider, _, model = key.partition("|")
+        try:
+            usage = p[0](input_tokens=v[0] // n, output_tokens=v[1] // n, cache_read_tokens=v[2] // n,
+                         cache_write_tokens=v[3] // n, request_count=1)
+            r = p[1](model, usage, provider=provider or None)
+            status = str(getattr(r, "status", "") or "")
+            amount = getattr(r, "amount_usd", None)
+            if amount is not None:
+                out = (float(amount) * n, "included" if status == "included" else "estimated")
+        except Exception:
+            out = (None, "unknown")
+    if len(_PRICES) > 4000:
+        _PRICES.clear()
+    _PRICES[memo] = out
+    return out
+
+
+def _add_costs(hours: dict) -> None:
+    """Replace the detailed token buckets of each hour by its estimated cost: c (usd), cm (per model),
+    cu / ci (calls without a known price / included in a subscription)."""
+    for b in hours.values():
+        c, cm, cu, ci = 0.0, {}, 0, 0
+        for key, v in (b.pop("u", None) or {}).items():
+            usd, status = _price(key, v)
+            model = key.partition("|")[2][:80]
+            if usd is None:
+                cu += int(v[4])
+            elif status == "included":
+                ci += int(v[4])
+            else:
+                c += usd
+                cm[model] = round(cm.get(model, 0.0) + usd, 6)
+        b["c"], b["cm"], b["cu"], b["ci"] = round(c, 6), cm, cu, ci
+
+
 def _merge(states: list[dict]) -> dict:
     now = time.time()
     out: dict[str, Any] = {
@@ -87,7 +156,8 @@ def _merge(states: list[dict]) -> dict:
         "sentinelle": {"maj": 0, "dernier": 0, "erreurs_outils": 0, "erreurs_api": 0,
                        "approbation": {"en_attente": False, "debut": 0, "fin": 0, "n": 0, "quoi": "", "ou": ""},
                        "bascule": {"n": 0, "dernier": 0, "de": "", "vers": ""},
-                       "lourd": {"n": 0, "dernier": 0, "tokens": 0, "plateforme": ""}},
+                       "lourd": {"n": 0, "dernier": 0, "tokens": 0, "plateforme": ""},
+                       "boucle": {"n": 0, "dernier": 0, "outil": "", "fois": 0, "plateforme": ""}},
         "h": {},
     }
     for st in states:
@@ -134,6 +204,11 @@ def _merge(states: list[dict]) -> dict:
         lso["n"] += int(_num(lo.get("n")))
         if _num(lo.get("dernier")) > lso["dernier"]:
             lso.update(dernier=_num(lo.get("dernier")), tokens=int(_num(lo.get("tokens"))), plateforme=_txt(lo.get("plateforme"), 30))
+        bo, bso = s.get("boucle") or {}, so["boucle"]
+        bso["n"] += int(_num(bo.get("n")))
+        if _num(bo.get("dernier")) > bso["dernier"]:
+            bso.update(dernier=_num(bo.get("dernier")), outil=_txt(bo.get("outil"), 60), fois=int(_num(bo.get("fois"))),
+                       plateforme=_txt(bo.get("plateforme"), 30))
         for e in (st.get("lourds") or [])[:8]:
             if isinstance(e, dict):
                 out["lourds"].append({"t": _num(e.get("t")), "tokens": int(_num(e.get("tokens"))),
@@ -161,10 +236,12 @@ def _merge(states: list[dict]) -> dict:
     for key in ("castor", "chouette", "taupe", "renard", "shiba"):
         out["animaux"].setdefault(key, {"dernier": 0, "n": 0})
     out["sentinelle"]["maj"] = max(out["sentinelle"]["maj"], out["maj"])
+    _add_costs(out["h"])
+    out["prix"] = bool(_pricing())
     return out
 
 
-def _read_state() -> dict:
+def _read_files() -> list[dict]:
     d = _data_dir()
     states = []
     if d.is_dir():
@@ -177,7 +254,26 @@ def _read_state() -> dict:
                     states.append(st)
             except (OSError, ValueError):
                 continue
-    return _merge(states)
+    return states
+
+
+def _read_state() -> dict:
+    return _merge(_read_files())
+
+
+TIMELINE_CODES = set("comfTEeabpgrs")
+
+
+def _read_timeline() -> dict:
+    """Every process's events of the last 26 hours, merged and sorted: [time, code] only."""
+    limit = time.time() - 26 * 3600
+    ev = []
+    for st in _read_files():
+        for e in (st.get("j") or [])[:2000] if isinstance(st.get("j"), list) else []:
+            if isinstance(e, list) and len(e) == 2 and e[1] in TIMELINE_CODES and _num(e[0]) >= limit:
+                ev.append([_num(e[0]), e[1]])
+    ev.sort(key=lambda e: e[0])
+    return {"events": ev[-4000:]}
 
 
 def _read_theme(theme_id: str) -> dict:
@@ -224,6 +320,11 @@ def _read_asset(name: str, theme_id: str = "") -> dict:
 @router.get("/state")
 async def state() -> dict:
     return await asyncio.to_thread(_read_state)
+
+
+@router.get("/timeline")
+async def timeline() -> dict:
+    return await asyncio.to_thread(_read_timeline)
 
 
 @router.get("/themes")

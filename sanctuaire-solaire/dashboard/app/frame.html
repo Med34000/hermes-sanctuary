@@ -107,6 +107,10 @@ body { background: var(--night); color: var(--ink); font-family: var(--body); ov
 }
 .shout::after { content: ""; position: absolute; left: 50%; bottom: -6px; width: 12px; height: 12px; background: #fff; transform: translateX(-50%) rotate(45deg); border-radius: 2px; }
 .shout.show { opacity: 1; transform: translate(-50%, -100%) scale(1); animation: cri .45s cubic-bezier(.3, 1.6, .5, 1); }
+.shout.guard { z-index: 8; white-space: normal; width: max-content; max-width: min(320px, 46vw); text-align: center; pointer-events: auto; cursor: pointer;
+  background: #FFF4F0; color: #8C1D18; border: 2px solid #D9452F; font: 700 clamp(11px, 1vw, 14px)/1.25 var(--body); }
+.shout.guard::after { background: #FFF4F0; border-right: 2px solid #D9452F; border-bottom: 2px solid #D9452F; bottom: -8px; }
+.shout.guard:not(.show) { pointer-events: none; }
 @keyframes cri { 0% { transform: translate(-50%, -100%) scale(.6); } 60% { transform: translate(-50%, -100%) scale(1.12); } 100% { transform: translate(-50%, -100%) scale(1); } }
 .plane { position: absolute; z-index: 6; width: 2.9%; aspect-ratio: 1; pointer-events: none; transform: translate(-50%, -50%); filter: drop-shadow(0 3px 3px rgba(30, 18, 5, .35)); }
 .plane svg { display: block; width: 100%; height: 100%; }
@@ -192,7 +196,7 @@ body.bands .log { display: block; }
 #today ul { list-style: none; margin: 0; padding: 0; }
 #today li { display: flex; justify-content: space-between; gap: 10px; padding: 2px 0; border-bottom: 1px dashed rgba(63, 42, 24, .12); }
 #today li b { font-variant-numeric: tabular-nums; color: var(--bark); }
-.t-big { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.t-big { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .t-big div { background: #fff; border-radius: 12px; padding: 6px 8px; text-align: center; }
 .t-big b { display: block; font: 600 20px/1.1 var(--display); color: var(--accent); }
 .t-big span { font: 700 9.5px/1.2 var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
@@ -206,6 +210,40 @@ body.bands .log { display: block; }
 .t-axis span:last-child { transform: translateX(-100%); }
 .t-peak { margin: 4px 0 0; font: 600 11.5px/1.3 var(--body); color: var(--bark); }
 .t-empty { margin: 6px 0; color: var(--muted); }
+/* coût, budget, partage, replay (2026-11-05) */
+.t-big b { font-size: 18px; white-space: nowrap; }
+.t-budget { margin: 8px 0 0; font: 700 11.5px/1.3 var(--body); color: var(--bark); }
+.t-budget.over { color: #B3261E; }
+.t-gauge { height: 6px; margin-top: 4px; border-radius: 3px; background: rgba(63, 42, 24, .12); overflow: hidden; }
+.t-gauge i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.t-budget.over .t-gauge i { background: #B3261E; }
+.t-note { margin: 4px 0 0; font: 600 10.5px/1.3 var(--body); color: var(--muted); }
+.t-actions { margin: 2px 0 10px; display: grid; gap: 7px; }
+.t-brow { display: flex; align-items: center; gap: 6px; font: 700 11px/1 var(--body); color: var(--bark); }
+.t-brow span { flex: 1; }
+.t-brow input { width: 70px; padding: 4px 6px; border: 1px solid rgba(63, 42, 24, .25); border-radius: 8px; font: 600 12px var(--body); background: #fff; color: var(--ink); }
+.t-actions button { border: 0; border-radius: 999px; padding: 6px 10px; font: 700 11px/1 var(--body); cursor: pointer; background: #fff; color: var(--bark); box-shadow: 0 1px 3px rgba(20, 12, 4, .15); }
+.t-actions button:hover { background: var(--bark); color: var(--cream); }
+.t-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.t-btns button { flex: 1; }
+.t-btns button[hidden] { display: none; }
+.share { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: rgba(15, 10, 5, .6); padding: 12px; }
+.share[hidden] { display: none; }
+.share-in { max-width: min(900px, 100%); max-height: 100%; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.share-in img { max-width: 100%; max-height: calc(100vh - 80px); border-radius: 12px; box-shadow: 0 12px 40px rgba(0, 0, 0, .5); background: #1c140c; min-height: 60px; min-width: 200px;
+  color: #F6EAD3; font: 600 13px var(--body); }
+.share-btns { display: flex; gap: 8px; }
+.share-btns button { border: 0; border-radius: 999px; padding: 8px 14px; font: 700 12px/1 var(--body); cursor: pointer; background: #fff; color: var(--bark); }
+.share-btns button.primary { background: var(--accent); color: #fff; }
+.replay-bar { position: fixed; z-index: 35; top: 8px; left: 8px; display: flex; align-items: center; gap: 10px; padding: 6px 8px 6px 14px;
+  border-radius: 999px; background: rgba(28, 20, 12, .82); color: #F6EAD3; font: 700 13px/1 var(--body); box-shadow: 0 6px 20px rgba(0, 0, 0, .35); }
+.replay-bar[hidden] { display: none; }
+.rb-clock { font-variant-numeric: tabular-nums; min-width: 112px; white-space: nowrap; }
+.rb-track { width: 140px; height: 6px; border-radius: 3px; background: rgba(246, 234, 211, .2); overflow: hidden; }
+.rb-track i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s linear; }
+.replay-bar button { border: 0; border-radius: 50%; width: 24px; height: 24px; background: rgba(246, 234, 211, .15); color: #F6EAD3; cursor: pointer; font: 700 12px/1 var(--body); }
+body.replay .bar, body.replay #today { visibility: hidden; }
+@media (max-height: 260px) { .replay-bar { top: 6px; left: 6px; padding: 4px 6px 4px 10px; font-size: 11.5px; } .rb-track { width: 90px; } }
 #today-btn[aria-pressed="true"] { background: var(--bark); color: var(--cream); }
 
 /* fiche d'un compagnon, sous-agents, nuit (2026-11-05) */

@@ -32,9 +32,14 @@ You chat with Hermes as usual; the Sanctuary shows what it is doing, including b
 
 - **Who is working**: each tool wakes its companion; Kitsune shouts and throws a paper plane to hand the work out.
 - **Where the work comes from**: Kitsune's label shows *Discord*, *Telegram* or *⏰ your scheduled task* when Hermes works without you.
-- **The Shiba guards you**: he barks on tool and provider errors, when Hermes **silently switches to a fallback model**, and when a permission is waiting (with Hermes's own short description, e.g. "recursive delete", and where to answer). In Hermes Desktop, a fallback or a permission waiting on Discord/Telegram also sends a native notification.
+- **The Shiba guards you**: he barks on tool and provider errors, when Hermes **silently switches to a fallback model**, and when a permission is waiting (with Hermes's own short description, e.g. "recursive delete", and where to answer). In Hermes Desktop, a fallback, a loop, a heavy turn, an exceeded budget or a permission waiting on Discord/Telegram also sends a native notification.
+- **Hermes going in circles**: the guard barks when Hermes calls the same tool with the same arguments again and again in one turn (4 times in its last 12 calls) — the kind of loop that burns tokens for nothing.
+- **Daily budget**: the journal shows today's **estimated cost** (Hermes's own pricing, per model). Set a daily budget in dollars and the guard barks once the day goes over it.
+- **Alerts in plain words**: every alert also appears in a bubble above the guard for a few seconds.
 - **Heavy turns**: the Shiba growls when one turn reads more than 200,000 input tokens (a conversation grown too long: time for `/new`), and the journal lists the heaviest turns.
-- **Today's journal** (*Today* button): turns, tools per companion, where the work came from, errors, fallbacks, heavy turns, permissions, tokens per model, hour by hour with the peak.
+- **Today's journal** (*Today* button): turns, tools per companion, where the work came from, errors, fallbacks, loops, heavy turns, permissions, tokens and cost per model, hour by hour with the peak.
+- **Share my day**: one click makes an image of the panorama with the day's numbers (turns, tools, busiest character, cost), ready to post.
+- **Replay the day**: the whole day plays again in the panorama, sped up, with a clock and a progress bar.
 - **Companion cards**: click a companion to see its role, how often it worked today and its recent tools.
 - **Subagents**: when Hermes delegates, doves circle the temple (Olympus) or little foxes join Kitsune (Clearing) until the subagents are done.
 - **Night and sounds**: in the evening the clearing darkens and fireflies come out (your local time); optional sounds (off by default), synthesised on the spot, no audio files.
@@ -45,15 +50,18 @@ You chat with Hermes as usual; the Sanctuary shows what it is doing, including b
 
 ## What it records — privacy
 
-- **Only names, times and counts**: tool names; turn start/end times and where a turn comes from (platform name, scheduled task name); counters of tool errors, provider errors, fallbacks, heavy turns and approvals; the number of running subagents; the generic description Hermes gives for an approval ("recursive delete"); model names and token counts per hour.
+- **Only names, times and counts**: tool names; turn start/end times and where a turn comes from (platform name, scheduled task name); counters of tool errors, provider errors, fallbacks, loops, heavy turns and approvals; the number of running subagents; the generic description Hermes gives for an approval ("recursive delete"); provider and model names with token counts per hour; for the replay, a list of one-letter event codes with their time (e.g. "a tool of the forge at 09:14").
+- To spot a loop, a short hash of each tool call (name + arguments) is kept **in memory, for the current turn only**, and never written.
+- The daily budget is kept by Hermes Desktop or your browser, not on the server.
 - **Never** messages, replies, tool arguments, commands, results, error texts, file paths or ids.
 - Stored in `<hermes home>/plugin-data/sanctuaire-solaire/proc/` (one small JSON file per Hermes process; files older than 2 days are removed).
 
 ## Disclosure
 
 - Hooks: `pre_tool_call`, `post_tool_call`, `pre_llm_call`, `post_llm_call`, `on_session_end`, `post_api_request`, `api_request_error`, `pre_approval_request`, `post_approval_response`, `subagent_start`, `subagent_stop`. All are observers: they never block, change or approve anything. Approvals are only shown, never answered: you answer them where Hermes asks.
-- Backend routes (`/api/plugins/sanctuaire-solaire/`): read-only — the merged activity, the theme, the page and its images, all from the plugin's own folders.
-- No network calls, no secrets, no `.env` access, no background process, no telemetry. Hermes Desktop may show native notifications (at most one per kind every 2 minutes).
+- Backend routes (`/api/plugins/sanctuaire-solaire/`): read-only — the merged activity, the day's events for the replay, the worlds, the theme, the page and its images, all from the plugin's own folders.
+- The cost is estimated with Hermes's own pricing module (`agent.usage_pricing`), the one Hermes uses for its own usage figures; Hermes may refresh its price list (models.dev, OpenRouter) by itself. The plugin makes no network call of its own.
+- No secrets, no `.env` access, no background process, no telemetry. Hermes Desktop may show native notifications (at most one per kind every 2 minutes).
 - The panorama runs in a sandboxed frame that receives everything by `postMessage` and makes no request of its own.
 
 ## Make your own world
@@ -70,7 +78,7 @@ hermes plugins install Med34000/sanctuaire-solaire-hermes/sanctuaire-solaire --e
 
 Redémarre ensuite Hermes. Dans Hermes Desktop, active le plugin dans **Capabilities → Plugins**.
 
-Le Sanctuaire montre aussi **d'où vient le travail** (Discord, Telegram, tâche planifiée). Le **gardien (Cerbère ou le Shiba) aboie** quand Hermes bascule en silence sur un modèle de secours, quand un tour devient trop lourd (plus de 200 000 tokens) ou qu'une autorisation attend. Le bouton **Aujourd'hui** ouvre le journal du jour. Un clic sur un compagnon ouvre sa fiche, des colombes ou des renardeaux apparaissent quand Hermes délègue à des sous-agents, le décor s'assombrit le soir, et des sons discrets sont disponibles (coupés par défaut).
+Le Sanctuaire montre aussi **d'où vient le travail** (Discord, Telegram, tâche planifiée). Le **gardien (Cerbère ou le Shiba) aboie**, avec une bulle qui dit pourquoi, quand Hermes **tourne en rond** (même outil, mêmes arguments), quand le **budget du jour** est dépassé (coût estimé avec les tarifs de Hermes), quand Hermes bascule en silence sur un modèle de secours, quand un tour devient trop lourd (plus de 200 000 tokens) ou qu'une autorisation attend. Le bouton **Aujourd'hui** ouvre le journal du jour, avec le coût, le réglage du budget, **📸 Partager** (une image de ta journée à poster) et **⏪ Rejouer la journée** (toute la journée en accéléré dans le panorama). Un clic sur un compagnon ouvre sa fiche, des colombes ou des renardeaux apparaissent quand Hermes délègue à des sous-agents, le décor s'assombrit le soir, et des sons discrets sont disponibles (coupés par défaut).
 
 Seuls des **noms, des heures et des compteurs** sont notés, jamais le contenu des conversations. Aucun appel réseau, aucun secret lu.
 
@@ -82,4 +90,4 @@ Code: [Apache 2.0](LICENSE) · Images and characters: [CC BY 4.0](LICENSE-ASSETS
 
 Independent project, not affiliated with Nous Research.
 
-*2026-11-05 ≈12:00, mis à jour ≈13:00 et ≈15:00 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin*
+*2026-11-05 ≈12:00, mis à jour ≈13:00, ≈15:00 et ≈16:20 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin*

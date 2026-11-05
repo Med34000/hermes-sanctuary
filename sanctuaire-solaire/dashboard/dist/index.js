@@ -2,7 +2,7 @@
    A "Sanctuaire" tab with the full panorama, and a foldable strip above the Chat tab.
    The panorama runs in an iframe (app/frame.html, same engine as the standalone page); this bundle feeds it the
    theme and the merged activity read from the plugin's own routes. No other network call.
-   2026-11-05 ≈11:35, mis à jour ≈15:20 (choix de l'univers) (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin
+   2026-11-05 ≈11:35, mis à jour ≈15:20 (choix de l'univers) et ≈16:10 (budget, image « Ma journée », replay) (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin
    Copyright 2026 Médéric Morin — Apache License 2.0 */
 (function () {
   "use strict";
@@ -27,6 +27,28 @@
     world = id;
     try { localStorage.setItem(WORLD_KEY, id); } catch (e) { /* stockage indisponible */ }
     worldListeners.slice().forEach(function (fn) { try { fn(id); } catch (e) { /* rien */ } });
+  }
+  /* réglages du panorama (budget du jour), gardés par la page */
+  function readSettings() {
+    try {
+      var s = JSON.parse(localStorage.getItem("sanctuaire.settings") || "{}") || {}, out = {};
+      if (typeof s.budget === "number" && s.budget > 0 && s.budget < 1e5) out.budget = s.budget;
+      if (typeof s.budgetDay === "string") out.budgetDay = s.budgetDay.slice(0, 40);
+      return out;
+    } catch (e) { return {}; }
+  }
+  function saveSettings(s) {
+    if (!s || typeof s !== "object") return;
+    var out = {};
+    if (typeof s.budget === "number" && s.budget > 0 && s.budget < 1e5) out.budget = Math.round(s.budget * 100) / 100;
+    if (typeof s.budgetDay === "string") out.budgetDay = s.budgetDay.slice(0, 40);
+    try { localStorage.setItem("sanctuaire.settings", JSON.stringify(out)); } catch (e) { /* stockage indisponible */ }
+  }
+  function download(msg) {
+    var u = typeof msg.url === "string" ? msg.url : "", name = typeof msg.name === "string" && /^[a-z0-9-]{1,60}\.png$/.test(msg.name) ? msg.name : "sanctuaire.png";
+    if (u.indexOf("data:image/png;base64,") !== 0 || u.length > 15 * 1024 * 1024) return;
+    var a = document.createElement("a"); a.href = u; a.download = name; a.style.display = "none";
+    document.body.appendChild(a); a.click(); setTimeout(function () { a.remove(); }, 0);
   }
   /* les univers connus du serveur ; un serveur plus ancien n'a que la clairière */
   function loadWorlds() {
@@ -73,11 +95,18 @@
         var f = ref.current;
         if (!f || ev.source !== f.contentWindow || !ev.data) return;
         if (ev.data.type === "sanctuaire:world") { setWorld(ev.data.id); return; }
+        if (ev.data.type === "sanctuaire:settings") { saveSettings(ev.data.settings); return; }
+        if (ev.data.type === "sanctuaire:download") { download(ev.data); return; }
+        if (ev.data.type === "sanctuaire:timeline-request") {
+          SDK.fetchJSON(API + "/timeline").then(function (r) { post({ type: "sanctuaire:timeline", events: r && Array.isArray(r.events) ? r.events : [] }); },
+            function () { post({ type: "sanctuaire:timeline", events: [] }); });
+          return;
+        }
         if (ev.data.type !== "sanctuaire:ready" || started) return;
         started = true;
         loadTheme(props.want).then(function (b) {
           if (!alive) return;
-          post({ type: "sanctuaire:theme", theme: b.theme, worlds: b.worlds, world: b.world });
+          post({ type: "sanctuaire:theme", theme: b.theme, worlds: b.worlds, world: b.world, settings: readSettings() });
           poll();
         }, function () { started = false; });
       }

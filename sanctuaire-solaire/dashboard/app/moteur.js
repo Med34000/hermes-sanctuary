@@ -66,7 +66,18 @@
       "cardRole_recherche": "Cherche dehors : web, pages, images, navigateur.",
       "cardRole_analyse": "Fouille ce qui existe déjà : fichiers, mémoire, anciennes conversations, skills.",
       "cardRole_securite": "Veille : erreurs d'outils et de fournisseur, bascules de modèle, tours trop lourds, autorisations.",
-      "subagents": "{coord} délègue à {n} sous-agent(s).", "soundOn": "Sons activés", "soundOff": "Sons coupés", "soundTitle": "Sons", "worldTitle": "Changer d'univers : {name}"},
+      "subagents": "{coord} délègue à {n} sous-agent(s).", "soundOn": "Sons activés", "soundOff": "Sons coupés", "soundTitle": "Sons", "worldTitle": "Changer d'univers : {name}",
+      "loop": "{name} aboie : Hermes tourne en rond ({outil} {fois} fois avec les mêmes arguments). Jette un œil à la conversation ou arrête-le.",
+      "loopTitle": "Hermes tourne en rond", "todayLoops": "boucles", "todayCost": "Coût", "costIncluded": "inclus", "costNone": "—",
+      "costNote": "Estimation avec les tarifs de Hermes.", "costPart": " {n} appel(s) sans tarif connu.", "costIncl": " {n} appel(s) inclus dans un abonnement.",
+      "costOff": "Coût indisponible avec cette version de Hermes.", "budgetLabel": "Budget du jour ($)", "budgetSave": "OK", "budgetUsed": "Budget : {cost} sur {budget} ({pct} %)",
+      "budgetAlert": "{name} aboie : le budget du jour est dépassé ({cost} pour {budget}).", "budgetTitle": "Budget du jour dépassé",
+      "shareBtn": "📸 Partager", "shareTitle": "Ma journée avec Hermes", "shareDownload": "Télécharger l'image", "shareClose": "Fermer",
+      "shareBusiest": "le plus actif", "shareFooter": "Le Sanctuaire Solaire · plugin pour Hermes Agent", "shareFile": "ma-journee-avec-hermes",
+      "shareMaking": "Préparation de l'image…", "replayBtn": "⏪ Rejouer la journée", "replayEmpty": "Rien à rejouer aujourd'hui.", "replayStop": "Arrêter le replay",
+      "replayStart": "Replay de ta journée : {n} événements en accéléré.", "replayDone": "Fin du replay, retour en direct.", "replayLoading": "Chargement de la journée…",
+      "loopShort": "Hermes tourne en rond : {outil} ×{fois}", "budgetShort": "Budget du jour dépassé : {cost}", "fallbackShort": "Modèle de secours : {vers}",
+      "heavyShort": "Tour très lourd ({tokens} tokens) : pense à /new", "approvalShort": "Autorisation demandée : {quoi}", "apiShort": "Le fournisseur ne répond pas"},
     en: {"srcLive": "Live · Hermes", "srcLost": "Connection lost · Hermes", "srcDemo": "Demo · simulated events", "logLive": "live feed", "logLost": "connection lost", "logDemo": "simulated feed", "hlLive": "Live from Hermes", "hlLost": "Connection lost · retrying", "done": "Done", "listening": "Listening", "and": " and ", "themeMissing": "Theme not found ({e}).", "docTitle": "Sanctuary · Panorama", "demoBtn": "Auto demo", "scenes": "The 5 scenes", "loading": "Loading…", "logTitle": "Under the hood", "logAria": "Log", "chatAria": "Chat with Kitsune", "folderMenuTitle": "Rename or archive this folder", "newBtn": "New", "newTitle": "Start a new conversation", "open": "Open", "close": "Close", "foldersTitle": "Folders / Projects", "foldersAria": "Folders and projects", "folderAdd": "+ New", "folderAddTitle": "Create a folder or project (a separate conversation, kept by Hermes)", "foldersHint": "Create one folder per project to keep your conversations tidy.", "attach": "Attach an image", "attachTitle": "Attach an image (you can also paste or drop it here)", "inputAria": "Your message to Kitsune", "send": "Send", "removeImg": "Remove image {n}", "activity": "Activity", "sessionTitle": "Sanctuary", "locale": "en-US",
       "src_discord": "Discord", "src_telegram": "Telegram", "src_slack": "Slack", "src_whatsapp": "WhatsApp", "src_signal": "Signal",
       "src_email": "e-mail", "src_api_server": "API", "src_cron": "Scheduled task", "srcStart": "{coord} heads off to {src}.",
@@ -89,7 +100,18 @@
       "cardRole_recherche": "Searches outside: web, pages, images, browser.",
       "cardRole_analyse": "Digs through what already exists: files, memory, past conversations, skills.",
       "cardRole_securite": "Keeps watch: tool and provider errors, model fallbacks, heavy turns, permissions.",
-      "subagents": "{coord} delegates to {n} subagent(s).", "soundOn": "Sound on", "soundOff": "Sound off", "soundTitle": "Sound", "worldTitle": "Switch world: {name}"} };
+      "subagents": "{coord} delegates to {n} subagent(s).", "soundOn": "Sound on", "soundOff": "Sound off", "soundTitle": "Sound", "worldTitle": "Switch world: {name}",
+      "loop": "{name} barks: Hermes is going in circles ({outil} {fois} times with the same arguments). Check the conversation or stop it.",
+      "loopTitle": "Hermes is going in circles", "todayLoops": "loops", "todayCost": "Cost", "costIncluded": "included", "costNone": "—",
+      "costNote": "Estimated with Hermes's own pricing.", "costPart": " {n} call(s) without a known price.", "costIncl": " {n} call(s) included in a subscription.",
+      "costOff": "Cost unavailable with this Hermes version.", "budgetLabel": "Daily budget ($)", "budgetSave": "OK", "budgetUsed": "Budget: {cost} of {budget} ({pct}%)",
+      "budgetAlert": "{name} barks: today's budget is exceeded ({cost} for {budget}).", "budgetTitle": "Daily budget exceeded",
+      "shareBtn": "📸 Share", "shareTitle": "My day with Hermes", "shareDownload": "Download image", "shareClose": "Close",
+      "shareBusiest": "busiest", "shareFooter": "The Solar Sanctuary · a plugin for Hermes Agent", "shareFile": "my-day-with-hermes",
+      "shareMaking": "Preparing the image…", "replayBtn": "⏪ Replay the day", "replayEmpty": "Nothing to replay today.", "replayStop": "Stop the replay",
+      "replayStart": "Replaying your day: {n} events, sped up.", "replayDone": "Replay over, back to live.", "replayLoading": "Loading the day…",
+      "loopShort": "Hermes is going in circles: {outil} ×{fois}", "budgetShort": "Daily budget exceeded: {cost}", "fallbackShort": "Fallback model: {vers}",
+      "heavyShort": "Very heavy turn ({tokens} tokens): consider /new", "approvalShort": "Permission requested: {quoi}", "apiShort": "The provider isn't responding"} };
   var LANG = (function () {
     var q = new URLSearchParams(location.search).get("lang") || (window.SANCTUAIRE_LANG || null), s = null;
     try {
@@ -168,7 +190,7 @@
   /* mode hôte (plugin) : la page qui contient le cadre envoie l'habillage, les images (data:/blob:) et l'activité */
   var srcMeta = document.querySelector('meta[name="sanctuaire-source"]');
   var HOSTED = !!(srcMeta && srcMeta.content === "host");
-  var ASSETS = {}, WORLDS = [], WORLD = "";
+  var ASSETS = {}, WORLDS = [], WORLD = "", SETTINGS = {};
   var hostQueue = [], hostHandler = null;
   function toHost(msg) { try { if (window.parent && window.parent !== window) window.parent.postMessage(msg, "*"); } catch (e) { /* rien */ } }
   if (HOSTED) {
@@ -183,6 +205,7 @@
           return w && typeof w.id === "string" && /^[a-z0-9_-]{1,40}$/.test(w.id);
         }).slice(0, 8);
         WORLD = typeof d.world === "string" ? d.world : "";
+        if (d.settings && typeof d.settings === "object") SETTINGS = JSON.parse(JSON.stringify(d.settings));
         if (d.assets && typeof d.assets === "object") Object.keys(d.assets).forEach(function (k) {
           var v = d.assets[k]; if (typeof v === "string" && /^(data:image\/|blob:)/.test(v)) ASSETS[k] = v;
         });
@@ -554,7 +577,7 @@
     }
     function apply(e) {
       var now = Date.now(), r = e.renard || {};
-      lastState = e; sources(e); renderToday(); renderCard();
+      lastState = e; sources(e); renderToday(); renderCard(); checkBudget();
       showSubagents(((e.sous_agents || {}).actifs) || 0);
       if (!prev) { prev = e; return; }
       var pr = prev.renard || {};
@@ -582,12 +605,12 @@
         if (sen.approbation.n > prevSen.approbation.n) alertUntil = 0;
         if (A.securite) A.securite.el.setAttribute("data-alert", Date.now() < alertUntil ? "1" : "0");
         set("securite", "work");
-        if (sen.erreurs_api > prevSen.erreurs_api) { log("ALERTE", say("errorApi", "securite")); sound("bark"); }
+        if (sen.erreurs_api > prevSen.erreurs_api) { log("ALERTE", say("errorApi", "securite")); guardSay(ui("apiShort")); sound("bark"); }
         if (sen.erreurs_outils > prevSen.erreurs_outils) log("ALERTE", say("errorTool", "securite"));
         if (sen.approbation.n > prevSen.approbation.n) {
           var ap = sen.approbation, ou = ap.ou === "gateway" ? ui("approvalWhere", { ou: ui("src_gateway") }) : "";
           var msgA = ap.quoi ? ui("approvalWhat", { name: R.securite.short, quoi: String(ap.quoi).slice(0, 80), ou: ou }) : say("approval", "securite");
-          log("GARDE", msgA);
+          log("GARDE", msgA); if (ap.quoi) guardSay(ui("approvalShort", { quoi: String(ap.quoi).slice(0, 60) }));
           if (ap.ou === "gateway") toHost({ type: "sanctuaire:notify", kind: "approval", title: ui("approvalTitle"), body: msgA });
         }
         var bs = sen.bascule || {}, pbs = prevSen.bascule || {};
@@ -595,16 +618,20 @@
           alertUntil = Date.now() + WORK_HOLD;
           if (A.securite) A.securite.el.setAttribute("data-alert", "1");
           var msgB = ui("fallback", { name: R.securite.short, de: shortModel(bs.de), vers: shortModel(bs.vers) });
-          log("ALERTE", msgB);
+          log("ALERTE", msgB); guardSay(ui("fallbackShort", { vers: shortModel(bs.vers) }));
           toHost({ type: "sanctuaire:notify", kind: "fallback", title: ui("fallbackTitle"), body: msgB });
           sound("bark");
         }
+        var bo = sen.boucle || {}, pbo = prevSen.boucle || {};
+        if ((bo.n || 0) > (pbo.n || 0))
+          bark(ui("loop", { name: R.securite.short, outil: String(bo.outil || "?").slice(0, 40), fois: bo.fois || 4 }), "loop", ui("loopTitle"),
+            ui("loopShort", { outil: String(bo.outil || "?").slice(0, 40), fois: bo.fois || 4 }));
         var lo = sen.lourd || {}, plo = prevSen.lourd || {};
         if ((lo.n || 0) > (plo.n || 0)) {
           alertUntil = Date.now() + WORK_HOLD;
           if (A.securite) A.securite.el.setAttribute("data-alert", "1");
           var msgH = ui("heavy", { name: R.securite.short, tokens: fmtN(lo.tokens), src: platformName(lo.plateforme) });
-          log("ALERTE", msgH);
+          log("ALERTE", msgH); guardSay(ui("heavyShort", { tokens: fmtN(lo.tokens) }));
           toHost({ type: "sanctuaire:notify", kind: "heavy", title: ui("heavyTitle"), body: msgH });
           sound("bark");
         }
@@ -647,6 +674,13 @@
     /* mode hôte : l'état fusionné arrive par message (même format que etat.json, avec « sentinelle » dedans),
        plus des événements instantanés du Desktop (outil, début et fin de tour, erreur) */
     function fromHost(d) {
+      if (d.type === "sanctuaire:timeline") { startReplay(d.events); return; }
+      if (replaying && d.type === "sanctuaire:state") {
+        /* pendant le replay, l'activité réelle est suivie sans être jouée (pas de rattrapage à la fin) */
+        if (d.state && d.state.animaux) { lastState = d.state; prev = d.state; if (d.state.sentinelle && d.state.sentinelle.approbation) prevSen = d.state.sentinelle; }
+        return;
+      }
+      if (replaying && d.type === "sanctuaire:event") return;
       if (d.type === "sanctuaire:state") {
         var e = d.state;
         if (!e || typeof e !== "object" || !e.animaux) return;
@@ -674,27 +708,52 @@
     /* ---- journal du jour (2026-11-05) : sommes heure par heure envoyées par le plugin, jour local du navigateur ---- */
     var todayBox = $("today"), todayBody = $("today-body"), todayBtn = $("today-btn");
     function fmtN(n) { n = Number(n) || 0; return n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e4 ? Math.round(n / 1e3) + "k" : n >= 1e3 ? (n / 1e3).toFixed(1) + "k" : String(n); }
-    function renderToday() {
-      if (!todayBox || !todayBody || todayBox.hidden || !lastState) return;
-      var H = lastState.h || {}, now = new Date(), tot = { t: 0, e: 0, a: 0, b: 0, p: 0, g: 0, o: {}, s: {}, k: {} }, hours = [], hT = [], hO = [], i;
+    function sameDay(dt, now) { return dt.getFullYear() === now.getFullYear() && dt.getMonth() === now.getMonth() && dt.getDate() === now.getDate(); }
+    /* sommes du jour local à partir du journal par heure (tours, outils, alertes, tokens, coût estimé) */
+    function todayTotals() {
+      var H = (lastState && lastState.h) || {}, now = new Date(), i,
+        tot = { t: 0, e: 0, a: 0, b: 0, p: 0, g: 0, r: 0, c: 0, cu: 0, ci: 0, o: {}, s: {}, k: {}, cm: {} }, hours = [], hT = [], hO = [];
       for (i = 0; i < 24; i++) { hours.push(0); hT.push(0); hO.push(0); }
       Object.keys(H).forEach(function (k) {
         var dt = new Date(Number(k) * 3600000), b = H[k] || {};
-        if (dt.getFullYear() !== now.getFullYear() || dt.getMonth() !== now.getMonth() || dt.getDate() !== now.getDate()) return;
-        ["t", "e", "a", "b", "p", "g"].forEach(function (f) { tot[f] += Number(b[f]) || 0; });
+        if (!sameDay(dt, now)) return;
+        ["t", "e", "a", "b", "p", "g", "r", "c", "cu", "ci"].forEach(function (f) { tot[f] += Number(b[f]) || 0; });
         var act = Number(b.t) || 0;
         Object.keys(b.o || {}).forEach(function (x) { tot.o[x] = (tot.o[x] || 0) + (Number(b.o[x]) || 0); act += Number(b.o[x]) || 0; });
         Object.keys(b.s || {}).forEach(function (x) { tot.s[x] = (tot.s[x] || 0) + (Number(b.s[x]) || 0); });
         Object.keys(b.k || {}).forEach(function (x) { var c = tot.k[x] || [0, 0], v = b.k[x] || []; tot.k[x] = [c[0] + (Number(v[0]) || 0), c[1] + (Number(v[1]) || 0)]; });
+        Object.keys(b.cm || {}).forEach(function (x) { tot.cm[x] = (tot.cm[x] || 0) + (Number(b.cm[x]) || 0); });
         hours[dt.getHours()] += act; hT[dt.getHours()] += Number(b.t) || 0; hO[dt.getHours()] += act - (Number(b.t) || 0);
       });
+      tot.tools = Object.keys(tot.o).reduce(function (n, x) { return n + tot.o[x]; }, 0);
+      tot.alerts = tot.e + tot.a + tot.b + tot.p + tot.g + tot.r;
+      return { tot: tot, hours: hours, hT: hT, hO: hO };
+    }
+    function fmtUsd(x) {
+      x = Number(x) || 0;
+      var v = x > 0 && x < 0.01 ? "<0.01" : x.toFixed(2);
+      return LANG === "fr" ? v.replace(".", ",") + " $" : "$" + v;
+    }
+    function costLabel(tot) {
+      if (tot.c > 0) return fmtUsd(tot.c);
+      if (tot.ci && !tot.cu) return ui("costIncluded");
+      return tot.cu ? ui("costNone") : fmtUsd(0);
+    }
+    function renderToday() {
+      if (!todayBox || !todayBody || todayBox.hidden || !lastState) return;
+      var X = todayTotals(), tot = X.tot, hours = X.hours, hT = X.hT, hO = X.hO, now = new Date(), tools = tot.tools, alerts = tot.alerts;
       todayBody.textContent = "";
-      var tools = Object.keys(tot.o).reduce(function (n, x) { return n + tot.o[x]; }, 0), alerts = tot.e + tot.a + tot.b + tot.p + tot.g;
       if (!tot.t && !tools && !alerts) { el("p", "t-empty", todayBody).textContent = ui("todayEmpty"); return; }
       var big = el("div", "t-big", todayBody);
-      [[tot.t, "todayTurns"], [tools, "todayTools"], [alerts, "todayAlerts"]].forEach(function (x) {
-        var c = el("div", "", big); el("b", "", c).textContent = fmtN(x[0]); el("span", "", c).textContent = ui(x[1]);
+      [[fmtN(tot.t), "todayTurns"], [fmtN(tools), "todayTools"], [fmtN(alerts), "todayAlerts"], [costLabel(tot), "todayCost"]].forEach(function (x) {
+        var c = el("div", "", big); el("b", "", c).textContent = x[0]; el("span", "", c).textContent = ui(x[1]);
       });
+      var bud = Number(SETTINGS.budget) || 0;
+      if (bud > 0) {
+        var pct = Math.round(tot.c / bud * 100), bw = el("div", "t-budget" + (pct >= 100 ? " over" : ""), todayBody);
+        el("span", "", bw).textContent = ui("budgetUsed", { cost: fmtUsd(tot.c), budget: fmtUsd(bud), pct: pct });
+        el("i", "", el("div", "t-gauge", bw)).style.width = Math.min(100, pct) + "%";
+      }
       function section(title) { var sct = el("section", "", todayBody); el("h3", "", sct).textContent = title; return el("ul", "", sct); }
       var keys = Object.keys(tot.o).sort(function (a, b) { return tot.o[b] - tot.o[a]; });
       if (keys.length) {
@@ -708,7 +767,7 @@
       }
       if (alerts) {
         var ul3 = section(ui("todayAlerts"));
-        [[tot.e, "todayErrTools"], [tot.a, "todayErrApi"], [tot.b, "todayFallbacks"], [tot.g, "todayHeavy"], [tot.p, "todayApprovals"]].forEach(function (x) {
+        [[tot.e, "todayErrTools"], [tot.a, "todayErrApi"], [tot.b, "todayFallbacks"], [tot.r, "todayLoops"], [tot.g, "todayHeavy"], [tot.p, "todayApprovals"]].forEach(function (x) {
           if (!x[0]) return; var li = el("li", "", ul3); el("span", "", li).textContent = ui(x[1]); el("b", "", li).textContent = fmtN(x[0]);
         });
       }
@@ -717,14 +776,20 @@
         var ul5 = section(ui("todayHeavyList"));
         heavy.slice(0, 5).forEach(function (x) {
           var li = el("li", "", ul5), d = new Date(x.t * 1000);
-          el("span", "", li).textContent = d.toTimeString().slice(0, 5) + " \u00B7 " + (x.tache ? "\u23F0 " + x.tache : platformName(x.plateforme));
+          el("span", "", li).textContent = d.toTimeString().slice(0, 5) + " · " + (x.tache ? "⏰ " + x.tache : platformName(x.plateforme));
           el("b", "", li).textContent = fmtN(x.tokens);
         });
       }
       var models = Object.keys(tot.k);
       if (models.length) {
         var ul4 = section(ui("todayTokens"));
-        models.forEach(function (k) { var li = el("li", "", ul4); el("span", "", li).textContent = shortModel(k); el("b", "", li).textContent = fmtN(tot.k[k][0]) + " / " + fmtN(tot.k[k][1]); });
+        models.forEach(function (k) {
+          var li = el("li", "", ul4), cm = tot.cm[k];
+          el("span", "", li).textContent = shortModel(k);
+          el("b", "", li).textContent = fmtN(tot.k[k][0]) + " / " + fmtN(tot.k[k][1]) + (cm ? " · " + fmtUsd(cm) : "");
+        });
+        var note = lastState.prix === false ? ui("costOff") : ui("costNote") + (tot.cu ? ui("costPart", { n: tot.cu }) : "") + (tot.ci ? ui("costIncl", { n: tot.ci }) : "");
+        el("p", "t-note", todayBody).textContent = note;
       }
       var hs = el("section", "", todayBody); el("h3", "", hs).textContent = ui("todayHours");
       var bars = el("div", "t-bars", hs), mx = Math.max.apply(null, hours) || 1, peak = hours.indexOf(Math.max.apply(null, hours));
@@ -735,6 +800,189 @@
       var axis = el("div", "t-axis", hs);
       [0, 6, 12, 18, 24].forEach(function (h) { var t = el("span", "", axis); t.textContent = h + (LANG === "fr" ? " h" : ":00"); t.style.left = (h / 24 * 100) + "%"; });
       if (hours[peak]) el("p", "t-peak", hs).textContent = ui("todayPeak", { h: peak, h2: peak + 1, t: hT[peak], o: hO[peak] });
+    }
+
+    /* ---- réglages gardés par la page hôte (le cadre du Desktop n'a pas de stockage à lui) ---- */
+    if (!HOSTED) { try { SETTINGS = JSON.parse(localStorage.getItem("sanctuaire.settings") || "{}") || {}; } catch (e) { SETTINGS = {}; } }
+    function saveSettings() {
+      if (HOSTED) toHost({ type: "sanctuaire:settings", settings: SETTINGS });
+      else { try { localStorage.setItem("sanctuaire.settings", JSON.stringify(SETTINGS)); } catch (e) { /* stockage indisponible */ } }
+    }
+
+    /* ---- le gardien aboie (alerte commune : boucle, budget…) ---- */
+    function bark(msg, kind, title, short) {
+      alertUntil = Date.now() + WORK_HOLD; lastWork.securite = Date.now();
+      if (A.securite) {
+        A.securite.el.setAttribute("data-alert", "1");
+        if (R.securite.alert && A.securite.state === "work") A.securite.label.textContent = R.securite.short + " \u00B7 " + R.securite.alert;
+      }
+      set("securite", "work"); log("ALERTE", msg); guardSay(short || msg);
+      if (kind) toHost({ type: "sanctuaire:notify", kind: kind, title: title || "", body: msg });
+      sound("bark");
+    }
+    /* la bulle du gardien : l'alerte en clair, au-dessus de lui, quelques secondes (le journal défilant est caché dans le cadre) */
+    var guardEl = el("div", "shout guard", pano), guardT = 0;
+    guardEl.setAttribute("role", "status");
+    guardEl.addEventListener("click", function (ev) { ev.stopPropagation(); guardEl.classList.remove("show"); });
+    function guardSay(text) {
+      var c = R.securite; if (!c || !c.pos || !text) return;
+      guardEl.textContent = "\u26A0 " + String(text).slice(0, 110);
+      guardEl.style.left = Math.min(Math.max(c.pos.x, 18), 80) + "%";
+      guardEl.style.top = Math.max(c.pos.y - c.pos.h - 8, 14) + "%";
+      guardEl.classList.remove("show"); void guardEl.offsetWidth; guardEl.classList.add("show");
+      clearTimeout(guardT); guardT = setTimeout(function () { guardEl.classList.remove("show"); }, 9000);
+    }
+
+    /* ---- budget du jour (2026-11-05) : coût estimé du jour comparé au seuil réglé dans le journal ---- */
+    function checkBudget() {
+      var bud = Number(SETTINGS.budget) || 0;
+      if (!(bud > 0) || !lastState) return;
+      var c = todayTotals().tot.c, day = new Date().toDateString();
+      if (c >= bud && SETTINGS.budgetDay !== day) {
+        SETTINGS.budgetDay = day; saveSettings();
+        bark(ui("budgetAlert", { name: R.securite.short, cost: fmtUsd(c), budget: fmtUsd(bud) }), "budget", ui("budgetTitle"), ui("budgetShort", { cost: fmtUsd(c) }));
+      }
+    }
+    /* en haut du journal : les deux boutons, puis le réglage du budget ; les chiffres viennent dessous */
+    var actions = todayBox && todayBody ? el("div", "t-actions", null) : null;
+    if (actions) {
+      todayBox.insertBefore(actions, todayBody);
+      var brow2 = el("div", "t-btns", actions), shareBtn = el("button", "", brow2), replayBtn = el("button", "", brow2);
+      var brow = el("label", "t-brow", actions), bin = document.createElement("input"), bok = el("button", "", null);
+      el("span", "", brow).textContent = ui("budgetLabel");
+      bin.type = "number"; bin.min = "0"; bin.step = "0.5"; bin.inputMode = "decimal"; bin.placeholder = "—";
+      if (Number(SETTINGS.budget) > 0) bin.value = String(SETTINGS.budget);
+      brow.appendChild(bin); bok.type = "button"; bok.textContent = ui("budgetSave"); brow.appendChild(bok);
+      var saveBudget = function () {
+        var v = Math.round((parseFloat(String(bin.value).replace(",", ".")) || 0) * 100) / 100;
+        SETTINGS.budget = v > 0 ? Math.min(v, 100000) : 0; delete SETTINGS.budgetDay; saveSettings(); renderToday(); checkBudget();
+      };
+      bok.addEventListener("click", saveBudget);
+      bin.addEventListener("keydown", function (ev) { if (ev.key === "Enter") saveBudget(); });
+      shareBtn.type = replayBtn.type = "button"; shareBtn.textContent = ui("shareBtn"); replayBtn.textContent = ui("replayBtn");
+      shareBtn.addEventListener("click", function () { openShare(); });
+      if (HOSTED) replayBtn.addEventListener("click", function () { headline(ui("replayLoading")); toHost({ type: "sanctuaire:timeline-request" }); });
+      else replayBtn.hidden = true;
+    }
+
+    /* ---- carte « Ma journée avec Hermes » (2026-11-05) : le panorama et les chiffres du jour, en image ---- */
+    function loadImg(src) {
+      return new Promise(function (ok) { var im = new Image(); im.onload = function () { ok(im); }; im.onerror = function () { ok(null); }; im.src = src; });
+    }
+    function buildCard() {
+      var W = 1600, Hc = 900, ratio = T.background.w / T.background.h, PH = Math.round(W / ratio), cv = document.createElement("canvas");
+      cv.width = W; cv.height = Hc;
+      var g = cv.getContext("2d"), roles = Object.keys(R), layers = (T.layers || []).filter(function (L) { return L.type === "img" && L.src; });
+      var srcs = [url(T.background.src)].concat(roles.map(function (k) { var c = R[k]; return url((c.sprites && (c.sprites.rest || c.sprites.work)) || ""); }), layers.map(function (L) { return url(L.src); }));
+      return Promise.all(srcs.map(loadImg)).then(function (ims) {
+        g.fillStyle = "#1c140c"; g.fillRect(0, 0, W, Hc);
+        if (ims[0]) g.drawImage(ims[0], 0, 0, W, PH);
+        function layer(L, im) { if (im) g.drawImage(im, L.x / 100 * W, L.y / 100 * PH, L.w / 100 * W, L.h / 100 * PH); }
+        layers.forEach(function (L, i) { if (L.z === "back") layer(L, ims[1 + roles.length + i]); });
+        roles.forEach(function (k, i) {
+          var c = R[k], im = ims[1 + i]; if (!im || !c.pos) return;
+          var h = c.pos.h / 100 * PH, ar = c.aspect ? c.aspect[0] / c.aspect[1] : im.width / im.height, w = h * ar;
+          g.drawImage(im, c.pos.x / 100 * W - w / 2, c.pos.y / 100 * PH - h, w, h);
+        });
+        layers.forEach(function (L, i) { if (L.z !== "back") layer(L, ims[1 + roles.length + i]); });
+        var fade = g.createLinearGradient(0, PH - 120, 0, PH);
+        fade.addColorStop(0, "rgba(28,20,12,0)"); fade.addColorStop(1, "rgba(28,20,12,1)");
+        g.fillStyle = fade; g.fillRect(0, PH - 120, W, 120);
+        var X = todayTotals(), tot = X.tot, accent = (T.colors && T.colors.accent) || "#E4802F", top = 0, topN = 0;
+        Object.keys(tot.o).forEach(function (k) { if (tot.o[k] > topN) { topN = tot.o[k]; top = k; } });
+        var serif = "Georgia, 'Times New Roman', serif", sans = "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
+        g.textBaseline = "alphabetic"; g.fillStyle = "#F6EAD3"; g.font = "600 46px " + serif;
+        g.fillText(ui("shareTitle"), 56, PH + 40);
+        g.font = "600 22px " + sans; g.fillStyle = "rgba(246,234,211,.7)"; g.textAlign = "right";
+        g.fillText(new Date().toLocaleDateString(LANG === "fr" ? "fr-CH" : "en-US", { weekday: "long", day: "numeric", month: "long", year: "numeric" }), W - 56, PH + 40);
+        var role = top ? KEY2ROLE[top] : "", cells = [[fmtN(tot.t), ui("todayTurns")], [fmtN(tot.tools), ui("todayTools")],
+          [role && R[role] ? R[role].short : "—", ui("shareBusiest") + (topN ? " · " + topN : "")], [costLabel(tot), ui("todayCost")]];
+        var cw = (W - 112) / cells.length;
+        cells.forEach(function (c, i) {
+          var cx = 56 + cw * i + cw / 2;
+          g.textAlign = "center"; g.fillStyle = accent; g.font = "600 " + (String(c[0]).length > 9 ? 38 : 52) + "px " + serif; g.fillText(String(c[0]), cx, PH + 128);
+          g.fillStyle = "rgba(246,234,211,.72)"; g.font = "700 17px " + sans; g.fillText(String(c[1]).toUpperCase(), cx, PH + 158);
+        });
+        g.textAlign = "right"; g.font = "600 17px " + sans; g.fillStyle = "rgba(246,234,211,.55)";
+        g.fillText("☀ " + ui("shareFooter") + " · github.com/Med34000/sanctuaire-solaire-hermes", W - 56, Hc - 22);
+        if (tot.alerts) { g.textAlign = "left"; g.fillText((T.roles.securite ? R.securite.short + " · " : "") + tot.alerts + " " + ui("todayAlerts").toLowerCase(), 56, Hc - 22); }
+        return cv.toDataURL("image/png");
+      });
+    }
+    var shareBox = null;
+    function openShare() {
+      if (!shareBox) {
+        shareBox = el("div", "share", document.body); shareBox.setAttribute("role", "dialog");
+        var inner = el("div", "share-in", shareBox); el("img", "", inner).alt = "";
+        var row = el("div", "share-btns", inner), dl = el("button", "primary", row), cl = el("button", "", row);
+        dl.type = cl.type = "button"; dl.textContent = ui("shareDownload"); cl.textContent = ui("shareClose");
+        cl.addEventListener("click", function () { shareBox.hidden = true; });
+        shareBox.addEventListener("click", function (ev) { if (ev.target === shareBox) shareBox.hidden = true; });
+        dl.addEventListener("click", function () {
+          var u = shareBox.dataset.url || "", name = ui("shareFile") + "-" + new Date().toISOString().slice(0, 10) + ".png";
+          if (!u) return;
+          if (HOSTED) toHost({ type: "sanctuaire:download", name: name, url: u });
+          else { var a = document.createElement("a"); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
+        });
+      }
+      shareBox.hidden = false; shareBox.dataset.url = "";
+      var img = shareBox.querySelector("img"); img.removeAttribute("src"); img.alt = ui("shareMaking");
+      buildCard().then(function (u) { shareBox.dataset.url = u; img.src = u; img.alt = ui("shareTitle"); }, function () { img.alt = "?"; });
+    }
+
+    /* ---- rejouer ma journée (2026-11-05) : les événements du jour (codes et heures) en accéléré ---- */
+    var replaying = false, replayTimer = 0, replayBar = null, CODE2ROLE = { c: "fabrication", o: "recherche", m: "analyse", f: "coordination" };
+    function stopReplay(done) {
+      if (!replaying) return;
+      replaying = false; clearTimeout(replayTimer);
+      if (replayBar) replayBar.hidden = true;
+      document.body.classList.remove("replay");
+      chatBusyFlag = false; coordBusy = false; alertUntil = 0; showSubagents(0);
+      WORKERS.forEach(function (role) { lastWork[role] = 0; });
+      tick();
+      if (done) log("HERMES", ui("replayDone"));
+    }
+    function startReplay(events) {
+      var now = new Date(), ev = (Array.isArray(events) ? events : []).filter(function (e) {
+        return Array.isArray(e) && typeof e[1] === "string" && sameDay(new Date(Number(e[0]) * 1000), now);
+      });
+      if (!ev.length) { headline(ui("replayEmpty")); return; }
+      if (todayBox && !todayBox.hidden) { todayBox.hidden = true; if (todayBtn) todayBtn.setAttribute("aria-pressed", "false"); }
+      if (demoOn) stopDemo();
+      var delays = [], total = 0, i;
+      for (i = 0; i < ev.length; i++) {
+        var gap = i + 1 < ev.length ? ev[i + 1][0] - ev[i][0] : 2;
+        var d = Math.min(Math.max(gap / 60, 0.35), gap > 1200 ? 1.6 : 1.1);
+        delays.push(d); total += d;
+      }
+      var scale = total > 75 ? 75 / total : 1;
+      delays = delays.map(function (d) { return Math.max(d * scale, 0.12) * 1000; });
+      if (!replayBar) {
+        replayBar = el("div", "replay-bar", document.body);
+        el("span", "rb-clock", replayBar); el("i", "", el("span", "rb-track", replayBar));
+        var stop = el("button", "", replayBar); stop.type = "button"; stop.textContent = "✕"; stop.title = ui("replayStop"); stop.setAttribute("aria-label", ui("replayStop"));
+        stop.addEventListener("click", function () { stopReplay(true); });
+      }
+      replaying = true; coordBusy = false; chatBusyFlag = false; replayBar.hidden = false; document.body.classList.add("replay");
+      if (!card.hidden) { card.hidden = true; cardRole = null; }
+      log("HERMES", ui("replayStart", { n: ev.length }));
+      var clock = replayBar.querySelector(".rb-clock"), bar = replayBar.querySelector(".rb-track i"), subs = 0;
+      function act(code) {
+        if (CODE2ROLE[code]) { pulse(CODE2ROLE[code]); return; }
+        if (code === "T") { chatBusyFlag = true; tick(); }
+        else if (code === "E") { chatBusyFlag = false; coordDoneAt = Date.now(); window.Sanctuaire.settle(); }
+        else if (code === "e" || code === "a") window.Sanctuaire.toolFailed();
+        else if (code === "b" || code === "g" || code === "r" || code === "p") { alertUntil = Date.now() + WORK_HOLD; lastWork.securite = Date.now(); if (A.securite) A.securite.el.setAttribute("data-alert", code === "p" ? "0" : "1"); set("securite", "work"); if (code !== "p") sound("bark"); }
+        else if (code === "s") { subs = Math.min(subs + 1, 4); showSubagents(subs); setTimeout(function () { subs = Math.max(0, subs - 1); if (replaying) showSubagents(subs); }, 4000); }
+      }
+      (function step(k) {
+        if (!replaying) return;
+        if (k >= ev.length) { replayTimer = setTimeout(function () { stopReplay(true); }, 2500); return; }
+        act(ev[k][1]);
+        clock.textContent = "⏪ Replay · " + new Date(ev[k][0] * 1000).toTimeString().slice(0, 5);
+        bar.style.width = Math.round((k + 1) / ev.length * 100) + "%";
+        replayTimer = setTimeout(function () { step(k + 1); }, delays[k]);
+      })(0);
     }
     if (todayBtn && todayBox) {
       todayBtn.addEventListener("click", function () {

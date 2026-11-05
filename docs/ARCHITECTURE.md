@@ -1,6 +1,6 @@
 # Architecture
 
-*2026-11-04 ≈18:55, mis à jour 2026-11-05 ≈11:55, ≈13:00 et ≈15:00 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin*
+*2026-11-04 ≈18:55, mis à jour 2026-11-05 ≈11:55, ≈13:00, ≈15:00 et ≈16:20 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin*
 
 Le Sanctuaire existe en deux formes, qui partagent le même moteur, le même habillage et les mêmes images :
 
@@ -22,10 +22,13 @@ dashboard/plugin_api.py  ── GET /state (fusion) · /themes · /theme · /fra
   - noms d'outils et heures, tours en cours avec leur provenance (nom de la plateforme, nom de la tâche planifiée) ;
   - compteurs d'erreurs, de **bascules** (un autre modèle répond dans le même tour juste après une erreur du fournisseur) et d'approbations, avec la courte description générique donnée par Hermes ;
   - un **journal par heure** (tours, outils par compagnon, provenances, alertes, tokens par modèle), gardé 49 heures ; la page en tire « aujourd'hui » dans son propre fuseau horaire ;
-  - les **tours trop lourds** (plus de 200 000 tokens d'entrée cumulés sur un tour), les 5 derniers outils de chaque compagnon et le nombre de sous-agents en cours.
+  - les **tours trop lourds** (plus de 200 000 tokens d'entrée cumulés sur un tour), les 5 derniers outils de chaque compagnon et le nombre de sous-agents en cours ;
+  - les **boucles** : une empreinte courte de chaque appel (outil + arguments) est gardée **en mémoire pour le tour en cours seulement**, jamais écrite ; le même appel 4 fois dans les 12 derniers = « Hermes tourne en rond » ;
+  - les tokens détaillés par fournisseur et modèle (entrée, sortie, cache), que la route `/state` transforme en **coût estimé** avec le module de tarifs de Hermes (`agent.usage_pricing`) ;
+  - le **fil de la journée** pour le replay : des codes d'une lettre avec leur heure (outil de tel compagnon, début et fin de tour, alerte), servi par `/timeline`.
 
   Ils ne renvoient jamais rien : Hermes n'est ni bloqué ni ralenti, et les approbations ne sont qu'affichées.
-- **`dashboard/plugin_api.py`** : en lecture seule. `/state` fusionne les fichiers des processus. `/themes` liste les univers, `/theme`, `/frame` et `/asset` (avec `theme=<id>` pour les images rangées dans `themes/<id>/`) servent l'habillage, la page et les images (Hermes Desktop ne peut pas lire les fichiers directement).
+- **`dashboard/plugin_api.py`** : en lecture seule. `/state` fusionne les fichiers des processus. `/timeline` sert le fil de la journée (replay), `/themes` liste les univers, `/theme`, `/frame` et `/asset` (avec `theme=<id>` pour les images rangées dans `themes/<id>/`) servent l'habillage, la page et les images (Hermes Desktop ne peut pas lire les fichiers directement).
 - **`dashboard/app/`** : le moteur (`moteur.js`), la page du cadre (`frame.html`), les habillages (`themes/<id>/`) et les images. Le mode serveur utilise les mêmes fichiers, par des liens dans `web/`.
 - **`dashboard/dist/index.js`** : la partie tableau de bord. Elle affiche `app/frame.html` dans un cadre et lui envoie l'habillage et l'activité par `postMessage`.
 - **`desktop/plugin.js`** : la partie Hermes Desktop. Elle affiche la page dans le cadre isolé de l'app (`SandboxedFrame`), lui envoie les images, l'activité fusionnée et les événements instantanés de l'app (`tool.start`, `message.start`, `message.complete` : **noms d'outils seulement**).

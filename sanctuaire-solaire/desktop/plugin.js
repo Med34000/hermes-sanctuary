@@ -6,6 +6,7 @@
 // 2026-11-05 ≈11:45, mis à jour ≈12:50 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin
 // 2026-11-05 ≈12:50 : notifications natives du Shiba (modèle de secours, autorisation en attente sur la messagerie)
 // 2026-11-05 ≈15:15 : choix de l'univers (Olympe, Clairière), notification « tour trop lourd »
+// 2026-11-05 ≈16:10 : boucle, budget du jour (réglage gardé ici), image « Ma journée » à télécharger, replay de la journée
 // Copyright 2026 Médéric Morin — Apache License 2.0
 import { SandboxedFrame, ROUTES_AREA, SIDEBAR_NAV_AREA } from '@hermes/plugin-sdk'
 import { useEffect, useRef, useState } from 'react'
@@ -16,7 +17,8 @@ const POLL_MS = 1500
 const listeners = new Set()
 const NOTIFY_GAP_MS = 120000
 const lastNotify = {}
-const KINDS = ['fallback', 'approval', 'heavy']
+const KINDS = ['fallback', 'approval', 'heavy', 'loop', 'budget']
+const SETTINGS_KEY = 'sanctuaire.settings'
 const DEFAULT_WORLD = 'olympe'
 const WORLD_KEY = 'sanctuaire.world'
 const worldListeners = new Set()
@@ -34,6 +36,40 @@ function setWorld(id) {
   world = id
   try { localStorage.setItem(WORLD_KEY, id) } catch (e) { /* stockage indisponible */ }
   worldListeners.forEach(fn => { try { fn(id) } catch (e) { /* rien */ } })
+}
+
+// Settings of the panorama (daily budget and the day its alert was shown), kept by the app: the sandboxed frame has no storage.
+function readSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') || {}
+    const out = {}
+    if (typeof s.budget === 'number' && s.budget > 0 && s.budget < 1e5) out.budget = s.budget
+    if (typeof s.budgetDay === 'string') out.budgetDay = s.budgetDay.slice(0, 40)
+    return out
+  } catch (e) { return {} }
+}
+
+function saveSettings(s) {
+  if (!s || typeof s !== 'object') return
+  const out = {}
+  if (typeof s.budget === 'number' && s.budget > 0 && s.budget < 1e5) out.budget = Math.round(s.budget * 100) / 100
+  if (typeof s.budgetDay === 'string') out.budgetDay = s.budgetDay.slice(0, 40)
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(out)) } catch (e) { /* stockage indisponible */ }
+}
+
+// The "My day" image made by the panorama: a PNG data URL, saved through the browser's own download.
+function download(msg) {
+  const url = typeof msg.url === 'string' ? msg.url : ''
+  const name = typeof msg.name === 'string' && /^[a-z0-9-]{1,60}\.png$/.test(msg.name) ? msg.name : 'sanctuaire.png'
+  if (!url.startsWith('data:image/png;base64,') || url.length > 15 * 1024 * 1024) return
+  const a = document.createElement('a')
+  a.href = url
+  a.download = name
+  a.rel = 'noopener'
+  a.style.display = 'none'
+  document.body.appendChild(a)
+  a.click()
+  setTimeout(() => a.remove(), 0)
 }
 
 // The worlds the backend knows. An older backend has no /themes route: then only the clearing exists.
@@ -143,9 +179,17 @@ function Panorama({ height }) {
       if (!w || ev.source !== w || !ev.data || typeof ev.data.type !== 'string') return
       if (ev.data.type === 'sanctuaire:notify') { notify(ev.data); return }
       if (ev.data.type === 'sanctuaire:world') { setWorld(ev.data.id); return }
+      if (ev.data.type === 'sanctuaire:settings') { saveSettings(ev.data.settings); return }
+      if (ev.data.type === 'sanctuaire:download') { download(ev.data); return }
+      if (ev.data.type === 'sanctuaire:timeline-request') {
+        api.rest('/timeline', { timeoutMs: 30000 })
+          .then(r => post({ type: 'sanctuaire:timeline', events: r && Array.isArray(r.events) ? r.events : [] }),
+            () => post({ type: 'sanctuaire:timeline', events: [] }))
+        return
+      }
       if (ev.data.type !== 'sanctuaire:ready' || started) return
       started = true
-      post({ type: 'sanctuaire:theme', theme: data.theme, assets: data.assets, worlds: data.worlds, world: data.world })
+      post({ type: 'sanctuaire:theme', theme: data.theme, assets: data.assets, worlds: data.worlds, world: data.world, settings: readSettings() })
       poll()
     }
     const live = msg => { if (started) post(msg) }

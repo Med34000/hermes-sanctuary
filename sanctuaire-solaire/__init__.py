@@ -5,6 +5,8 @@ tool names, turn start/end times and where a turn comes from (platform name, sch
 task name), error / fallback / approval counters, the generic description Hermes gives
 for an approval ("recursive delete"…), model names and token counts per hour.
 Never messages, replies, tool arguments, commands, results, error texts, ids or paths.
+To spot a loop, a short hash of each call (tool name + arguments) is kept IN MEMORY for the
+current turn only; it is never written anywhere.
 
 Each Hermes process (gateway, dashboard chat, Desktop backend, cron) writes its own
 small file in <hermes home>/plugin-data/sanctuaire-solaire/proc/; the dashboard
@@ -15,14 +17,19 @@ directive: Hermes is never blocked, changed or slowed.
 2026-11-05 ≈12:30 — sources des tours (plateforme, tâche planifiée), bascules de modèle, journal par heure,
                      description des approbations
 2026-11-05 ≈13:20 — tours trop lourds (tokens d'entrée), derniers outils par compagnon, sous-agents en cours
+2026-11-05 ≈15:40 — « Hermes tourne en rond » (même outil, mêmes arguments : empreinte gardée en mémoire seulement,
+                     jamais écrite), tokens détaillés par fournisseur et modèle pour le coût du jour,
+                     fil de la journée (codes d'événements et heures) pour le replay
 Copyright 2026 Médéric Morin — Apache License 2.0
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import threading
+from collections import deque
 import time
 from pathlib import Path
 from typing import Any
@@ -43,11 +50,19 @@ KEEP_SECONDS = 2 * 24 * 3600  # files of processes gone for 2 days are removed a
 KEEP_HOURS = 49               # hourly journal kept ~2 days (the page shows "today" in its own time zone)
 ERROR_WINDOW = 300            # an API error this recent makes a model change count as a fallback
 HEAVY_TOKENS = 200_000        # input tokens summed over one turn above which the Shiba warns (long conversation)
+LOOP_WINDOW = 12              # last calls of a turn compared for a loop
+LOOP_REPEAT = 4               # the same call (tool + arguments) this many times in the window = Hermes goes in circles
+TIMELINE_MAX = 900            # events kept for the replay of the day (codes and times only)
+TIMELINE_SECONDS = 26 * 3600
+# event codes of the replay: companion of a tool, turn start/end, alerts
+CODE = {"castor": "c", "chouette": "o", "taupe": "m", "renard": "f"}
 
 _lock = threading.Lock()
 _ctx: Any = None
 _actifs: dict[str, dict] = {}      # session -> {"plateforme", "tache", "debut", "modele"}
 _derniere_erreur_api = 0.0
+_appels: dict[str, deque] = {}      # session -> hashes of the last calls of the current turn (memory only)
+_signales: dict[str, set] = {}      # session -> hashes already reported as a loop this turn
 _etat: dict[str, Any] = {
     "v": 3,
     "maj": 0,
@@ -64,8 +79,10 @@ _etat: dict[str, Any] = {
         "approbation": {"en_attente": False, "debut": 0, "fin": 0, "n": 0, "quoi": "", "ou": ""},
         "bascule": {"n": 0, "dernier": 0, "de": "", "vers": ""},
         "lourd": {"n": 0, "dernier": 0, "tokens": 0, "plateforme": ""},
+        "boucle": {"n": 0, "dernier": 0, "outil": "", "fois": 0, "plateforme": ""},
     },
     "h": {},
+    "j": [],
 }
 _fichier: Path | None = None
 
@@ -160,8 +177,21 @@ def _heure(t: float) -> dict:
         limite = int(t // 3600) - KEEP_HOURS
         for old in [x for x in h if int(x) < limite]:
             del h[old]
-        h[k] = {"t": 0, "o": {}, "e": 0, "a": 0, "b": 0, "p": 0, "g": 0, "s": {}, "k": {}}
-    return h[k]
+        h[k] = {"t": 0, "o": {}, "e": 0, "a": 0, "b": 0, "p": 0, "g": 0, "r": 0, "s": {}, "k": {}, "u": {}}
+    b = h[k]
+    for f in ("r",):
+        b.setdefault(f, 0)
+    b.setdefault("u", {})
+    return b
+
+
+def _fil(t: float, code: str) -> None:
+    """One event of the day for the replay: [time, code]. Never a name, an argument or a text."""
+    j = _etat.setdefault("j", [])
+    j.append([t, code])
+    if len(j) > TIMELINE_MAX or (j and t - j[0][0] > TIMELINE_SECONDS):
+        limite = t - TIMELINE_SECONDS
+        _etat["j"] = [e for e in j if e[0] >= limite][-TIMELINE_MAX:]
 
 
 def _plus(d: dict, cle: str, n: int = 1, limite: int = 20) -> None:
@@ -184,14 +214,51 @@ def _cron_name() -> str:
 
 # ---- hooks (observers only: they always return None) ----
 
-def _pre_tool_call(tool_name: str = "", **_: Any) -> None:
+def _empreinte(nom: str, args: Any) -> str:
+    try:
+        brut = json.dumps([nom, args], sort_keys=True, default=str, ensure_ascii=False)[:50_000]
+    except Exception:
+        brut = nom + repr(args)[:50_000]
+    return hashlib.sha256(brut.encode("utf-8", "replace")).hexdigest()[:16]
+
+
+def _pre_tool_call(tool_name: str = "", args: Any = None, session_id: Any = None, task_id: Any = None, **_: Any) -> None:
     nom = _court(tool_name)
     a = _animal(nom)
-    if a:
-        def f(t):
-            _touche(a, t, nom)
-            _plus(_heure(t)["o"], a)
-        _maj(f)
+    if not a:
+        return
+    sid = str(session_id or task_id or "?")[:80]
+    boucle = 0
+    try:
+        h = _empreinte(nom, args)
+        vus = _appels.setdefault(sid, deque(maxlen=LOOP_WINDOW))
+        vus.append(h)
+        fois = sum(1 for x in vus if x == h)
+        deja = _signales.setdefault(sid, set())
+        if fois >= LOOP_REPEAT and h not in deja:
+            deja.add(h)
+            boucle = fois
+        if len(_appels) > 200:  # sessions that never ended cleanly
+            for k in list(_appels)[:100]:
+                _appels.pop(k, None)
+                _signales.pop(k, None)
+    except Exception:
+        boucle = 0
+
+    def f(t):
+        _touche(a, t, nom)
+        _plus(_heure(t)["o"], a)
+        _fil(t, CODE.get(a, "c"))
+        if boucle:
+            s = _etat["sentinelle"]
+            tour = _actifs.get(sid) or {}
+            s["dernier"] = s["maj"] = t
+            s["boucle"].update(dernier=t, outil=nom, fois=boucle, plateforme=tour.get("plateforme", ""))
+            s["boucle"]["n"] += 1
+            _heure(t)["r"] += 1
+            _touche("shiba", t)
+            _fil(t, "r")
+    _maj(f)
 
 
 def _post_tool_call(tool_name: str = "", status: Any = None, error_type: Any = None, **_: Any) -> None:
@@ -205,12 +272,16 @@ def _post_tool_call(tool_name: str = "", status: Any = None, error_type: Any = N
         s["erreurs_outils"] += 1
         _touche("shiba", t)
         _heure(t)["e"] += 1
+        _fil(t, "e")
     _maj(f)
 
 
 def _debut_tour(session_id: Any = None, platform: Any = "", model: Any = "", **_: Any) -> None:
     tache = _cron_name()
     plateforme = "cron" if tache else _court(platform, 30).lower()
+    sid0 = str(session_id or "?")[:80]
+    _appels.pop(sid0, None)
+    _signales.pop(sid0, None)
 
     def f(t):
         _actifs[str(session_id or "?")[:80]] = {"plateforme": plateforme, "tache": tache, "debut": t,
@@ -221,6 +292,7 @@ def _debut_tour(session_id: Any = None, platform: Any = "", model: Any = "", **_
         b = _heure(t)
         b["t"] += 1
         _plus(b["s"], plateforme or "?")
+        _fil(t, "T")
     _maj(f)
 
 
@@ -230,6 +302,8 @@ def _fin_tour(session_id: Any = None, **_: Any) -> None:
         if sid not in _actifs and not _etat["renard"]["en_cours"]:
             return False
         tour = _actifs.pop(sid, None)
+        _appels.pop(sid, None)
+        _signales.pop(sid, None)
         if tour and tour.get("tokens", 0) >= HEAVY_TOKENS:
             lo = _etat["sentinelle"]["lourd"]
             lo.update(dernier=t, tokens=tour["tokens"], plateforme=tour["plateforme"])
@@ -239,23 +313,36 @@ def _fin_tour(session_id: Any = None, **_: Any) -> None:
                                  "tache": tour["tache"]}] + _etat["lourds"])[:8]
             _heure(t)["g"] += 1
             _touche("shiba", t)
+            _fil(t, "g")
         _etat["tours"] = _tours()
         if _actifs:
             return None
         _touche("renard", t)
         _etat["renard"].update(en_cours=False, fin=t)
+        _fil(t, "E")
     _maj(f)
 
 
-def _apres_appel(session_id: Any = None, model: Any = "", usage: Any = None, **_: Any) -> None:
+def _entier(u: dict, *cles: str) -> int:
+    for c in cles:
+        try:
+            v = int(u.get(c) or 0)
+        except (TypeError, ValueError):
+            v = 0
+        if v:
+            return max(v, 0)
+    return 0
+
+
+def _apres_appel(session_id: Any = None, model: Any = "", usage: Any = None, provider: Any = "", **_: Any) -> None:
     modele = _court(model, 80)
+    fournisseur = _court(provider, 40).lower()
     sid = str(session_id or "?")[:80]
     u = usage if isinstance(usage, dict) else {}
-    try:
-        entree = int(u.get("prompt_tokens") or u.get("input_tokens") or 0)
-        sortie = int(u.get("output_tokens") or 0)
-    except (TypeError, ValueError):
-        entree = sortie = 0
+    entree = _entier(u, "prompt_tokens", "input_tokens")
+    sortie = _entier(u, "output_tokens")
+    # detailed buckets, for the cost of the day (priced by the dashboard route with Hermes's own pricing)
+    detail = [_entier(u, "input_tokens"), sortie, _entier(u, "cache_read_tokens"), _entier(u, "cache_write_tokens"), 1]
 
     def f(t):
         b = _heure(t)
@@ -263,6 +350,11 @@ def _apres_appel(session_id: Any = None, model: Any = "", usage: Any = None, **_
             k = b["k"].setdefault(modele, [0, 0])
             k[0] += entree
             k[1] += sortie
+        cle = (fournisseur + "|" + modele)[:120]
+        if modele and (entree or sortie) and (cle in b["u"] or len(b["u"]) < 8):
+            d = b["u"].setdefault(cle, [0, 0, 0, 0, 0])
+            for i, v in enumerate(detail):
+                d[i] += v
         tour = _actifs.get(sid)
         if tour:
             tour["tokens"] = tour.get("tokens", 0) + entree
@@ -278,6 +370,7 @@ def _apres_appel(session_id: Any = None, model: Any = "", usage: Any = None, **_
             s["bascule"]["n"] += 1
             b["b"] += 1
             _touche("shiba", t)
+            _fil(t, "b")
     _maj(f)
 
 
@@ -290,6 +383,7 @@ def _erreur_api(**_: Any) -> None:
         s["erreurs_api"] += 1
         _touche("shiba", t)
         _heure(t)["a"] += 1
+        _fil(t, "a")
     _maj(f)
 
 
@@ -301,6 +395,7 @@ def _approbation_demandee(description: Any = "", surface: Any = "", **_: Any) ->
         s["approbation"]["n"] += 1
         _touche("shiba", t)
         _heure(t)["p"] += 1
+        _fil(t, "p")
     _maj(f)
 
 
@@ -320,6 +415,7 @@ def _sous_agent_debut(**_: Any) -> None:
         sa["actifs"] = min(sa["actifs"] + 1, 20)
         sa["n"] += 1
         _touche("renard", t)
+        _fil(t, "s")
     _maj(f)
 
 
