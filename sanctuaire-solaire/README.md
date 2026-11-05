@@ -4,7 +4,9 @@
 
 Works in **Hermes Desktop** (macOS, Windows, Linux) and in the **web dashboard**. English or French, from your system language.
 
-![The Solar Sanctuary](https://raw.githubusercontent.com/Med34000/sanctuaire-solaire-hermes/main/docs/panorama.jpg)
+![The Solar Sanctuary](../docs/catalog/banner.jpg)
+
+![Today's journal](../docs/catalog/today-en.jpg)
 
 ## Install
 
@@ -27,6 +29,10 @@ You chat with Hermes as usual; the Sanctuary shows what it is doing, including b
 - **Where the work comes from**: Kitsune's label shows *Discord*, *Telegram* or *⏰ your scheduled task* when Hermes works without you.
 - **The Shiba guards you**: he barks on tool and provider errors, when Hermes **silently switches to a fallback model**, and when a permission is waiting (with Hermes's own short description, e.g. "recursive delete", and where to answer). In Hermes Desktop, a fallback or a permission waiting on Discord/Telegram also sends a native notification.
 - **Today's journal** (*Today* button): turns, tools per companion, where the work came from, errors, fallbacks, permissions, tokens per model, hour by hour.
+
+## Updating
+
+`hermes plugins update sanctuaire-solaire` (or reinstall with `--force`), then restart the web dashboard. With Hermes Desktop connected to a remote Hermes, also reinstall the pane half (**Install from Git**, **Force reinstall**) and **quit and reopen the app** so its backend loads the new routes.
 
 ## What it records — privacy
 
