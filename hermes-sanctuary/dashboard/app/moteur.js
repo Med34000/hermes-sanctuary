@@ -263,7 +263,7 @@
       var a = A[role] = { role: role, c: c, state: "rest", hit: null, vStart: 0 };
       var e = a.el = el("div", "actor", pano);
       e.id = "a-" + role; e.setAttribute("data-role", role); e.setAttribute("data-state", "rest");
-      e.tabIndex = 0; e.title = c.name;
+      e.tabIndex = 0; e.setAttribute("aria-label", c.name); // pas d’infobulle du navigateur : l’étiquette apparaît déjà au survol (2026-11-06)
       e.style.left = c.pos.x + "%"; e.style.top = c.pos.y + "%"; e.style.height = c.pos.h + "%";
       e.style.aspectRatio = c.aspect[0] + " / " + c.aspect[1];
       if (c.doneSprite === "work") e.setAttribute("data-done-sprite", "work");
