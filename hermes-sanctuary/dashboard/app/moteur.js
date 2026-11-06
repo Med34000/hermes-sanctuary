@@ -835,10 +835,13 @@
         var ul = section(ui("todayTools"));
         keys.forEach(function (k) { var role = KEY2ROLE[k], li = el("li", "", ul); el("span", "", li).textContent = role && R[role] ? R[role].name : k; el("b", "", li).textContent = fmtN(tot.o[k]); });
       }
-      var srcs = Object.keys(tot.s).sort(function (a, b) { return tot.s[b] - tot.s[a]; });
+      /* provenances regroupées par nom affiché (2026-11-06) : « desktop » et « gui » donnaient deux lignes « Desktop » */
+      var bySrc = {};
+      Object.keys(tot.s).forEach(function (k) { var n = platformName(k); bySrc[n] = (bySrc[n] || 0) + tot.s[k]; });
+      var srcs = Object.keys(bySrc).sort(function (a, b) { return bySrc[b] - bySrc[a]; });
       if (srcs.length) {
         var ul2 = section(ui("todaySources"));
-        srcs.forEach(function (k) { var li = el("li", "", ul2); el("span", "", li).textContent = platformName(k); el("b", "", li).textContent = fmtN(tot.s[k]); });
+        srcs.forEach(function (n) { var li = el("li", "", ul2); el("span", "", li).textContent = n; el("b", "", li).textContent = fmtN(bySrc[n]); });
       }
       if (alerts) {
         var ul3 = section(ui("todayAlerts"));

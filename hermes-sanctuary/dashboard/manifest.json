@@ -3,7 +3,7 @@
   "label": "Sanctuaire",
   "description": "Hermes Sanctuary: animated companions that react to Hermes tools.",
   "icon": "Sparkles",
-  "version": "2.7.2",
+  "version": "2.7.3",
   "tab": { "path": "/sanctuaire", "position": "after:chat" },
   "slots": ["chat:top"],
   "entry": "dist/index.js",
