@@ -7,13 +7,15 @@
 - **Olympus** (default): Hermes reads the message and hands out the work, Athena's owl flies off to search the web, Hephaestus forges code behind his anvil, Mnemosyne searches files and memory, and Cerberus barks at errors and guards approvals. Leaves, water, forge fire and smoke move gently, and the idle characters keep living: one or two at a time play a short "waiting for work" moment of their own (Hephaestus wipes his brow, Cerberus yawns…).
 - **The Clearing**: the owl, the beaver, the mole, the Shiba and Kitsune with her paper planes.
 
-Switch worlds with the button in the panorama's bar (🏛 Olympus / ☀ Clearing); the choice is remembered.
+Switch worlds with the round button in the top-right corner (🏛 / ☀); the choice is remembered.
 
 Works in **Hermes Desktop** (macOS, Windows, Linux) and in the **web dashboard**. English or French, from your system language.
 
 ![Hermes Sanctuary](../docs/catalog/banner.jpg)
 
 ![Today's journal](../docs/catalog/today-en.jpg)
+
+![The Clearing](../docs/catalog/clearing-en.jpg)
 
 ## Install
 
@@ -33,6 +35,7 @@ You chat with Hermes as usual; the Sanctuary shows what it is doing, including b
 ## What it shows
 
 - **Who is working**: each tool wakes its character; Hermes (Kitsune in the Clearing) calls out and hands the work out.
+- **A clean scene**: a character's name shows while it works or when you hover it; the controls are four small icons in the top-right corner (live dot, 📊 journal, sound, world). In a wide, low pane the panorama crops the sky and the ground, never a character.
 - **Where the work comes from**: the coordinator's label shows *Discord*, *Telegram* or *⏰ your scheduled task* when Hermes works without you.
 - **The guard (Cerberus, or the Shiba in the Clearing) protects you**: he barks on tool and provider errors, when Hermes **silently switches to a fallback model**, and when a permission is waiting (with Hermes's own short description, e.g. "recursive delete", and where to answer). In Hermes Desktop, a fallback, a loop, a heavy turn, an exceeded budget or a permission waiting on Discord/Telegram also sends a native notification.
 - **Hermes going in circles**: the guard barks when Hermes calls the same tool with the same arguments again and again in one turn (4 times in its last 12 calls) — the kind of loop that burns tokens for nothing.
@@ -92,4 +95,4 @@ Code: [Apache 2.0](LICENSE) · Images and characters: [CC BY 4.0](LICENSE-ASSETS
 
 Independent project, not affiliated with Nous Research.
 
-*2026-11-05 ≈12:00, mis à jour ≈13:00, ≈15:00, ≈16:20 et ≈17:00 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin*
+*2026-11-05 ≈12:00, mis à jour ≈13:00, ≈15:00, ≈16:20, ≈17:00, puis 2026-11-06 ≈11:35 (Europe/Zurich) — Claude (Cowork) — Anthropic, Claude Opus 5.5, pour Médéric Morin*
