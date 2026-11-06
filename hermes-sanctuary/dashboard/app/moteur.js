@@ -236,6 +236,17 @@
     if (T.colors) Object.keys(T.colors).forEach(function (k) { document.documentElement.style.setProperty("--" + k, T.colors[k]); });
     var bg = "url('" + url(T.background.src) + "')";
     document.documentElement.style.setProperty("--ratio", String(T.background.w / T.background.h));
+    /* recadrage des fenêtres très larges (2026-11-06) : on garde au moins la bande qui va du personnage le plus haut
+       (avec la place de son étiquette) jusqu'à 90 % de l'image ; avant, une bande fixe de 34 % à 90 % coupait
+       la chouette de l'Olympe, perchée dans l'olivier. Réglable par habillage : "cropTop" (en % de la hauteur). */
+    (function () {
+      var top = typeof T.cropTop === "number" ? T.cropTop : 100;
+      if (typeof T.cropTop !== "number") Object.keys(T.roles || {}).forEach(function (k) {
+        var p = T.roles[k].pos; if (p) top = Math.min(top, p.y - p.h - 4);
+      });
+      var keep = Math.min(Math.max(0.90 - top / 100, 0.56), 0.85);
+      document.documentElement.style.setProperty("--keep", keep.toFixed(3));
+    })();
     pano.style.aspectRatio = T.background.w + " / " + T.background.h;
     pano.style.backgroundImage = bg;
     if ($("backdrop")) $("backdrop").style.backgroundImage = bg;
