@@ -107,7 +107,7 @@ body { background: var(--night); color: var(--ink); font-family: var(--body); ov
   font: 600 clamp(11px, 1.05vw, 16px)/1.2 var(--display); box-shadow: 0 6px 18px rgba(30, 18, 5, .3);
   transition: opacity .16s ease, transform .16s ease;
 }
-.shout::after { content: ""; position: absolute; left: 50%; bottom: -6px; width: 12px; height: 12px; background: #fff; transform: translateX(-50%) rotate(45deg); border-radius: 2px; }
+.shout::after { content: ""; position: absolute; left: var(--ax, 50%); bottom: -6px; width: 12px; height: 12px; background: #fff; transform: translateX(-50%) rotate(45deg); border-radius: 2px; }
 .shout.show { opacity: 1; transform: translate(-50%, -100%) scale(1); animation: cri .45s cubic-bezier(.3, 1.6, .5, 1); }
 @keyframes cri { 0% { transform: translate(-50%, -100%) scale(.6); } 60% { transform: translate(-50%, -100%) scale(1.12); } 100% { transform: translate(-50%, -100%) scale(1); } }
 .plane { position: absolute; z-index: 6; width: 2.9%; aspect-ratio: 1; pointer-events: none; transform: translate(-50%, -50%); filter: drop-shadow(0 3px 3px rgba(30, 18, 5, .35)); }

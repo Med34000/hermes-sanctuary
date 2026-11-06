@@ -286,21 +286,49 @@ body.replay .bar, body.replay #today { visibility: hidden; }
   .pano { --pw: min(100vw, calc(100vh * var(--ratio) / .56)); width: var(--pw); margin-bottom: calc(var(--pw) / var(--ratio) * -0.10); }
 }
 /* petite hauteur (bandeau) : seules les étiquettes des compagnons au travail restent visibles */
-@media (max-height: 220px) { .actor[data-state="rest"] .tag { display: none; } .tag { font-size: 8.5px; padding: 3px 6px; } }
-@media (max-height: 260px) { .bar { top: 6px; left: 6px; padding: 3px 8px 3px 4px; } .titles { display: none; } }
-@media (max-width: 520px) { .titles { display: none; } }
+@media (max-height: 220px) { .actor[data-state="rest"] .tag { display: none; } .tag { font-size: 8.5px; padding: 2px 6px; } }
+
+/* ---- scène épurée (2026-11-06 ≈09:00, Europe/Zurich — Claude, Anthropic, Claude Opus 5.5, pour Médéric Morin) ---- */
+/* barre d'outils : quelques icônes discrètes en haut à droite ; le titre reste lisible par les lecteurs d'écran */
+.bar { top: 6px; right: 6px; left: auto; padding: 2px; gap: 0; border-radius: 999px; flex-wrap: nowrap;
+  background: rgba(255, 247, 229, .5); box-shadow: 0 2px 8px rgba(30, 18, 5, .18); opacity: .78; transition: opacity .2s ease, background .2s ease; }
+.bar:hover, .bar:focus-within { opacity: 1; background: var(--glass); }
+.logo { display: none; }
+.titles { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.pills { gap: 1px; flex-wrap: nowrap; align-items: center; }
+.bar .pill { border: 0; background: transparent; height: 24px; padding: 0 7px; font-size: 9px; }
+.bar .pill.ico { width: 24px; padding: 0; justify-content: center; border-radius: 50%; font: 400 13px/1 system-ui, sans-serif; letter-spacing: 0; text-transform: none; }
+.bar .pill.ico:hover { background: rgba(255, 255, 255, .9); }
+.bar .pill.ico[aria-pressed="true"] { background: var(--bark); }
+#sound-btn, #world-btn { padding: 0; font-size: 13px; }
+/* en direct : un simple point vert ; le texte n'apparaît que pour la démo ou une connexion perdue */
+#src-pill[data-src="live"] { width: 18px; padding: 0; justify-content: center; }
+#src-pill[data-src="live"] #src-txt { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+#today { top: 38px; max-height: calc(100vh - 44px); }
+/* étiquettes des personnages : petites, sans majuscules ; au repos, le nom n'apparaît qu'au survol */
+.tag { font: 700 clamp(8.5px, .62vw, 10.5px)/1 var(--body); letter-spacing: .02em; text-transform: none; gap: 4px; padding: 3px 7px 3px 6px;
+  background: rgba(255, 247, 229, .86); box-shadow: 0 2px 6px rgba(30, 18, 5, .22); transition: opacity .25s ease; }
+.tag i { width: 5px; height: 5px; }
+.actor[data-state="rest"] .tag { opacity: 0; }
+.actor[data-state="rest"]:hover .tag, .actor[data-state="rest"]:focus-visible .tag { opacity: 1; }
+/* qui parle n'a pas besoin de son étiquette : la bulle la remplace le temps qu'elle est affichée */
+.pano.shouting .actor[data-role="coordination"] .tag, .pano.guard-on .actor[data-role="securite"] .tag { opacity: 0; }
+/* bulles plus légères ; la pointe suit le personnage même quand la bulle est recalée dans l'écran (--ax) */
+.shout { font-size: clamp(10px, .85vw, 14px); padding: .4em .75em; border-radius: 12px; box-shadow: 0 4px 12px rgba(30, 18, 5, .25); }
+.shout::after { left: var(--ax, 50%); bottom: -5px; width: 10px; height: 10px; }
+.shout.guard { max-width: min(250px, 40vw); font: 700 clamp(10px, .78vw, 12.5px)/1.25 var(--body); border-width: 1.5px; padding: .45em .8em; }
+.shout.guard::after { border-right-width: 1.5px; border-bottom-width: 1.5px; bottom: -6px; }
 </style>
 </head>
 <body>
 <div class="backdrop" id="backdrop" aria-hidden="true"></div>
 <header class="bar">
-  <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2" fill="#fff"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M18.7 5.3l-1.8 1.8M7.1 16.9l-1.8 1.8"/></svg></div>
   <div class="titles"><h1 id="title">Sanctuaire</h1><p class="sub" id="subtitle"></p></div>
   <div class="pills">
     <span class="pill" id="src-pill" data-src="demo"><span class="dot"></span><span id="src-txt" data-i18n="srcDemo">Démo · événements simulés</span></span>
-    <button class="pill" id="today-btn" type="button" aria-pressed="false" aria-controls="today" data-i18n="todayBtn">Aujourd'hui</button>
-    <button class="pill" id="sound-btn" type="button" aria-pressed="false">🔇</button>
-    <button class="pill" id="world-btn" type="button" hidden></button>
+    <button class="pill ico" id="today-btn" type="button" aria-pressed="false" aria-controls="today" data-i18n-title="todayTitle" data-i18n-aria="todayTitle">📊</button>
+    <button class="pill ico" id="sound-btn" type="button" aria-pressed="false">🔇</button>
+    <button class="pill ico" id="world-btn" type="button" hidden></button>
     <button class="pill" id="demo" type="button" aria-pressed="false" data-i18n="demoBtn">Démo auto</button>
   </div>
 </header>

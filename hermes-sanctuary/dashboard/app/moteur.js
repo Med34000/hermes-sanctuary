@@ -353,7 +353,7 @@
       var a = A[role]; if (!a || a.state === s) return;
       a.state = s; a.el.setAttribute("data-state", s); a.el.setAttribute("data-hit", "0");
       var c = a.c, alarm = a.el.getAttribute("data-alert") === "1" && c.alert;
-      a.label.textContent = s === "work" ? c.short + " · " + (alarm ? c.alert : c.work) : s === "done" ? c.short + " · " + ui("done") : s === "listen" ? c.short + " · " + (c.listening || ui("listening")) : c.name;
+      a.label.textContent = s === "work" ? c.short + " · " + (alarm ? c.alert : c.work) : s === "done" ? c.short + " \u2713" : s === "listen" ? c.short + " · " + (c.listening || ui("listening")) : c.name;
       clearInterval(a.hit);
       if (s === "work" || s === "listen") a.vStart = performance.now();
       if (s === "work" && c.sprites.hit && !reduce && !a.el.classList.contains("has-video"))
@@ -504,13 +504,30 @@
       var n = roles.map(function (r) { return R[r].short; });
       return n.length < 2 ? n.join("") : n.slice(0, -1).join(", ") + ui("and") + n[n.length - 1];
     }
+    /* bulles toujours entières à l'écran (2026-11-06) : dans le cadre recadré et hors de la barre d'outils ;
+       la pointe (--ax) reste sur le personnage quand la bulle est décalée sur le côté */
+    function fitBubble(b, xPct, yPct) {
+      b.style.left = xPct + "%"; b.style.top = yPct + "%"; b.style.removeProperty("--ax");
+      var pr = pano.getBoundingClientRect(); if (!pr.width || !pr.height) return;
+      var w = b.offsetWidth, h = b.offsetHeight, m = 6, bar = document.querySelector(".bar");
+      var x = pr.left + xPct / 100 * pr.width, y = pr.top + yPct / 100 * pr.height;
+      var minL = Math.max(pr.left, 0) + m, maxR = Math.min(pr.right, window.innerWidth) - m, minT = Math.max(pr.top, 0) + m;
+      var left = Math.max(minL, Math.min(x - w / 2, maxR - w)), top = y - h;
+      var br = bar && getComputedStyle(bar).visibility !== "hidden" ? bar.getBoundingClientRect() : null;
+      if (br && br.width && left < br.right + 4 && left + w > br.left - 4) minT = Math.max(minT, br.bottom + 6);
+      if (top < minT) top = minT;
+      b.style.left = ((left + w / 2 - pr.left) / pr.width * 100) + "%";
+      b.style.top = ((top + h - pr.top) / pr.height * 100) + "%";
+      b.style.setProperty("--ax", Math.round(Math.min(Math.max(x - left, 14), w - 14)) + "px");
+    }
     function shout(roles, from) {
       var t = (roles.length === 1 && pick(R[roles[0]].shouts)) || fmt(TX.shoutMany || "Hé {names}, au boulot !", { names: names(roles) });
       if (!t) return;
       shoutEl.textContent = t;
-      shoutEl.style.left = from[0] + "%"; shoutEl.style.top = (from[1] - from[2] * 1.45) + "%";
-      shoutEl.classList.remove("show"); void shoutEl.offsetWidth; shoutEl.classList.add("show");
-      clearTimeout(shoutT); shoutT = setTimeout(function () { shoutEl.classList.remove("show"); }, SHOUT_MS);
+      /* juste au-dessus de la tête : l'étiquette du coordinateur s'efface pendant qu'il crie */
+      fitBubble(shoutEl, from[0], from[1] - from[2] * 1.03 - 1);
+      shoutEl.classList.remove("show"); void shoutEl.offsetWidth; shoutEl.classList.add("show"); pano.classList.add("shouting");
+      clearTimeout(shoutT); shoutT = setTimeout(function () { shoutEl.classList.remove("show"); pano.classList.remove("shouting"); }, SHOUT_MS);
       return t;
     }
 
@@ -579,8 +596,9 @@
     var prev = null, prevSen = null, isLive = false, fails = 0, lastWork = {}, phase = {}, inFlight = {}, approval = false, alertUntil = 0;
     var coordBusy = false, chatBusyFlag = false, coordDoneAt = 0, demoOn = false, demoTimer = null, chatActive = false;
     function badge(m) {
-      var pill = $("src-pill"); if (pill) pill.setAttribute("data-src", m);
-      if ($("src-txt")) $("src-txt").textContent = ui(m === "live" ? "srcLive" : m === "lost" ? "srcLost" : "srcDemo");
+      var pill = $("src-pill"), srcT = ui(m === "live" ? "srcLive" : m === "lost" ? "srcLost" : "srcDemo");
+      if (pill) { pill.setAttribute("data-src", m); pill.title = srcT; }
+      if ($("src-txt")) $("src-txt").textContent = srcT;
       if ($("log-src")) $("log-src").textContent = ui(m === "live" ? "logLive" : m === "lost" ? "logLost" : "logDemo");
       if ($("hl-sub")) $("hl-sub").textContent = ui(m === "live" ? "hlLive" : m === "lost" ? "hlLost" : "srcDemo");
     }
@@ -869,14 +887,15 @@
     /* la bulle du gardien : l'alerte en clair, au-dessus de lui, quelques secondes (le journal défilant est caché dans le cadre) */
     var guardEl = el("div", "shout guard", pano), guardT = 0;
     guardEl.setAttribute("role", "status");
-    guardEl.addEventListener("click", function (ev) { ev.stopPropagation(); guardEl.classList.remove("show"); });
+    function guardHide() { guardEl.classList.remove("show"); pano.classList.remove("guard-on"); }
+    guardEl.addEventListener("click", function (ev) { ev.stopPropagation(); guardHide(); });
     function guardSay(text) {
       var c = R.securite; if (!c || !c.pos || !text) return;
       guardEl.textContent = "\u26A0 " + String(text).slice(0, 110);
-      guardEl.style.left = Math.min(Math.max(c.pos.x, 18), 80) + "%";
-      guardEl.style.top = Math.max(c.pos.y - c.pos.h - 8, 14) + "%";
-      guardEl.classList.remove("show"); void guardEl.offsetWidth; guardEl.classList.add("show");
-      clearTimeout(guardT); guardT = setTimeout(function () { guardEl.classList.remove("show"); }, 9000);
+      /* juste au-dessus du gardien, pointe sur lui ; son étiquette s'efface le temps de la bulle */
+      fitBubble(guardEl, c.pos.x, c.pos.y - c.pos.h - 1.5);
+      guardEl.classList.remove("show"); void guardEl.offsetWidth; guardEl.classList.add("show"); pano.classList.add("guard-on");
+      clearTimeout(guardT); guardT = setTimeout(guardHide, 9000);
     }
 
     /* ---- budget du jour (2026-11-05) : coût estimé du jour comparé au seuil réglé dans le journal ---- */
@@ -1182,7 +1201,9 @@
       var next = WORLDS[(wi + 1) % WORLDS.length];
       var wname = function (w) { var n = (w.names && (w.names[LANG] || w.names.fr)) || w.id; return String(n).slice(0, 24); };
       /* le bouton montre l'univers où l'on va (l'univers actuel est déjà dans le titre) */
-      worldBtn.textContent = (next.icon ? String(next.icon).slice(0, 4) + " " : "\u21C4 ") + wname(next);
+      /* bouton rond de la barre épurée (2026-11-06) : l'icône seule, le nom est dans l'infobulle */
+      worldBtn.textContent = worldBtn.classList.contains("ico") ? (next.icon ? String(next.icon).slice(0, 4) : "\u21C4")
+        : (next.icon ? String(next.icon).slice(0, 4) + " " : "\u21C4 ") + wname(next);
       worldBtn.title = ui("worldTitle", { name: wname(next) });
       worldBtn.setAttribute("aria-label", worldBtn.title);
       worldBtn.hidden = false;

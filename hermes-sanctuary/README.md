@@ -39,7 +39,7 @@ You chat with Hermes as usual; the Sanctuary shows what it is doing, including b
 - **Daily budget**: the journal shows today's **estimated cost** (Hermes's own pricing, per model). Set a daily budget in dollars and the guard barks once the day goes over it.
 - **Alerts in plain words**: every alert also appears in a bubble above the guard for a few seconds.
 - **Heavy turns**: the guard growls when one turn reads more than 200,000 input tokens (a conversation grown too long: time for `/new`), and the journal lists the heaviest turns.
-- **Today's journal** (*Today* button): turns, tools per companion, where the work came from, errors, fallbacks, loops, heavy turns, permissions, tokens and cost per model, hour by hour with the peak.
+- **Today's journal** (📊 button): turns, tools per companion, where the work came from, errors, fallbacks, loops, heavy turns, permissions, tokens and cost per model, hour by hour with the peak.
 - **Share my day**: one click makes an image of the panorama with the day's numbers (turns, tools, busiest character, cost), ready to post.
 - **Replay the day**: the whole day plays again in the panorama, sped up, with a clock and a progress bar.
 - **Companion cards**: click a companion to see its role, how often it worked today and its recent tools.
@@ -80,7 +80,7 @@ hermes plugins install Med34000/hermes-sanctuary/hermes-sanctuary --enable
 
 Redémarre ensuite Hermes. Dans Hermes Desktop, active le plugin dans **Capabilities → Plugins**.
 
-Le Sanctuaire montre aussi **d'où vient le travail** (Discord, Telegram, tâche planifiée). Le **gardien (Cerbère ou le Shiba) aboie**, avec une bulle qui dit pourquoi, quand Hermes **tourne en rond** (même outil, mêmes arguments), quand le **budget du jour** est dépassé (coût estimé avec les tarifs de Hermes), quand Hermes bascule en silence sur un modèle de secours, quand un tour devient trop lourd (plus de 200 000 tokens) ou qu'une autorisation attend. Le bouton **Aujourd'hui** ouvre le journal du jour, avec le coût, le réglage du budget, **📸 Partager** (une image de ta journée à poster) et **⏪ Rejouer la journée** (toute la journée en accéléré dans le panorama). Un clic sur un compagnon ouvre sa fiche, des colombes ou des renardeaux apparaissent quand Hermes délègue à des sous-agents, le décor s'assombrit le soir, et des sons discrets sont disponibles (coupés par défaut).
+Le Sanctuaire montre aussi **d'où vient le travail** (Discord, Telegram, tâche planifiée). Le **gardien (Cerbère ou le Shiba) aboie**, avec une bulle qui dit pourquoi, quand Hermes **tourne en rond** (même outil, mêmes arguments), quand le **budget du jour** est dépassé (coût estimé avec les tarifs de Hermes), quand Hermes bascule en silence sur un modèle de secours, quand un tour devient trop lourd (plus de 200 000 tokens) ou qu'une autorisation attend. Le bouton **📊** (en haut à droite) ouvre le journal du jour, avec le coût, le réglage du budget, **📸 Partager** (une image de ta journée à poster) et **⏪ Rejouer la journée** (toute la journée en accéléré dans le panorama). Un clic sur un compagnon ouvre sa fiche, des colombes ou des renardeaux apparaissent quand Hermes délègue à des sous-agents, le décor s'assombrit le soir, et des sons discrets sont disponibles (coupés par défaut).
 
 Seuls des **noms, des heures et des compteurs** sont notés, jamais le contenu des conversations. Aucun appel réseau, aucun secret lu.
 
