@@ -17,8 +17,11 @@
 
 ### Install (Hermes plugin — macOS, Windows, Linux)
 ```bash
-hermes plugins install Med34000/hermes-sanctuary/hermes-sanctuary --enable
+hermes plugins install hermes-sanctuary --enable
 ```
+
+In the official [Hermes plugin catalog](https://hermes-agent.nousresearch.com/marketplace/hermes-sanctuary) since November 8, 2026. If an older Hermes doesn't find it by name: `hermes plugins install Med34000/hermes-sanctuary/hermes-sanctuary --enable`.
+
 Restart Hermes, then:
 - **Hermes Desktop**: turn on *Hermes Sanctuary* in **Capabilities → Plugins**. The panorama appears in a pane under the conversation, and as a **Sanctuaire** page in the sidebar.
 - **Web dashboard**: a **Sanctuaire** tab, and a foldable strip above the **Chat** tab.
@@ -72,8 +75,11 @@ New worlds and characters, better tool mappings, translations, support for other
 
 ### Installer (plugin Hermes — Mac, Windows, Linux)
 ```bash
-hermes plugins install Med34000/hermes-sanctuary/hermes-sanctuary --enable
+hermes plugins install hermes-sanctuary --enable
 ```
+
+Dans le [catalogue officiel des plugins Hermes](https://hermes-agent.nousresearch.com/marketplace/hermes-sanctuary) depuis le 8 novembre 2026. Si ton Hermes, plus ancien, ne le trouve pas par son nom : `hermes plugins install Med34000/hermes-sanctuary/hermes-sanctuary --enable`.
+
 Redémarre Hermes, puis :
 - **Hermes Desktop** : active *Hermes Sanctuary* dans **Capabilities → Plugins**. Le panorama s'affiche dans un panneau sous la conversation, et dans une page **Sanctuaire**.
 - **Tableau de bord web** : un onglet **Sanctuaire**, et un bandeau repliable au-dessus de l'onglet **Chat**.

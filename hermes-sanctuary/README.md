@@ -20,8 +20,10 @@ Works in **Hermes Desktop** (macOS, Windows, Linux) and in the **web dashboard**
 ## Install
 
 ```bash
-hermes plugins install Med34000/hermes-sanctuary/hermes-sanctuary --enable
+hermes plugins install hermes-sanctuary --enable
 ```
+
+In the official [Hermes plugin catalog](https://hermes-agent.nousresearch.com/marketplace/hermes-sanctuary) since November 8, 2026. If an older Hermes doesn't find it by name: `hermes plugins install Med34000/hermes-sanctuary/hermes-sanctuary --enable`.
 
 Then restart Hermes (gateway / dashboard) so the hooks and routes load.
 
@@ -78,8 +80,10 @@ The engine and the look are separate: one environment = one `dashboard/app/theme
 Hermes Sanctuary montre ce que fait ton agent : chaque outil utilisé par Hermes réveille un personnage, dans deux univers au choix, l'**Olympe** (par défaut : Hermès, Héphaïstos à sa forge, la chouette d'Athéna, Mnémosyne, Cerbère ; quand ils n'ont rien à faire, chacun a de temps en temps sa petite scène d'attente) ou la **Clairière** (Kitsune, le castor, la chouette, la taupe, le Shiba). Il fonctionne dans **Hermes Desktop** (Mac, Windows, Linux) et dans le **tableau de bord web**, en français ou en anglais selon la langue de ton système.
 
 ```bash
-hermes plugins install Med34000/hermes-sanctuary/hermes-sanctuary --enable
+hermes plugins install hermes-sanctuary --enable
 ```
+
+Dans le [catalogue officiel des plugins Hermes](https://hermes-agent.nousresearch.com/marketplace/hermes-sanctuary) depuis le 8 novembre 2026. Si ton Hermes, plus ancien, ne le trouve pas par son nom : `hermes plugins install Med34000/hermes-sanctuary/hermes-sanctuary --enable`.
 
 Redémarre ensuite Hermes. Dans Hermes Desktop, active le plugin dans **Capabilities → Plugins**.
 
